@@ -1,13 +1,15 @@
 """
 Authentication module for MATATAG AI Lesson Plan Generator.
-MySQL-backed user auth with Flask sessions.
+MySQL-backed user auth with signed URL tokens.
+Cloudways Nginx strips Cookie headers, so we pass auth via URL tokens.
 """
 
 import os
 import functools
 import pymysql
-from flask import Blueprint, request, session, redirect, url_for, render_template, flash, jsonify
+from flask import Blueprint, request, session, redirect, url_for, render_template, flash, jsonify, g, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import URLSafeTimedSerializer
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -50,6 +52,35 @@ def init_db():
         conn.close()
 
 
+def _get_serializer():
+    """Get the URL-safe timed serializer for auth tokens."""
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+
+
+def generate_auth_token(user_id, email, name, role):
+    """Generate a signed auth token encoding user info (valid 24h)."""
+    s = _get_serializer()
+    return s.dumps({"uid": user_id, "email": email, "name": name, "role": role})
+
+
+def verify_auth_token(token, max_age=86400):
+    """Verify and decode an auth token. Returns user dict or None."""
+    s = _get_serializer()
+    try:
+        return s.loads(token, max_age=max_age)
+    except Exception:
+        return None
+
+
+def _token_redirect(endpoint, **kwargs):
+    """Redirect to endpoint, carrying forward the auth token."""
+    token = request.args.get("_t", "")
+    url = url_for(endpoint, **kwargs)
+    if token:
+        url += ("&" if "?" in url else "?") + f"_t={token}"
+    return redirect(url)
+
+
 def login_required(f):
     """Decorator that requires an authenticated, approved user."""
     @functools.wraps(f)
@@ -68,7 +99,7 @@ def admin_required(f):
             return redirect(url_for("auth.login", next=request.path))
         if session.get("user_role") != "admin":
             flash("Admin access required.", "error")
-            return redirect(url_for("generator"))
+            return _token_redirect("generator")
         return f(*args, **kwargs)
     return wrapped
 
@@ -108,13 +139,15 @@ def login():
             flash("Your account has been rejected.", "error")
             return render_template("login.html")
 
-        # Login successful
+        # Login successful — generate auth token for URL-based session
         session["user_id"] = user["id"]
         session["user_email"] = user["email"]
         session["user_name"] = user["name"]
         session["user_role"] = user["role"]
 
+        token = generate_auth_token(user["id"], user["email"], user["name"], user["role"])
         next_url = request.args.get("next") or request.form.get("next") or url_for("generator")
+        next_url += ("&" if "?" in next_url else "?") + f"_t={token}"
         return redirect(next_url)
 
     return render_template("login.html")
@@ -219,7 +252,7 @@ def admin_approve(user_id):
     finally:
         conn.close()
     flash("User approved.", "success")
-    return redirect(url_for("auth.admin_panel"))
+    return _token_redirect("auth.admin_panel")
 
 
 @auth_bp.route("/admin/reject/<int:user_id>", methods=["POST"])
@@ -232,7 +265,7 @@ def admin_reject(user_id):
     finally:
         conn.close()
     flash("User rejected.", "success")
-    return redirect(url_for("auth.admin_panel"))
+    return _token_redirect("auth.admin_panel")
 
 
 @auth_bp.route("/admin/toggle-role/<int:user_id>", methods=["POST"])
@@ -240,7 +273,7 @@ def admin_reject(user_id):
 def admin_toggle_role(user_id):
     if user_id == session.get("user_id"):
         flash("You cannot change your own role.", "error")
-        return redirect(url_for("auth.admin_panel"))
+        return _token_redirect("auth.admin_panel")
 
     conn = get_db()
     try:
@@ -253,4 +286,4 @@ def admin_toggle_role(user_id):
                 flash(f"User role changed to {new_role}.", "success")
     finally:
         conn.close()
-    return redirect(url_for("auth.admin_panel"))
+    return _token_redirect("auth.admin_panel")

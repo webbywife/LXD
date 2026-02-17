@@ -90,9 +90,9 @@ a{text-decoration:none;}
     </div>
     <div class="nav-links">
         {% if session.get('user_id') %}
-        <a href="{{ url_for('generator') }}" class="nav-btn nav-btn-ghost">Generator</a>
+        <a href="{{ turl('generator') }}" class="nav-btn nav-btn-ghost">Generator</a>
         {% if session.get('user_role') == 'admin' %}
-        <a href="{{ url_for('auth.admin_panel') }}" class="nav-btn nav-btn-ghost">Admin</a>
+        <a href="{{ turl('auth.admin_panel') }}" class="nav-btn nav-btn-ghost">Admin</a>
         {% endif %}
         <a href="{{ url_for('auth.logout') }}" class="nav-btn nav-btn-ghost">Logout</a>
         {% else %}
@@ -114,7 +114,7 @@ a{text-decoration:none;}
             <span class="hero-stat">&#128230; SCORM 1.2 Ready</span>
         </div>
         {% if session.get('user_id') %}
-        <a href="{{ url_for('generator') }}" class="hero-cta">Open Generator &#8594;</a>
+        <a href="{{ turl('generator') }}" class="hero-cta">Open Generator &#8594;</a>
         {% else %}
         <a href="{{ url_for('auth.signup') }}" class="hero-cta">Get Started Free &#8594;</a>
         {% endif %}
@@ -221,7 +221,7 @@ a{text-decoration:none;}
     <h2>Ready to Transform Your Lesson Planning?</h2>
     <p>Join Filipino teachers who are saving hours every week with AI-powered, MATATAG-aligned lesson plans.</p>
     {% if session.get('user_id') %}
-    <a href="{{ url_for('generator') }}" class="cta-btn">Open Generator &#8594;</a>
+    <a href="{{ turl('generator') }}" class="cta-btn">Open Generator &#8594;</a>
     {% else %}
     <a href="{{ url_for('auth.signup') }}" class="cta-btn">Create Free Account &#8594;</a>
     {% endif %}

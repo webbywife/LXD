@@ -72,7 +72,7 @@ tr:hover td{background:#f8fbfc;}
     <h1>Admin Panel</h1>
     <div class="hdr-links">
         <a href="{{ url_for('landing') }}">Home</a>
-        <a href="{{ url_for('generator') }}">Generator</a>
+        <a href="{{ turl('generator') }}">Generator</a>
         <a href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 </div>
@@ -132,15 +132,15 @@ tr:hover td{background:#f8fbfc;}
                     <td>
                         <div class="actions">
                         {% if user.status == 'pending' %}
-                            <form method="POST" action="{{ url_for('auth.admin_approve', user_id=user.id) }}" style="display:inline;">
+                            <form method="POST" action="{{ turl('auth.admin_approve', user_id=user.id) }}" style="display:inline;">
                                 <button type="submit" class="act-btn act-btn-approve">Approve</button>
                             </form>
-                            <form method="POST" action="{{ url_for('auth.admin_reject', user_id=user.id) }}" style="display:inline;">
+                            <form method="POST" action="{{ turl('auth.admin_reject', user_id=user.id) }}" style="display:inline;">
                                 <button type="submit" class="act-btn act-btn-reject">Reject</button>
                             </form>
                         {% endif %}
                         {% if user.id != session.get('user_id') and user.status == 'approved' %}
-                            <form method="POST" action="{{ url_for('auth.admin_toggle_role', user_id=user.id) }}" style="display:inline;">
+                            <form method="POST" action="{{ turl('auth.admin_toggle_role', user_id=user.id) }}" style="display:inline;">
                                 <button type="submit" class="act-btn act-btn-role">
                                     {% if user.role == 'user' %}Make Admin{% else %}Make User{% endif %}
                                 </button>

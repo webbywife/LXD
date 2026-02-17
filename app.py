@@ -7,7 +7,7 @@ import os
 import re
 import json
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for, g
 
 load_dotenv()
 from curriculum_loader import (
@@ -21,7 +21,7 @@ from lesson_generator import (
     TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES
 )
 from scorm_builder import build_scorm_package
-from auth import auth_bp, login_required, init_db
+from auth import auth_bp, login_required, init_db, verify_auth_token, generate_auth_token
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -41,6 +41,49 @@ if not os.path.exists(DB_PATH):
     load_all_curriculum_data()
 
 
+# ── Token-based Session (Cloudways Nginx strips cookies) ──
+
+@app.before_request
+def restore_session_from_token():
+    """Restore session from URL auth token since cookies are stripped by Nginx."""
+    if "user_id" in session:
+        # Session already populated (cookie worked or already restored)
+        token = request.args.get("_t", "")
+        g.auth_token = token if token else generate_auth_token(
+            session["user_id"], session.get("user_email", ""),
+            session.get("user_name", ""), session.get("user_role", ""))
+        return
+    token = request.args.get("_t", "")
+    if not token:
+        g.auth_token = ""
+        return
+    data = verify_auth_token(token)
+    if data:
+        session["user_id"] = data["uid"]
+        session["user_email"] = data["email"]
+        session["user_name"] = data["name"]
+        session["user_role"] = data["role"]
+        g.auth_token = token
+    else:
+        g.auth_token = ""
+
+
+@app.context_processor
+def inject_auth_token():
+    """Make auth_token available in all templates."""
+    return {"auth_token": getattr(g, "auth_token", "")}
+
+
+@app.template_global()
+def turl(endpoint, **kwargs):
+    """Generate URL with auth token appended."""
+    url = url_for(endpoint, **kwargs)
+    token = getattr(g, "auth_token", "")
+    if token:
+        url += ("&" if "?" in url else "?") + f"_t={token}"
+    return url
+
+
 # ── Security Headers ────────────────────────────────────────
 
 @app.after_request
@@ -58,6 +101,10 @@ def add_security_headers(response):
         "img-src 'self' data:; "
         "connect-src 'self'"
     )
+    # Prevent Varnish from caching/stripping cookies
+    response.headers["Cache-Control"] = "private, no-store, no-cache, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Vary"] = "Cookie"
     return response
 
 

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="auth-token" content="{{ auth_token }}">
 <title>MATATAG AI Lesson Plan Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -192,7 +193,7 @@ textarea{resize:vertical;min-height:60px;}
     <div style="display:flex;gap:12px;">
         <a href="{{ url_for('landing') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Home</a>
         {% if session.get('user_role') == 'admin' %}
-        <a href="{{ url_for('auth.admin_panel') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Admin</a>
+        <a href="{{ turl('auth.admin_panel') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Admin</a>
         {% endif %}
         <a href="{{ url_for('auth.logout') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Logout</a>
     </div>
@@ -342,19 +343,21 @@ textarea{resize:vertical;min-height:60px;}
 <script>
 document.addEventListener("DOMContentLoaded",function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
+function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
 let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="";
 
 function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
 
 const S=$("#sel-s"),G=$("#sel-g"),Q=$("#sel-q");
 
-S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose Grade --</option>';G.disabled=true;Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(`/api/grades/${this.value}`).then(r=>r.json()).then(g=>{g.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.match(/^[0-9]/)?`Grade ${v}`:v;G.appendChild(o);});G.disabled=false;});fetch(`/api/curriculum-context/${this.value}`).then(r=>r.json()).then(c=>{skData=c.skills||[];const b=$("#sk-cb");b.innerHTML="";skData.forEach(s=>{const l=document.createElement("label");l.style.cssText="font-size:12px;display:flex;gap:6px;margin-bottom:3px;cursor:pointer;";l.innerHTML=`<input type="checkbox" class="skc" value="${s.skill_name}"> ${s.skill_name}`;b.appendChild(l);});});});
+S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose Grade --</option>';G.disabled=true;Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/grades/${this.value}`)).then(r=>r.json()).then(g=>{g.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.match(/^[0-9]/)?`Grade ${v}`:v;G.appendChild(o);});G.disabled=false;});fetch(aurl(`/api/curriculum-context/${this.value}`)).then(r=>r.json()).then(c=>{skData=c.skills||[];const b=$("#sk-cb");b.innerHTML="";skData.forEach(s=>{const l=document.createElement("label");l.style.cssText="font-size:12px;display:flex;gap:6px;margin-bottom:3px;cursor:pointer;";l.innerHTML=`<input type="checkbox" class="skc" value="${s.skill_name}"> ${s.skill_name}`;b.appendChild(l);});});});
 
-G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(`/api/quarters/${S.value}/${this.value}`).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Quarter ${v}`;Q.appendChild(o);});Q.disabled=false;});});
+G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/quarters/${S.value}/${this.value}`)).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Quarter ${v}`;Q.appendChild(o);});Q.disabled=false;});});
 
 Q.addEventListener("change",function(){$("#bn1").disabled=!this.value;});
 
-$("#bn1").addEventListener("click",function(){const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(u).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});});
+$("#bn1").addEventListener("click",function(){const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(aurl(u)).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});});
 
 function renderC(){const l=$("#cl");l.innerHTML="";if(!cData.length){l.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-s)">No competencies found.</div>';return;}cData.forEach(c=>{const d=document.createElement("div");d.className="cc";d.dataset.id=c.id;const cb=document.createElement("input");cb.type="checkbox";const info=document.createElement("div");info.innerHTML=`<div class="cc-c">${c.lc_id||"LC-"+c.id}</div><div class="cc-d">${c.learning_competency}</div><div class="cc-m">${[c.domain,c.blooms_level?"Bloom's: "+c.blooms_level:""].filter(Boolean).join(" | ")}</div>`;d.appendChild(cb);d.appendChild(info);d.addEventListener("click",e=>{if(e.target!==cb)cb.checked=!cb.checked;if(cb.checked){selC.add(c.id);d.classList.add("sel");}else{selC.delete(c.id);d.classList.remove("sel");}upC();});l.appendChild(d);});upC();}
 function upC(){$("#scnt").textContent=`${selC.size} of ${cData.length} selected`;$("#bn2").disabled=selC.size===0;}
@@ -417,9 +420,9 @@ reflection:{enabled:on("reflection"),customizable_fields:{num_prompts:parseInt($
 
 const ai=$("#f-ai").checked,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic",ids=Array.from(selC);
 const done=showP(ai);
-const ps=[fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
+const ps=[fetch(aurl("/api/generate"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
 const needA=am!=="none"&&at.length>0;
-if(needA)ps.push(fetch("/api/generate-assessment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+if(needA)ps.push(fetch(aurl("/api/generate-assessment"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
 
 Promise.all(ps).then(rs=>{done();const lp=rs[0],as=needA?rs[1]:null;
 setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";
@@ -463,7 +466,7 @@ $("#b-scorm").addEventListener("click",function(){
     const gn=G.value||"";
     const title=`${sn} Grade ${gn} Q${Q.value||""}`;
     this.textContent="Building SCORM...";this.disabled=true;
-    fetch("/api/download-scorm",{
+    fetch(aurl("/api/download-scorm"),{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||""})
