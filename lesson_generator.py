@@ -150,6 +150,25 @@ def _gather_curriculum_context(subject_id, competency_ids):
     skills = get_21st_century_skills(subject_id)
     concepts = get_crosscutting_concepts(subject_id)
 
+    # Gather content_topic — fall back to content_standard if topic is empty
+    content_topic = competencies[0].get("content_topic", "")
+    content_standard = competencies[0].get("content_standard", "")
+    if not content_topic and content_standard:
+        content_topic = content_standard
+
+    # Collect all unique content standards across selected competencies for richer context
+    all_content_standards = list(dict.fromkeys(
+        c.get("content_standard", "") for c in competencies if c.get("content_standard", "")
+    ))
+
+    # Collect all unique performance standards
+    all_perf_standards = list(dict.fromkeys(
+        c.get("performance_standard", "") for c in competencies if c.get("performance_standard", "")
+    ))
+
+    # Build a summary of all competency texts for context
+    all_lc_texts = [c.get("learning_competency", "") for c in competencies if c.get("learning_competency", "")]
+
     return {
         "subject": SUBJECT_DISPLAY.get(subject_id, subject_id),
         "subject_id": subject_id,
@@ -158,9 +177,12 @@ def _gather_curriculum_context(subject_id, competency_ids):
         "quarter": competencies[0].get("quarter", ""),
         "key_stage": competencies[0].get("key_stage", ""),
         "domain": competencies[0].get("domain", ""),
-        "content_topic": competencies[0].get("content_topic", ""),
-        "content_standard": competencies[0].get("content_standard", ""),
+        "content_topic": content_topic,
+        "content_standard": content_standard,
         "performance_standard": competencies[0].get("performance_standard", ""),
+        "all_content_standards": all_content_standards,
+        "all_performance_standards": all_perf_standards,
+        "all_lc_texts": all_lc_texts,
         "blooms_level": competencies[0].get("blooms_level", ""),
         "pedagogical_approaches": approaches,
         "twenty_first_century_skills": skills,
@@ -181,10 +203,30 @@ def build_ai_prompt(context, template_config):
         lc = c.get("learning_competency", "")
         lc_id = c.get("lc_id", "")
         bloom = c.get("blooms_level", "")
-        competency_texts.append(f"- [{lc_id}] {lc} (Bloom's: {bloom})")
+        cs = c.get("content_standard", "")
+        ps = c.get("performance_standard", "")
+        extra_info = ""
+        if c.get("extra_data"):
+            try:
+                ed = json.loads(c["extra_data"])
+                extra_parts = []
+                for k, v in ed.items():
+                    if v and k not in ("AI-Searchable Tags", "Notes"):
+                        extra_parts.append(f"{k}: {v}")
+                if extra_parts:
+                    extra_info = " | " + " | ".join(extra_parts[:3])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        competency_texts.append(f"- [{lc_id}] {lc} (Bloom's: {bloom}, Content Standard: {cs}){extra_info}")
 
     content_std = context.get("content_standard", "")
     perf_std = context.get("performance_standard", "")
+
+    # Include ALL content standards and performance standards across selected competencies
+    all_cs = context.get("all_content_standards", [])
+    all_ps = context.get("all_performance_standards", [])
+    all_cs_text = "\n".join(f"- {cs}" for cs in all_cs) if all_cs else content_std
+    all_ps_text = "\n".join(f"- {ps}" for ps in all_ps) if all_ps else perf_std
 
     approaches_text = "\n".join(
         f"- {a['approach_name']}: {a.get('description', '')}"
@@ -212,6 +254,7 @@ def build_ai_prompt(context, template_config):
 
     prompt = f"""You are an expert Philippine DepEd curriculum specialist and instructional designer.
 Generate a detailed, classroom-ready lesson plan based on the MATATAG curriculum data below.
+The lesson plan MUST directly teach the specific learning competencies listed. Every activity, question, and assessment must relate to these competencies.
 
 === CURRICULUM DATA ===
 Subject: {subject}
@@ -221,10 +264,13 @@ Key Stage: {context.get('key_stage', '')}
 Domain: {domain}
 Content Topic: {topic}
 
-Content Standard: {content_std}
-Performance Standard: {perf_std}
+Content Standards (what students should know):
+{all_cs_text}
 
-Learning Competencies:
+Performance Standards (what students should be able to do):
+{all_ps_text}
+
+Learning Competencies (THESE are the specific skills to teach — each one must be addressed):
 {chr(10).join(competency_texts)}
 
 Recommended Pedagogical Approaches:
@@ -414,6 +460,12 @@ def generate_lesson_plan_local(context, template_config):
 
     sections = []
 
+    # Include all content/performance standards in header
+    all_cs = context.get("all_content_standards", [])
+    all_ps = context.get("all_performance_standards", [])
+    cs_display = "; ".join(all_cs) if all_cs else context.get("content_standard", "")
+    ps_display = "; ".join(all_ps) if all_ps else context.get("performance_standard", "")
+
     if "title_info" in enabled:
         fields = enabled["title_info"].get("customizable_fields", {})
         time_allot = fields.get("time_allotment", "60 minutes")
@@ -432,8 +484,8 @@ def generate_lesson_plan_local(context, template_config):
 | **Domain** | {domain} |
 | **Content Topic** | {topic} |
 | **Time Allotment** | {time_allot} |
-| **Content Standard** | {context.get('content_standard', '')} |
-| **Performance Standard** | {context.get('performance_standard', '')} |
+| **Content Standard** | {cs_display} |
+| **Performance Standard** | {ps_display} |
 """)
 
     if "twenty_first_century_skills" in enabled:
@@ -1037,6 +1089,263 @@ def generate_assessment(subject_id, competency_ids, assessment_config,
             ) + content
     else:
         content = generate_authentic_assessment_local(context, assessment_config)
+
+    return content, None
+
+
+## ============================================================
+## QUIZ GENERATOR
+## ============================================================
+
+QUIZ_TYPES = {
+    "multiple_choice": {"label": "Multiple Choice", "default_count": 5},
+    "true_false": {"label": "True or False", "default_count": 5},
+    "identification": {"label": "Identification", "default_count": 5},
+    "matching": {"label": "Matching Type", "default_count": 5},
+}
+
+
+def generate_quiz_local(context, quiz_config):
+    """Generate a quiz using template approach (no AI)."""
+    subject = context["subject"]
+    grade = context["grade"]
+    quarter = context["quarter"]
+    topic = context["content_topic"]
+    domain = context["domain"]
+    content_std = context.get("content_standard", "")
+    perf_std = context.get("performance_standard", "")
+
+    selected_types = quiz_config.get("types", ["multiple_choice", "true_false"])
+    num_questions = quiz_config.get("num_questions", 5)
+
+    competency_texts = []
+    for c in context["competencies"]:
+        lc = c.get("learning_competency", "")
+        bloom = c.get("blooms_level", "")
+        competency_texts.append(f"- {lc} *(Bloom's: {bloom})*")
+
+    sections = []
+
+    # Header
+    sections.append(f"""## Quiz / Assessment
+
+| | |
+|---|---|
+| **Subject** | {subject} |
+| **Grade Level** | Grade {grade} |
+| **Quarter** | {quarter} |
+| **Domain** | {domain} |
+| **Content Topic** | {topic} |
+| **Content Standard** | {content_std} |
+| **Performance Standard** | {perf_std} |
+
+### Target Learning Competencies
+
+{chr(10).join(competency_texts)}
+""")
+
+    answer_key = []
+
+    # Multiple Choice
+    if "multiple_choice" in selected_types:
+        sections.append(f"## I. Multiple Choice ({num_questions} items)\n")
+        sections.append("**Directions:** Choose the letter of the best answer.\n")
+        for i in range(1, num_questions + 1):
+            sections.append(f"{i}. [Question about {topic} aligned to the learning competency]")
+            sections.append(f"   - A. [Option A]")
+            sections.append(f"   - B. [Option B]")
+            sections.append(f"   - C. [Option C]")
+            sections.append(f"   - D. [Option D]\n")
+            answer_key.append(f"{i}. [A/B/C/D]")
+        sections.append("")
+
+    # True or False
+    if "true_false" in selected_types:
+        offset = len(answer_key)
+        sections.append(f"## II. True or False ({num_questions} items)\n")
+        sections.append("**Directions:** Write TRUE if the statement is correct, FALSE if it is not.\n")
+        for i in range(1, num_questions + 1):
+            n = offset + i
+            sections.append(f"{n}. [Statement about {topic} that is either true or false]\n")
+            answer_key.append(f"{n}. [TRUE/FALSE]")
+        sections.append("")
+
+    # Identification
+    if "identification" in selected_types:
+        offset = len(answer_key)
+        sections.append(f"## III. Identification ({num_questions} items)\n")
+        sections.append("**Directions:** Write the correct answer on the blank.\n")
+        for i in range(1, num_questions + 1):
+            n = offset + i
+            sections.append(f"{n}. __________________ [Clue/description related to {topic}]\n")
+            answer_key.append(f"{n}. [Answer]")
+        sections.append("")
+
+    # Matching Type
+    if "matching" in selected_types:
+        offset = len(answer_key)
+        sections.append(f"## IV. Matching Type ({num_questions} items)\n")
+        sections.append("**Directions:** Match Column A with Column B. Write the letter of the correct answer.\n")
+        sections.append("| Column A | Column B |")
+        sections.append("|----------|----------|")
+        letters = "ABCDEFGHIJ"
+        for i in range(num_questions):
+            n = offset + i + 1
+            letter = letters[i] if i < len(letters) else str(i + 1)
+            sections.append(f"| {n}. [Term/concept from {topic}] | {letter}. [Definition/description] |")
+            answer_key.append(f"{n}. [{letter}]")
+        sections.append("")
+
+    # Answer Key
+    sections.append("---\n")
+    sections.append("## Answer Key\n")
+    for a in answer_key:
+        sections.append(a)
+    sections.append("")
+
+    return "\n".join(sections)
+
+
+def build_quiz_ai_prompt(context, quiz_config):
+    """Build AI prompt for quiz generation."""
+    subject = context["subject"]
+    grade = context["grade"]
+    quarter = context["quarter"]
+    domain = context["domain"]
+    topic = context["content_topic"]
+    content_std = context.get("content_standard", "")
+    perf_std = context.get("performance_standard", "")
+
+    competency_texts = "\n".join(
+        f"- [{c.get('lc_id', '')}] {c.get('learning_competency', '')} (Bloom's: {c.get('blooms_level', '')})"
+        for c in context["competencies"]
+    )
+
+    selected_types = quiz_config.get("types", ["multiple_choice", "true_false"])
+    num_questions = quiz_config.get("num_questions", 5)
+    type_labels = [QUIZ_TYPES[t]["label"] for t in selected_types if t in QUIZ_TYPES]
+
+    type_instructions = []
+    item_num = 1
+    for t in selected_types:
+        if t == "multiple_choice":
+            type_instructions.append(
+                f"## I. Multiple Choice ({num_questions} items, starting at #{item_num})\n"
+                f"- Provide a question stem + 4 options (A-D)\n"
+                f"- Questions should align to the Bloom's taxonomy level of the competencies\n"
+                f"- Include plausible distractors"
+            )
+            item_num += num_questions
+        elif t == "true_false":
+            type_instructions.append(
+                f"## II. True or False ({num_questions} items, starting at #{item_num})\n"
+                f"- Write clear, unambiguous statements\n"
+                f"- Mix true and false answers"
+            )
+            item_num += num_questions
+        elif t == "identification":
+            type_instructions.append(
+                f"## III. Identification ({num_questions} items, starting at #{item_num})\n"
+                f"- Provide a clue/description, student writes the answer\n"
+                f"- Use underscores for the blank"
+            )
+            item_num += num_questions
+        elif t == "matching":
+            type_instructions.append(
+                f"## IV. Matching Type ({num_questions} items, starting at #{item_num})\n"
+                f"- Create Column A (terms) and Column B (definitions) as a table\n"
+                f"- Shuffle Column B so items don't match directly"
+            )
+            item_num += num_questions
+
+    prompt = f"""You are an expert Philippine DepEd quiz maker. Generate a READY-TO-USE quiz based on the MATATAG curriculum data below.
+
+=== CURRICULUM DATA ===
+Subject: {subject}
+Grade Level: Grade {grade}
+Quarter: {quarter}
+Domain: {domain}
+Content Topic: {topic}
+Content Standard: {content_std}
+Performance Standard: {perf_std}
+
+Learning Competencies:
+{competency_texts}
+=== END CURRICULUM DATA ===
+
+Generate a quiz with the following sections:
+
+{chr(10).join(type_instructions)}
+
+IMPORTANT:
+- Start with a header table showing Subject, Grade, Quarter, Topic
+- Number items continuously across all sections
+- All questions must directly assess the learning competencies listed above
+- Match the Bloom's taxonomy level (if Remember, ask recall questions; if Analyze, ask analysis questions)
+- Make questions specific to {topic} for Grade {grade} Filipino students
+- Use clear, age-appropriate language
+- At the END, include a complete "## Answer Key" section with all correct answers
+- Use markdown formatting throughout
+"""
+    return prompt
+
+
+def generate_quiz_ai(context, quiz_config, api_key=None, provider="anthropic"):
+    """Generate quiz using AI."""
+    prompt = build_quiz_ai_prompt(context, quiz_config)
+
+    if provider == "anthropic":
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return message.content[0].text
+        except ImportError:
+            return "ERROR: anthropic package not installed."
+        except Exception as e:
+            return f"ERROR: AI generation failed: {str(e)}"
+    elif provider == "openai":
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are an expert Philippine DepEd quiz maker."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=4096
+            )
+            return response.choices[0].message.content
+        except ImportError:
+            return "ERROR: openai package not installed."
+        except Exception as e:
+            return f"ERROR: AI generation failed: {str(e)}"
+    return "ERROR: Unknown AI provider."
+
+
+def generate_quiz(subject_id, competency_ids, quiz_config,
+                  use_ai=False, api_key=None, ai_provider="anthropic"):
+    """Main entry point: generate a quiz."""
+    context = _gather_curriculum_context(subject_id, competency_ids)
+    if not context:
+        return None, "No competencies found for the given IDs."
+
+    if use_ai and api_key:
+        content = generate_quiz_ai(context, quiz_config, api_key, ai_provider)
+        if content.startswith("ERROR:"):
+            ai_error = content
+            content = generate_quiz_local(context, quiz_config)
+            content = (
+                "> **Note:** AI generation failed — showing template-based quiz instead.\n"
+                f"> *Reason: {ai_error.replace('ERROR: ', '')}*\n\n"
+            ) + content
+    else:
+        content = generate_quiz_local(context, quiz_config)
 
     return content, None
 

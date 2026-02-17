@@ -155,20 +155,38 @@ textarea{resize:vertical;min-height:60px;}
 
 /* Output */
 .ob{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;max-height:70vh;overflow-y:auto;line-height:1.8;font-size:14px;}
-.ob h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:var(--c2);margin:24px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--c1);}
-.ob h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--c1);}
-.ob h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:14px 0 6px;}
-.ob table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
-.ob th{background:var(--c2);color:#fff;padding:8px 12px;font-family:'Poppins',sans-serif;font-weight:600;text-align:left;}
-.ob td{padding:7px 12px;border:1px solid var(--border);}
-.ob tr:nth-child(even) td{background:#f9fafb;}
+.ob h1{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:var(--c2);margin:24px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--c1);text-align:center;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.ob h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:22px 0 10px;padding:10px 16px;border-left:4px solid var(--c1);background:#f0fcfe;border-radius:0 8px 8px 0;}
+.ob h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:16px 0 8px;padding-left:8px;border-left:3px solid var(--accent);}
+.ob h4{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--c2);margin:12px 0 6px;}
+.ob table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px;border-radius:8px;overflow:hidden;}
+.ob th{background:var(--c2);color:#fff;padding:10px 14px;font-family:'Poppins',sans-serif;font-weight:600;text-align:left;}
+.ob td{padding:8px 14px;border:1px solid var(--border);}
+.ob tr:nth-child(even) td{background:#f8fffe;}
 .ob td:first-child{font-weight:600;color:var(--c2);}
-.ob ul,.ob ol{padding-left:20px;margin:6px 0;}
-.ob li{margin-bottom:4px;font-size:13px;}
-.ob blockquote{border-left:4px solid var(--accent);background:var(--accent-lt);padding:10px 16px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px;}
+.ob ul,.ob ol{padding-left:22px;margin:8px 0;}
+.ob li{margin-bottom:5px;font-size:13px;line-height:1.6;}
+.ob blockquote{border-left:4px solid var(--accent);background:var(--accent-lt);padding:12px 18px;border-radius:0 8px 8px 0;margin:12px 0;font-size:12px;}
 .ob hr{border:none;height:3px;background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));border-radius:2px;margin:24px 0;}
 .ob em{color:var(--text-s);}
-.ob p{margin:5px 0;}
+.ob p{margin:6px 0;}
+
+/* Section Tabs (within output) */
+.section-tabs{display:flex;gap:4px;padding:8px 0 14px;overflow-x:auto;flex-wrap:wrap;}
+.section-tab{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;white-space:nowrap;}
+.section-tab:hover{border-color:var(--c1);background:#f0fcfe;}
+.section-tab.active{background:var(--c1);color:#fff;border-color:var(--c1);}
+.section-pane{display:none;}
+.section-pane.active{display:block;}
+
+/* Quiz Type Grid */
+.qt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:600px){.qt-grid{grid-template-columns:1fr;}}
+.qt{padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
+.qt:hover{border-color:var(--c1);}
+.qt.on{border-color:var(--c1);background:#e0f7fa;}
+.qt-n{font-size:12px;font-weight:600;}
+.qt-d{font-size:10px;color:var(--text-s);}
 
 .oa{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
 .tabs{display:none;margin-bottom:14px;gap:4px;}
@@ -178,7 +196,7 @@ textarea{resize:vertical;min-height:60px;}
 
 .ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:20px;}
 
-@media print{.hdr,.steps,.br,.oa,.tabs,.ft,.sp:not(#step4){display:none!important;}.ob{max-height:none;overflow:visible;box-shadow:none;border:none;}}
+@media print{.hdr,.steps,.br,.oa,.tabs,.ft,.sp:not(#step4),.section-tabs{display:none!important;}.ob{max-height:none;overflow:visible;box-shadow:none;border:none;}.section-pane{display:block!important;}}
 
 /* Scrollbar */
 ::-webkit-scrollbar{width:5px;}
@@ -202,8 +220,8 @@ textarea{resize:vertical;min-height:60px;}
     <h1>MATATAG AI Lesson Plan Generator</h1>
     <p>DepEd-Aligned Curriculum Content Development System</p>
     <div class="stats">
-        <span class="st">&#128218; 3,410 Competencies</span>
-        <span class="st">&#128214; 12 Subjects</span>
+        <span class="st">&#128218; 3,400+ Competencies</span>
+        <span class="st">&#128214; 13 Subjects</span>
         <span class="st">&#127891; Grades K-10</span>
         <span class="st">&#128230; SCORM 1.2 Ready</span>
     </div>
@@ -299,15 +317,39 @@ textarea{resize:vertical;min-height:60px;}
         </div>
     </div>
 
-    <!-- AI Toggle -->
+    <!-- Quiz Generation -->
     <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;" id="ai-box">
-            <label class="sw"><input type="checkbox" id="f-ai"><span class="sl"></span></label>
-            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">&#129302; Use AI (Claude) for Enhanced Generation</div><div style="font-size:11px;color:var(--text-s);">AI writes detailed, classroom-ready content. Without AI, you get a structured template.</div></div>
+        <div class="crd-t">&#128221; Quiz Generation</div>
+        <div class="crd-s">Generate a downloadable quiz based on the selected competencies.</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;margin-bottom:10px;" id="quiz-box">
+            <label class="sw"><input type="checkbox" id="f-quiz"><span class="sl"></span></label>
+            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">Enable Quiz Generation</div><div style="font-size:11px;color:var(--text-s);">Creates a separate quiz with answer key from the lesson content.</div></div>
         </div>
-        <div id="ai-opts" style="display:none;padding:10px 4px 0;">
-            <div class="fr"><div class="fg"><label>AI Provider</label><select id="f-aip"><option value="anthropic">Anthropic (Claude)</option><option value="openai">OpenAI (GPT-4)</option></select></div><div class="fg"><label>API Key</label><input type="password" id="f-aik" placeholder="Leave blank for server key"><div class="hn" style="color:var(--success);">&#9989; Server key pre-configured</div></div></div>
+        <div id="quiz-opts" style="display:none;">
+            <div class="fr">
+                <div class="fg"><label>Number of Questions (per type)</label><select id="f-qnum"><option value="5" selected>5 questions</option><option value="10">10 questions</option><option value="15">15 questions</option><option value="20">20 questions</option></select></div>
+            </div>
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;font-family:'Poppins',sans-serif;color:var(--c2);">Question Types</label>
+            <div class="qt-grid">
+                <div class="qt on" data-qt="multiple_choice"><span style="font-size:18px;">&#9898;</span><div><div class="qt-n">Multiple Choice</div><div class="qt-d">4-option questions (A-D)</div></div></div>
+                <div class="qt on" data-qt="true_false"><span style="font-size:18px;">&#9989;</span><div><div class="qt-n">True or False</div><div class="qt-d">Statement-based questions</div></div></div>
+                <div class="qt" data-qt="identification"><span style="font-size:18px;">&#9999;&#65039;</span><div><div class="qt-n">Identification</div><div class="qt-d">Fill-in-the-blank</div></div></div>
+                <div class="qt" data-qt="matching"><span style="font-size:18px;">&#128279;</span><div><div class="qt-n">Matching Type</div><div class="qt-d">Two-column matching</div></div></div>
+            </div>
+            <div class="tip" style="margin-top:10px;"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> The quiz includes an Answer Key at the end. With AI enabled, questions will be specific and content-rich. Without AI, you get a structured template.</span></div>
         </div>
+    </div>
+
+    <!-- AI Status (always on) -->
+    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--c1);border-radius:10px;background:#f0fcfe;" id="ai-box">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:18px;">&#129302;</span></div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">AI-Powered Generation (Claude)</div><div style="font-size:11px;color:var(--text-s);">All content is generated by AI for detailed, classroom-ready lesson plans, assessments, and quizzes.</div></div>
+            <span style="background:var(--success);color:#fff;padding:3px 12px;border-radius:16px;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif;flex-shrink:0;">ACTIVE</span>
+        </div>
+        <input type="hidden" id="f-ai" value="on">
+        <input type="hidden" id="f-aip" value="anthropic">
+        <input type="hidden" id="f-aik" value="">
     </div>
 
     <div class="br"><button class="btn" id="bb3">&#8592; Back</button><button class="btn btn-g" id="bgen">&#9889; Generate Lesson Plan</button></div>
@@ -319,13 +361,14 @@ textarea{resize:vertical;min-height:60px;}
 <div class="crd">
     <div class="crd-t" id="out-t">&#128196; Your Generated Lesson Plan</div>
     <div class="crd-s" id="out-s"></div>
-    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button></div>
+    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button><button class="tab" id="t-qz" style="display:none">&#128221; Quiz</button></div>
     <div class="ob" id="out-b"></div>
     <div class="oa">
         <button class="btn" id="b-copy">&#128203; Copy</button>
         <button class="btn" id="b-dl">&#128229; Download .md</button>
         <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
         <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
+        <button class="btn" id="b-dlq" style="display:none">&#128221; Quiz .md</button>
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
@@ -345,7 +388,7 @@ document.addEventListener("DOMContentLoaded",function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
 function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
-let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="";
+let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",activeTab="lp";
 
 function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
 
@@ -379,8 +422,11 @@ $$(".mc").forEach(c=>{c.addEventListener("click",function(){$$(".mc").forEach(x=
 $$(".at").forEach(c=>{c.addEventListener("click",function(){this.classList.toggle("on");});});
 $("#a-mode").addEventListener("change",function(){$("#a-sec").style.display=this.value!=="none"?"block":"none";});
 
-// AI
-$("#f-ai").addEventListener("change",function(){$("#ai-opts").style.display=this.checked?"block":"none";$("#ai-box").style.borderColor=this.checked?"var(--c1)":"var(--border)";});
+// Quiz toggle & types
+$("#f-quiz").addEventListener("change",function(){$("#quiz-opts").style.display=this.checked?"block":"none";$("#quiz-box").style.borderColor=this.checked?"var(--c1)":"var(--border)";});
+$$(".qt").forEach(c=>{c.addEventListener("click",function(){this.classList.toggle("on");});});
+
+// AI is always on (server key pre-configured)
 
 // Progress - adapts speed based on AI vs template mode
 const pStepsFast=[{p:20,t:"Loading curriculum data..."},{p:50,t:"Building lesson plan..."},{p:80,t:"Formatting output..."},{p:95,t:"Almost done..."}];
@@ -397,6 +443,44 @@ function showP(isAI){
     return function(){clearInterval(iv);$("#pp").textContent="100%";$("#pf").style.width="100%";$("#pt").textContent="Done! Loading your lesson plan...";setTimeout(()=>$("#po").classList.remove("a"),500);};
 }
 
+// Render tabbed sections within output box
+function renderTabbed(html,container){
+    const parts=html.split(/<h2>/i);
+    if(parts.length<3){container.innerHTML=html;return;}
+    const intro=parts[0];
+    const sections=[];
+    for(let i=1;i<parts.length;i++){
+        const closeIdx=parts[i].indexOf('</h2>');
+        if(closeIdx===-1){sections.push({title:'Section '+i,content:'<h2>'+parts[i]});}
+        else{
+            const title=parts[i].substring(0,closeIdx).replace(/<[^>]*>/g,'').trim();
+            const content=parts[i].substring(closeIdx+5);
+            sections.push({title:title,content:content});
+        }
+    }
+    let tabBar='<div class="section-tabs">';
+    tabBar+='<div class="section-tab active" data-idx="all">View All</div>';
+    for(let i=0;i<sections.length;i++){tabBar+='<div class="section-tab" data-idx="'+i+'">'+sections[i].title+'</div>';}
+    tabBar+='</div>';
+    let panes='<div class="section-pane active" data-pane="all">'+intro;
+    for(let i=0;i<sections.length;i++){panes+='<h2>'+sections[i].title+'</h2>'+sections[i].content;}
+    panes+='</div>';
+    for(let i=0;i<sections.length;i++){panes+='<div class="section-pane" data-pane="'+i+'"><h2>'+sections[i].title+'</h2>'+sections[i].content+'</div>';}
+    container.innerHTML=tabBar+panes;
+    const tabs=container.querySelectorAll('.section-tab');
+    tabs.forEach(function(tab){
+        tab.addEventListener('click',function(){
+            tabs.forEach(function(t){t.classList.remove('active');});
+            tab.classList.add('active');
+            const idx=tab.getAttribute('data-idx');
+            container.querySelectorAll('.section-pane').forEach(function(p){
+                p.classList.remove('active');
+                if(p.getAttribute('data-pane')===idx)p.classList.add('active');
+            });
+        });
+    });
+}
+
 // GENERATE
 $("#bgen").addEventListener("click",function(){
 if(!selC.size)return;
@@ -405,6 +489,8 @@ const ln=id=>($(id)?.value||"").split("\n").map(s=>s.trim()).filter(Boolean);
 const on=s=>$(`#ttoggles .tc[data-s="${s}"]`)?.classList.contains("on");
 const am=$("#a-mode").value;
 const at=Array.from($$(".at.on")).map(c=>c.dataset.a);
+const wantQuiz=$("#f-quiz").checked;
+const quizTypes=Array.from($$(".qt.on")).map(c=>c.dataset.qt);
 
 const cfg={
 title_info:{enabled:on("title_info"),customizable_fields:{custom_title:$("#f-title")?.value||"",time_allotment:$("#f-time")?.value||"60 minutes"}},
@@ -418,33 +504,84 @@ assessment:{enabled:on("assessment"),customizable_fields:{include_formative:$("#
 reflection:{enabled:on("reflection"),customizable_fields:{num_prompts:parseInt($("#f-nref")?.value||"3"),custom_prompts:ln("#f-cref")}},
 };
 
-const ai=$("#f-ai").checked,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic",ids=Array.from(selC);
-const done=showP(ai);
+const ai=true,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic",ids=Array.from(selC);
+const done=showP(true);
 const ps=[fetch(aurl("/api/generate"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
 const needA=am!=="none"&&at.length>0;
 if(needA)ps.push(fetch(aurl("/api/generate-assessment"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+if(wantQuiz&&quizTypes.length>0)ps.push(fetch(aurl("/api/generate-quiz"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,quiz_config:{types:quizTypes,num_questions:parseInt($("#f-qnum")?.value||"5")},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
 
-Promise.all(ps).then(rs=>{done();const lp=rs[0],as=needA?rs[1]:null;
-setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";
+Promise.all(ps).then(rs=>{done();
+const lp=rs[0];
+const as=needA?rs[1]:null;
+const qzIdx=needA?2:1;
+const qz=(wantQuiz&&quizTypes.length>0)?rs[qzIdx]:null;
+
+setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";rawQZ=qz?.content||"";
 const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text;
 $("#out-s").textContent=`${sn} - ${gn} | ${selC.size} competencies | ${new Date().toLocaleString()}`;
 if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
-if(am==="incorporate"&&rawAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.remove("on");$("#b-dla").style.display="none";$("#out-t").textContent="\u{1F4C4} Lesson Plan + Assessment";}
-else if(am==="separate"&&rawAS){$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.add("on");$("#b-dla").style.display="inline-flex";$("#out-t").textContent="\u{1F4C4} Your Generated Lesson Plan";setTab("lp");}
-else if(am==="both"&&rawAS){const c=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;$("#out-b").innerHTML=md2h(c);rawLP=c;$("#out-tabs").classList.remove("on");$("#b-dla").style.display="inline-flex";$("#out-t").textContent="\u{1F4C4} Lesson Plan + Assessment";}
-else{$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.remove("on");$("#b-dla").style.display="none";$("#out-t").textContent="\u{1F4C4} Your Generated Lesson Plan";}
+
+// Determine tabs visibility
+const hasAS=!!rawAS;
+const hasQZ=!!rawQZ;
+const showTabs=hasAS||hasQZ;
+
+if(am==="incorporate"&&hasAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
+
+// Show/hide tabs
+if(showTabs||(am==="separate"&&hasAS)){
+    $("#out-tabs").classList.add("on");
+    $("#t-as").style.display=hasAS?"inline-flex":"none";
+    $("#t-qz").style.display=hasQZ?"inline-flex":"none";
+}else{
+    $("#out-tabs").classList.remove("on");
+}
+
+// Show/hide download buttons
+$("#b-dla").style.display=(hasAS&&am!=="incorporate")?"inline-flex":"none";
+$("#b-dlq").style.display=hasQZ?"inline-flex":"none";
+
+if(am==="both"&&hasAS){
+    const c=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;
+    rawLP=c;
+}
+
+// Set title
+let titleParts=["Lesson Plan"];
+if(rawAS)titleParts.push("Assessment");
+if(hasQZ)titleParts.push("Quiz");
+$("#out-t").textContent="\u{1F4C4} "+titleParts.join(" + ");
+
+// Render with section tabs
+setTab("lp");
 go(4);},700);
 }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
 });
 
-function setTab(t){if(t==="lp"){$("#t-lp").className="tab a";$("#t-as").className="tab";$("#out-b").innerHTML=md2h(rawLP);}else{$("#t-lp").className="tab";$("#t-as").className="tab a";$("#out-b").innerHTML=md2h(rawAS);}}
+function setTab(t){
+    activeTab=t;
+    $$(".tabs .tab").forEach(b=>b.classList.remove("a"));
+    if(t==="lp"){
+        $("#t-lp").classList.add("a");
+        renderTabbed(md2h(rawLP),$("#out-b"));
+    }else if(t==="assess"){
+        $("#t-as").classList.add("a");
+        renderTabbed(md2h(rawAS),$("#out-b"));
+    }else if(t==="quiz"){
+        $("#t-qz").classList.add("a");
+        renderTabbed(md2h(rawQZ),$("#out-b"));
+    }
+}
 $("#t-lp").addEventListener("click",()=>setTab("lp"));
 $("#t-as").addEventListener("click",()=>setTab("assess"));
+$("#t-qz").addEventListener("click",()=>setTab("quiz"));
 
 function md2h(m){if(!m)return"";let h=m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 h=h.replace(/^&gt; (.+)$/gm,"<blockquote>$1</blockquote>");h=h.replace(/<\/blockquote>\n<blockquote>/g,"<br>");
 h=h.replace(/^---$/gm,"<hr>");
 h=h.replace(/- \[ \]/g,"\u2610");h=h.replace(/- \[x\]/g,"\u2611");
+h=h.replace(/^#### (.+)$/gm,"<h4>$1</h4>");
 h=h.replace(/^### (.+)$/gm,"<h3>$1</h3>");h=h.replace(/^## (.+)$/gm,"<h2>$1</h2>");h=h.replace(/^# (.+)$/gm,"<h1>$1</h1>");
 h=h.replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>");h=h.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");h=h.replace(/\*(.+?)\*/g,"<em>$1</em>");
 h=h.replace(/^\|(.+)\|$/gm,function(m){const c=m.split("|").filter(c=>c.trim());if(c.every(c=>/^[\s\-:]+$/.test(c)))return"<!--s-->";return"<tr>"+c.map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>";});
@@ -453,10 +590,14 @@ h=h.replace(/^[-*] (.+)$/gm,"<li>$1</li>");h=h.replace(/^\d+\.\s+(.+)$/gm,"<li>$
 h=h.replace(/^(?!<[a-z\/])((?!<).+)$/gm,"<p>$1</p>");h=h.replace(/<p>\s*<\/p>/g,"");return h;}
 
 // Actions
-$("#b-copy").addEventListener("click",function(){navigator.clipboard.writeText(rawLP).then(()=>{this.textContent="\u2705 Copied!";setTimeout(()=>this.textContent="\u{1F4CB} Copy",2000);});});
+$("#b-copy").addEventListener("click",function(){
+    const txt=activeTab==="assess"?rawAS:activeTab==="quiz"?rawQZ:rawLP;
+    navigator.clipboard.writeText(txt).then(()=>{this.textContent="\u2705 Copied!";setTimeout(()=>this.textContent="\u{1F4CB} Copy",2000);});
+});
 $("#b-pr").addEventListener("click",()=>window.print());
 $("#b-dl").addEventListener("click",()=>{dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);});
 $("#b-dla").addEventListener("click",()=>{dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
+$("#b-dlq").addEventListener("click",()=>{dl(rawQZ,`Quiz_${S.value}_G${G.value}_Q${Q.value}.md`);});
 
 function dl(txt,fn){const b=new Blob([txt],{type:"text/markdown"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fn.replace(/\s+/g,"_");a.click();}
 
@@ -469,7 +610,7 @@ $("#b-scorm").addEventListener("click",function(){
     fetch(aurl("/api/download-scorm"),{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||""})
+        body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||"",quiz:rawQZ||""})
     }).then(r=>{if(!r.ok)throw new Error("Failed");return r.blob();}).then(b=>{
         const a=document.createElement("a");
         a.href=URL.createObjectURL(b);
@@ -479,7 +620,7 @@ $("#b-scorm").addEventListener("click",function(){
     }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
 });
 
-$("#b-new").addEventListener("click",()=>{rawAS="";go(1);});
+$("#b-new").addEventListener("click",()=>{rawAS="";rawQZ="";go(1);});
 });
 </script>
 </body>

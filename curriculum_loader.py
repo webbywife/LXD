@@ -1,6 +1,6 @@
 """
 MATATAG Curriculum Data Loader
-Parses all 12 MATATAG Excel spreadsheets into a SQLite database.
+Parses all 13 MATATAG Excel spreadsheets into a SQLite database.
 """
 
 import os
@@ -25,6 +25,7 @@ SUBJECT_FILES = {
     "Reading_Literacy_G1": "MATATAG_RL_G1_AI_Reference.xlsx",
     "EPP_TLE": "EPP_TLE_MATATAG_AI_Reference_Curriculum.xlsx",
     "Makabansa": "Makabansa_G1-3_AI_Curriculum_Reference.xlsx",
+    "Araling_Panlipunan": "MATATAG_AP_Curriculum_AI_Reference.xlsx",
 }
 
 # Display names for subjects
@@ -41,6 +42,7 @@ SUBJECT_DISPLAY = {
     "Reading_Literacy_G1": "Reading & Literacy - Grade 1",
     "EPP_TLE": "EPP / TLE (Technology & Livelihood)",
     "Makabansa": "Makabansa (Civics/History/Geography)",
+    "Araling_Panlipunan": "Araling Panlipunan (Social Studies)",
 }
 
 
@@ -222,10 +224,10 @@ def load_learning_competencies(conn, subject_id, ws):
     col_key_stage = _find_column(headers, "key_stage", "keystage")
     col_domain = _find_column(headers, "domain", "component", "learning_area")
     col_subdomain = _find_column(headers, "subdomain", "sub_domain", "sub_component")
-    col_topic = _find_column(headers, "content_topic", "topic", "theme", "content_focus")
-    col_lc = _find_column(headers, "learning_competency", "competency_text", "competency_description")
-    col_cs = _find_column(headers, "content_standard")
-    col_ps = _find_column(headers, "performance_standard")
+    col_topic = _find_column(headers, "content_topic", "topic", "theme", "content_focus", "nilalaman")
+    col_lc = _find_column(headers, "learning_competency", "competency_text", "competency_description", "kasanayang", "pampagkatuto")
+    col_cs = _find_column(headers, "content_standard", "pangnilalaman")
+    col_ps = _find_column(headers, "performance_standard", "pagganap")
     col_bloom = _find_column(headers, "bloom", "blooms")
     col_type = _find_column(headers, "competency_type")
     col_tags = _find_column(headers, "ai_tag", "ai_searchable", "tags")

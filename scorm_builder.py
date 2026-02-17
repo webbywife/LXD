@@ -367,10 +367,48 @@ hr {{
     margin-top: 30px;
 }}
 
+/* Section Tabs */
+.section-tabs {{
+    display: flex;
+    gap: 4px;
+    padding: 12px 0;
+    overflow-x: auto;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}}
+.section-tab {{
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 2px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+}}
+.section-tab:hover {{
+    border-color: var(--color1);
+}}
+.section-tab.active {{
+    background: var(--color2);
+    color: var(--white);
+    border-color: var(--color2);
+}}
+.section-pane {{
+    display: none;
+}}
+.section-pane.active {{
+    display: block;
+}}
+
 @media print {{
     body {{ background: white; }}
     .scorm-container {{ padding: 0; }}
     .section-card {{ box-shadow: none; page-break-inside: avoid; }}
+    .section-tabs {{ display: none; }}
+    .section-pane {{ display: block !important; }}
 }}
 </style>
 <script>
@@ -399,7 +437,58 @@ function finishSCORM() {{
         API.LMSFinish("");
     }}
 }}
-window.onload = initSCORM;
+
+function initTabs() {{
+    var container = document.querySelector('.scorm-container');
+    if (!container) return;
+    var html = container.innerHTML;
+    var parts = html.split(/<h2>/i);
+    if (parts.length < 2) return;
+    var intro = parts[0];
+    var sections = [];
+    for (var i = 1; i < parts.length; i++) {{
+        var closeIdx = parts[i].indexOf('</h2>');
+        if (closeIdx === -1) {{
+            sections.push({{ title: 'Section ' + i, content: '<h2>' + parts[i] }});
+        }} else {{
+            var title = parts[i].substring(0, closeIdx).replace(/<[^>]*>/g, '').trim();
+            var content = parts[i].substring(closeIdx + 5);
+            sections.push({{ title: title, content: content }});
+        }}
+    }}
+    if (sections.length < 2) return;
+    var tabBar = '<div class="section-tabs">';
+    tabBar += '<div class="section-tab active" data-idx="all">View All</div>';
+    for (var i = 0; i < sections.length; i++) {{
+        tabBar += '<div class="section-tab" data-idx="' + i + '">' + sections[i].title + '</div>';
+    }}
+    tabBar += '</div>';
+    var panes = '<div class="section-pane active" data-pane="all">' + intro;
+    for (var i = 0; i < sections.length; i++) {{
+        panes += '<h2>' + sections[i].title + '</h2>' + sections[i].content;
+    }}
+    panes += '</div>';
+    for (var i = 0; i < sections.length; i++) {{
+        panes += '<div class="section-pane" data-pane="' + i + '">';
+        panes += '<h2>' + sections[i].title + '</h2>' + sections[i].content;
+        panes += '</div>';
+    }}
+    container.innerHTML = tabBar + panes;
+    var tabs = container.querySelectorAll('.section-tab');
+    tabs.forEach(function(tab) {{
+        tab.addEventListener('click', function() {{
+            tabs.forEach(function(t) {{ t.classList.remove('active'); }});
+            tab.classList.add('active');
+            var idx = tab.getAttribute('data-idx');
+            container.querySelectorAll('.section-pane').forEach(function(p) {{
+                p.classList.remove('active');
+                if (p.getAttribute('data-pane') === idx) p.classList.add('active');
+            }});
+        }});
+    }});
+}}
+
+window.onload = function() {{ initSCORM(); initTabs(); }};
 window.onbeforeunload = finishSCORM;
 </script>
 </head>
@@ -474,7 +563,7 @@ def md_to_styled_html(md_content):
     return h
 
 
-def build_scorm_package(title, lesson_plan_md=None, assessment_md=None):
+def build_scorm_package(title, lesson_plan_md=None, assessment_md=None, quiz_md=None):
     """Build a SCORM 1.2 compliant ZIP package."""
     buffer = io.BytesIO()
 
@@ -510,6 +599,21 @@ def build_scorm_package(title, lesson_plan_md=None, assessment_md=None):
         resources_xml += '''<resource identifier="RES-ASSESS" type="webcontent"
             adlcp:scormtype="sco" href="assessment.html">
             <file href="assessment.html"/>
+        </resource>\n'''
+
+    if quiz_md:
+        quiz_html = md_to_styled_html(quiz_md)
+        quiz_page = SCORM_HTML_TEMPLATE.format(
+            title=html_lib.escape(title + " - Quiz"),
+            content=quiz_html
+        )
+        files_to_add["quiz.html"] = quiz_page
+        items_xml += '''<item identifier="ITEM-QUIZ" identifierref="RES-QUIZ">
+            <title>Quiz</title>
+        </item>\n'''
+        resources_xml += '''<resource identifier="RES-QUIZ" type="webcontent"
+            adlcp:scormtype="sco" href="quiz.html">
+            <file href="quiz.html"/>
         </resource>\n'''
 
     manifest_id = "MATATAG-" + _sanitize_id(title)

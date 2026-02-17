@@ -17,8 +17,9 @@ from curriculum_loader import (
     DB_PATH, SUBJECT_DISPLAY
 )
 from lesson_generator import (
-    generate_lesson_plan, generate_assessment, get_template_sections, get_procedure_models,
-    TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES
+    generate_lesson_plan, generate_assessment, generate_quiz,
+    get_template_sections, get_procedure_models,
+    TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES, QUIZ_TYPES
 )
 from scorm_builder import build_scorm_package
 from auth import auth_bp, login_required, init_db, verify_auth_token, generate_auth_token
@@ -242,6 +243,42 @@ def api_generate_assessment():
     return jsonify({"content": content})
 
 
+@app.route("/api/generate-quiz", methods=["POST"])
+@login_required
+def api_generate_quiz():
+    """Generate a quiz from competencies."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    subject_id = data.get("subject_id")
+    competency_ids = data.get("competency_ids", [])
+    quiz_config = data.get("quiz_config", {})
+    use_ai = data.get("use_ai", False)
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    if not subject_id:
+        return jsonify({"error": "Subject is required"}), 400
+    if not competency_ids:
+        return jsonify({"error": "Select at least one learning competency"}), 400
+
+    try:
+        competency_ids = [int(cid) for cid in competency_ids]
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid competency IDs"}), 400
+
+    content, error = generate_quiz(
+        subject_id, competency_ids, quiz_config,
+        use_ai=use_ai, api_key=api_key, ai_provider=ai_provider
+    )
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({"content": content})
+
+
 @app.route("/api/download-scorm", methods=["POST"])
 @login_required
 def api_download_scorm():
@@ -253,11 +290,12 @@ def api_download_scorm():
     title = data.get("title", "MATATAG Lesson Plan")
     lesson_plan_md = data.get("lesson_plan", "")
     assessment_md = data.get("assessment", "")
+    quiz_md = data.get("quiz", "")
 
-    if not lesson_plan_md and not assessment_md:
+    if not lesson_plan_md and not assessment_md and not quiz_md:
         return jsonify({"error": "No content to package"}), 400
 
-    pkg = build_scorm_package(title, lesson_plan_md or None, assessment_md or None)
+    pkg = build_scorm_package(title, lesson_plan_md or None, assessment_md or None, quiz_md or None)
     safe_title = re.sub(r'[^a-zA-Z0-9_-]', '_', title)[:50]
 
     return send_file(
