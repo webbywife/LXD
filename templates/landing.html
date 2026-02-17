@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATATAG AI Lesson Plan Generator - DepEd-Aligned AI for Filipino Teachers</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--c1:#00bbd6;--c1d:#009bb3;--c2:#237194;--c2d:#1a5670;--accent:#faa32b;--accent-lt:#fff8ed;--white:#ffffff;--text:#2d3436;--text-s:#636e72;--border:#dfe6e9;--bg:#f1f1f2;--success:#00b894;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Open Sans',sans-serif;color:var(--text);line-height:1.7;}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif;}
+a{text-decoration:none;}
+
+/* Nav */
+.nav{background:var(--white);padding:14px 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-logo span{font-size:26px;}
+.nav-logo h2{font-size:17px;font-weight:800;color:var(--c2);letter-spacing:-0.5px;}
+.nav-links{display:flex;gap:10px;}
+.nav-btn{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Poppins',sans-serif;transition:.2s;border:2px solid transparent;}
+.nav-btn-ghost{color:var(--c2);border-color:var(--border);}
+.nav-btn-ghost:hover{border-color:var(--c1);color:var(--c1);}
+.nav-btn-primary{background:var(--c1);color:#fff;border-color:var(--c1);}
+.nav-btn-primary:hover{background:var(--c1d);}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:80px 30px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:350px;height:350px;background:rgba(255,255,255,0.05);border-radius:50%;}
+.hero::after{content:'';position:absolute;bottom:-80px;left:-80px;width:280px;height:280px;background:rgba(255,255,255,0.03);border-radius:50%;}
+.hero-inner{max-width:780px;margin:0 auto;position:relative;z-index:1;}
+.hero h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.2;margin-bottom:14px;}
+.hero p{font-size:16px;opacity:0.9;margin-bottom:30px;max-width:600px;margin-left:auto;margin-right:auto;}
+.hero-stats{display:flex;justify-content:center;gap:14px;margin-bottom:30px;flex-wrap:wrap;}
+.hero-stat{background:rgba(255,255,255,0.15);padding:6px 18px;border-radius:20px;font-size:13px;font-weight:600;}
+.hero-cta{display:inline-block;background:var(--accent);color:#fff;padding:14px 40px;border-radius:10px;font-size:17px;font-weight:700;font-family:'Poppins',sans-serif;transition:.2s;box-shadow:0 4px 20px rgba(250,163,43,0.4);}
+.hero-cta:hover{background:#e8922a;transform:translateY(-2px);box-shadow:0 6px 28px rgba(250,163,43,0.5);}
+
+/* Features */
+.features{padding:70px 30px;background:var(--white);}
+.features-inner{max-width:960px;margin:0 auto;}
+.sec-t{text-align:center;font-size:28px;font-weight:800;color:var(--c2);margin-bottom:6px;}
+.sec-s{text-align:center;font-size:14px;color:var(--text-s);margin-bottom:44px;max-width:560px;margin-left:auto;margin-right:auto;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media(max-width:768px){.feat-grid{grid-template-columns:1fr;}}
+.feat{background:var(--bg);border-radius:14px;padding:28px 24px;text-align:center;border:1px solid var(--border);transition:.2s;}
+.feat:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.06);}
+.feat-i{font-size:38px;margin-bottom:12px;}
+.feat h3{font-size:16px;font-weight:700;color:var(--c2);margin-bottom:6px;}
+.feat p{font-size:13px;color:var(--text-s);line-height:1.6;}
+
+/* How it works */
+.how{padding:70px 30px;background:var(--bg);}
+.how-inner{max-width:860px;margin:0 auto;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:10px;}
+@media(max-width:768px){.steps{grid-template-columns:1fr 1fr;}}
+.step{text-align:center;position:relative;}
+.step-n{width:48px;height:48px;border-radius:50%;background:var(--c1);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin-bottom:10px;font-family:'Poppins',sans-serif;}
+.step h4{font-size:14px;font-weight:700;color:var(--c2);margin-bottom:4px;}
+.step p{font-size:12px;color:var(--text-s);}
+
+/* Testimonials */
+.testi{padding:70px 30px;background:var(--white);}
+.testi-inner{max-width:960px;margin:0 auto;}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media(max-width:768px){.testi-grid{grid-template-columns:1fr;}}
+.tcard{background:var(--bg);border-radius:14px;padding:24px;border:1px solid var(--border);}
+.tcard-q{font-size:13px;color:var(--text);line-height:1.7;font-style:italic;margin-bottom:14px;}
+.tcard-a{font-size:12px;font-weight:600;color:var(--c2);}
+.tcard-r{font-size:11px;color:var(--text-s);}
+
+/* CTA */
+.cta{padding:70px 30px;background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;text-align:center;}
+.cta h2{font-size:30px;font-weight:800;margin-bottom:10px;}
+.cta p{font-size:15px;opacity:0.9;margin-bottom:28px;max-width:500px;margin-left:auto;margin-right:auto;}
+.cta-btn{display:inline-block;background:var(--accent);color:#fff;padding:14px 40px;border-radius:10px;font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;transition:.2s;}
+.cta-btn:hover{background:#e8922a;transform:translateY(-2px);}
+
+/* Footer */
+.ft{padding:24px 30px;text-align:center;font-size:12px;color:var(--text-s);border-top:1px solid var(--border);background:var(--white);}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-logo">
+        <span>&#128218;</span>
+        <h2>MATATAG AI</h2>
+    </div>
+    <div class="nav-links">
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('generator') }}" class="nav-btn nav-btn-ghost">Generator</a>
+        {% if session.get('user_role') == 'admin' %}
+        <a href="{{ url_for('auth.admin_panel') }}" class="nav-btn nav-btn-ghost">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" class="nav-btn nav-btn-ghost">Logout</a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="nav-btn nav-btn-ghost">Login</a>
+        <a href="{{ url_for('auth.signup') }}" class="nav-btn nav-btn-primary">Get Started</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <h1>AI-Powered Lesson Plans Aligned to MATATAG Curriculum</h1>
+        <p>Generate complete, DepEd-aligned lesson plans in minutes. Built for Filipino teachers, powered by AI, grounded in the official MATATAG curriculum.</p>
+        <div class="hero-stats">
+            <span class="hero-stat">&#128218; 3,410 Competencies</span>
+            <span class="hero-stat">&#128214; 12 Subjects</span>
+            <span class="hero-stat">&#127891; Grades K-10</span>
+            <span class="hero-stat">&#128230; SCORM 1.2 Ready</span>
+        </div>
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('generator') }}" class="hero-cta">Open Generator &#8594;</a>
+        {% else %}
+        <a href="{{ url_for('auth.signup') }}" class="hero-cta">Get Started Free &#8594;</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="features-inner">
+        <div class="sec-t">Why Teachers Love MATATAG AI</div>
+        <div class="sec-s">Purpose-built for the Philippine K-10 MATATAG Curriculum with 3,410+ learning competencies across all subjects.</div>
+        <div class="feat-grid">
+            <div class="feat">
+                <div class="feat-i">&#129302;</div>
+                <h3>AI-Enhanced Content</h3>
+                <p>Claude AI writes detailed, classroom-ready activities, differentiation strategies, and assessments tailored to your selected competencies.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-i">&#127919;</div>
+                <h3>Curriculum-Aligned</h3>
+                <p>Every lesson plan maps directly to official DepEd MATATAG learning competencies, content standards, and performance standards.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-i">&#9881;&#65039;</div>
+                <h3>Fully Customizable</h3>
+                <p>Choose your instructional model (5E, 4A's, DepEd DLP), toggle sections, add custom materials, and tailor every aspect.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-i">&#128203;</div>
+                <h3>Authentic Assessment</h3>
+                <p>Generate performance tasks, rubrics, portfolios, and project-based assessments aligned to your lesson competencies.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-i">&#128230;</div>
+                <h3>SCORM 1.2 Export</h3>
+                <p>Download lesson plans as SCORM packages ready to upload to Moodle, Canvas, Brightspace, or any LMS.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-i">&#127758;</div>
+                <h3>12 Subject Areas</h3>
+                <p>Math, Science, English, Filipino, Makabansa, GMRC/VE, Music, Arts, PE, Health, EPP/TLE, and Kindergarten.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="how">
+    <div class="how-inner">
+        <div class="sec-t">How It Works</div>
+        <div class="sec-s">Generate a complete lesson plan in just 4 simple steps.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-n">1</div>
+                <h4>Select Curriculum</h4>
+                <p>Pick your subject, grade level, and quarter from the MATATAG curriculum.</p>
+            </div>
+            <div class="step">
+                <div class="step-n">2</div>
+                <h4>Choose Competencies</h4>
+                <p>Select the specific learning competencies to cover in your lesson.</p>
+            </div>
+            <div class="step">
+                <div class="step-n">3</div>
+                <h4>Customize</h4>
+                <p>Toggle sections, pick your instructional model, add custom content.</p>
+            </div>
+            <div class="step">
+                <div class="step-n">4</div>
+                <h4>Generate &amp; Export</h4>
+                <p>Get your lesson plan instantly. Download as Markdown or SCORM package.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testi">
+    <div class="testi-inner">
+        <div class="sec-t">What Teachers Are Saying</div>
+        <div class="sec-s">Filipino educators across the country are saving hours every week.</div>
+        <div class="testi-grid">
+            <div class="tcard">
+                <div class="tcard-q">"This tool cut my lesson planning time from 3 hours to 20 minutes. The AI-generated activities are creative and actually work in my classroom."</div>
+                <div class="tcard-a">Teacher Maria S.</div>
+                <div class="tcard-r">Grade 4, Math &bull; Quezon City</div>
+            </div>
+            <div class="tcard">
+                <div class="tcard-q">"I love that it's aligned directly to MATATAG. No more guessing if my lesson plan matches the curriculum guide. The SCORM export is a bonus!"</div>
+                <div class="tcard-a">Teacher Jun R.</div>
+                <div class="tcard-r">Grade 7, Science &bull; Cebu</div>
+            </div>
+            <div class="tcard">
+                <div class="tcard-q">"The differentiation strategies and authentic assessments are exactly what our principal asks for. This has made my DLPs consistently high quality."</div>
+                <div class="tcard-a">Teacher Ana L.</div>
+                <div class="tcard-r">Grade 2, English &bull; Davao</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <h2>Ready to Transform Your Lesson Planning?</h2>
+    <p>Join Filipino teachers who are saving hours every week with AI-powered, MATATAG-aligned lesson plans.</p>
+    {% if session.get('user_id') %}
+    <a href="{{ url_for('generator') }}" class="cta-btn">Open Generator &#8594;</a>
+    {% else %}
+    <a href="{{ url_for('auth.signup') }}" class="cta-btn">Create Free Account &#8594;</a>
+    {% endif %}
+</section>
+
+<!-- Footer -->
+<div class="ft">
+    MATATAG AI Lesson Plan Generator &bull; Philippine DepEd Curriculum &bull; SCORM 1.2 Compliant<br>
+    &copy; 2025 Skooled AI. All rights reserved.
+</div>
+
+</body>
+</html>

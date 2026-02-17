@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - MATATAG AI Lesson Plan Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--c1:#00bbd6;--c1d:#009bb3;--c2:#237194;--c2d:#1a5670;--accent:#faa32b;--white:#ffffff;--text:#2d3436;--text-s:#636e72;--border:#dfe6e9;--bg:#f1f1f2;--success:#00b894;--danger:#e74c3c;--warning:#fdcb6e;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+h1,h2,.poppins{font-family:'Poppins',sans-serif;}
+
+.hdr{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;}
+.hdr h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.hdr p{font-size:12px;opacity:0.85;margin-top:3px;}
+
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;}
+.card{background:var(--white);border-radius:16px;padding:40px 36px;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid var(--border);width:100%;max-width:420px;}
+.card-t{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--c2);}
+.card-s{font-size:13px;color:var(--text-s);text-align:center;margin-bottom:24px;}
+
+.flash{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;}
+.flash-error{background:#ffeaea;color:var(--danger);border:1px solid #f5c6c6;}
+.flash-success{background:#e8f8f5;color:var(--success);border:1px solid #b8e6d8;}
+.flash-warning{background:#fef9e7;color:#856404;border:1px solid #fce8a6;}
+
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif;color:var(--c2);}
+.fg input{width:100%;padding:11px 14px;font-size:14px;font-family:inherit;border:2px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;}
+.fg input:focus{outline:none;border-color:var(--c1);}
+
+.btn{width:100%;padding:12px;border-radius:8px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;background:var(--c1);color:#fff;}
+.btn:hover{background:var(--c1d);}
+
+.links{text-align:center;margin-top:20px;font-size:13px;color:var(--text-s);}
+.links a{color:var(--c1);text-decoration:none;font-weight:600;}
+.links a:hover{text-decoration:underline;}
+
+.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+    <h1>MATATAG AI Lesson Plan Generator</h1>
+    <p>DepEd-Aligned Curriculum Content Development System</p>
+</div>
+
+<div class="wrap">
+<div class="card">
+    <div class="card-t">Welcome Back</div>
+    <div class="card-s">Sign in to access the lesson plan generator</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        {% if request.args.get('next') %}
+        <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+        {% endif %}
+        <div class="fg">
+            <label>Email Address</label>
+            <input type="email" name="email" required placeholder="you@school.edu.ph" autofocus>
+        </div>
+        <div class="fg">
+            <label>Password</label>
+            <input type="password" name="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn">Sign In</button>
+    </form>
+
+    <div class="links">
+        Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up</a>
+    </div>
+</div>
+</div>
+
+<div class="ft">MATATAG AI Lesson Plan Generator &bull; Philippine DepEd Curriculum</div>
+</body>
+</html>

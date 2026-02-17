@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATATAG AI Lesson Plan Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #f1f1f2;
+    --c1: #00bbd6;
+    --c1d: #009bb3;
+    --c2: #237194;
+    --c2d: #1a5670;
+    --accent: #faa32b;
+    --accent-lt: #fff8ed;
+    --white: #ffffff;
+    --text: #2d3436;
+    --text-s: #636e72;
+    --border: #dfe6e9;
+    --success: #00b894;
+    --danger: #e74c3c;
+    --rad: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Open Sans','Roboto',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
+h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
+
+/* Header */
+.hdr{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;}
+.hdr::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;background:rgba(255,255,255,0.04);border-radius:50%;}
+.hdr h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.hdr p{font-size:12px;opacity:0.85;margin-top:3px;}
+.hdr .stats{display:flex;justify-content:center;gap:12px;margin-top:10px;font-size:11px;flex-wrap:wrap;}
+.hdr .st{background:rgba(255,255,255,0.15);padding:3px 12px;border-radius:16px;}
+
+/* Steps */
+.steps{display:flex;justify-content:center;gap:0;padding:18px 20px 0;max-width:800px;margin:0 auto;}
+.stp{flex:1;text-align:center;position:relative;padding-bottom:10px;}
+.stp-n{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:#dfe6e9;color:var(--text-s);margin-bottom:4px;transition:.3s;}
+.stp.a .stp-n{background:var(--c1);color:#fff;}
+.stp.d .stp-n{background:var(--success);color:#fff;}
+.stp-l{font-size:11px;font-weight:600;color:var(--text-s);}
+.stp.a .stp-l{color:var(--c2);}
+.stp.d .stp-l{color:var(--success);}
+.stp-ln{position:absolute;top:17px;left:50%;width:100%;height:3px;background:#dfe6e9;z-index:0;}
+.stp:last-child .stp-ln{display:none;}
+.stp.d .stp-ln{background:var(--success);}
+
+/* Container */
+.cnt{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
+
+/* Card */
+.crd{background:var(--white);border-radius:var(--rad);padding:26px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border:1px solid var(--border);margin-bottom:16px;}
+.crd-t{font-size:18px;font-weight:700;margin-bottom:3px;}
+.crd-s{font-size:12px;color:var(--text-s);margin-bottom:18px;}
+
+/* Tip */
+.tip{display:flex;gap:10px;background:var(--accent-lt);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin:12px 0;font-size:12px;align-items:flex-start;line-height:1.5;}
+.tip .ti{font-size:18px;flex-shrink:0;}
+.tip .tt{color:#5a4310;}
+
+/* Step Panels */
+.sp{display:none;}.sp.a{display:block;}
+
+/* Form */
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:600px){.fr{grid-template-columns:1fr;}}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif;color:var(--c2);}
+.fg .hn{font-size:11px;color:var(--text-s);margin-top:2px;}
+select,input[type="text"],input[type="password"],textarea{width:100%;padding:10px 14px;font-size:13px;font-family:inherit;border:2px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--c1);}
+select:disabled{background:#f5f6fa;opacity:.6;}
+textarea{resize:vertical;min-height:60px;}
+
+/* Buttons */
+.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;transition:.2s;font-family:'Poppins',sans-serif;}
+.btn:hover{border-color:var(--c1);}
+.btn-p{background:var(--c1);color:#fff;border-color:var(--c1);}
+.btn-p:hover{background:var(--c1d);}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-g{background:var(--accent);color:#fff;border-color:var(--accent);padding:14px 32px;font-size:15px;font-weight:700;}
+.btn-g:hover{background:#e8922a;}
+.btn-g:disabled{opacity:.5;cursor:not-allowed;}
+.btn-s2{background:var(--c2);color:#fff;border-color:var(--c2);}
+.btn-s2:hover{background:var(--c2d);}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.br{display:flex;justify-content:space-between;margin-top:22px;gap:10px;}
+
+/* Competencies */
+.cg{max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
+.cc{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #f5f6fa;cursor:pointer;transition:background .15s;align-items:flex-start;}
+.cc:hover{background:#f0fcfe;}.cc.sel{background:#e0f7fa;}
+.cc:last-child{border-bottom:none;}
+.cc input{margin-top:3px;transform:scale(1.15);accent-color:var(--c1);}
+.cc-c{font-size:10px;font-weight:700;color:var(--c1);}
+.cc-d{font-size:12px;line-height:1.5;}
+.cc-m{font-size:10px;color:var(--text-s);margin-top:2px;}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:6px 0;margin-bottom:6px;}
+.sc{font-size:13px;font-weight:700;color:var(--c2);}
+
+/* Toggles */
+.tc{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.2s;}
+.tc:hover{border-color:var(--c1);}
+.tc.on{border-color:var(--c1);background:#f0fcfe;}
+.tc-i{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
+.tc-n{font-size:13px;font-weight:600;flex:1;}
+.tc-ck{width:20px;height:20px;border-radius:5px;border:2px solid #b2bec3;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;transition:.2s;flex-shrink:0;}
+.tc.on .tc-ck{background:var(--c1);border-color:var(--c1);}
+.tc-x{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-s);padding:2px 6px;transition:transform .2s;flex-shrink:0;}
+.tc-x.op{transform:rotate(180deg);}
+.to{display:none;padding:14px 16px;margin:-8px 0 8px;border:2px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:#fafbfc;}
+.to.op{display:block;}
+
+/* Model Cards */
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:600px){.mg{grid-template-columns:1fr;}}
+.mc{padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:center;}
+.mc:hover{border-color:var(--c1);}
+.mc.sel{border-color:var(--c1);background:#e0f7fa;}
+.mc-n{font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;}
+.mc-d{font-size:10px;color:var(--text-s);margin-top:2px;}
+
+/* Assessment Types */
+.at-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:600px){.at-grid{grid-template-columns:1fr;}}
+.at{padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
+.at:hover{border-color:var(--accent);}
+.at.on{border-color:var(--accent);background:var(--accent-lt);}
+.at-i{font-size:20px;flex-shrink:0;}
+.at-n{font-size:12px;font-weight:600;}
+.at-d{font-size:10px;color:var(--text-s);}
+
+/* Switch */
+.sw{position:relative;width:42px;height:22px;flex-shrink:0;}
+.sw input{opacity:0;width:0;height:0;}
+.sl{position:absolute;top:0;left:0;right:0;bottom:0;background:#b2bec3;border-radius:22px;cursor:pointer;transition:.3s;}
+.sl:before{content:"";position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+.sw input:checked+.sl{background:var(--c1);}
+.sw input:checked+.sl:before{transform:translateX(20px);}
+
+/* Progress */
+.po{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(29,78,120,0.85);z-index:1000;justify-content:center;align-items:center;}
+.po.a{display:flex;}
+.pb{background:#fff;border-radius:20px;padding:40px 44px;text-align:center;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.pb-t{font-size:18px;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:6px;}
+.pb-s{font-size:12px;color:var(--text-s);margin-bottom:22px;}
+.pb-p{font-size:36px;font-weight:800;color:var(--c1);margin-bottom:4px;font-family:'Poppins',sans-serif;}
+.pb-bg{width:100%;height:10px;background:#ecf0f1;border-radius:5px;overflow:hidden;margin-bottom:10px;}
+.pb-fl{height:100%;background:linear-gradient(90deg,var(--c1),var(--accent));border-radius:5px;transition:width .4s;width:0%;}
+.pb-st{font-size:11px;color:var(--text-s);min-height:16px;}
+
+/* Output */
+.ob{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;max-height:70vh;overflow-y:auto;line-height:1.8;font-size:14px;}
+.ob h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:var(--c2);margin:24px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--c1);}
+.ob h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--c1);}
+.ob h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:14px 0 6px;}
+.ob table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
+.ob th{background:var(--c2);color:#fff;padding:8px 12px;font-family:'Poppins',sans-serif;font-weight:600;text-align:left;}
+.ob td{padding:7px 12px;border:1px solid var(--border);}
+.ob tr:nth-child(even) td{background:#f9fafb;}
+.ob td:first-child{font-weight:600;color:var(--c2);}
+.ob ul,.ob ol{padding-left:20px;margin:6px 0;}
+.ob li{margin-bottom:4px;font-size:13px;}
+.ob blockquote{border-left:4px solid var(--accent);background:var(--accent-lt);padding:10px 16px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px;}
+.ob hr{border:none;height:3px;background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));border-radius:2px;margin:24px 0;}
+.ob em{color:var(--text-s);}
+.ob p{margin:5px 0;}
+
+.oa{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
+.tabs{display:none;margin-bottom:14px;gap:4px;}
+.tabs.on{display:flex;}
+.tab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;}
+.tab.a{background:var(--c2);color:#fff;border-color:var(--c2);}
+
+.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:20px;}
+
+@media print{.hdr,.steps,.br,.oa,.tabs,.ft,.sp:not(#step4){display:none!important;}.ob{max-height:none;overflow:visible;box-shadow:none;border:none;}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#b2bec3;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div style="background:var(--c2d);color:#fff;padding:6px 20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+    <span>Welcome, <strong>{{ session.get('user_name', 'User') }}</strong></span>
+    <div style="display:flex;gap:12px;">
+        <a href="{{ url_for('landing') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Home</a>
+        {% if session.get('user_role') == 'admin' %}
+        <a href="{{ url_for('auth.admin_panel') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Logout</a>
+    </div>
+</div>
+<div class="hdr">
+    <h1>MATATAG AI Lesson Plan Generator</h1>
+    <p>DepEd-Aligned Curriculum Content Development System</p>
+    <div class="stats">
+        <span class="st">&#128218; 3,410 Competencies</span>
+        <span class="st">&#128214; 12 Subjects</span>
+        <span class="st">&#127891; Grades K-10</span>
+        <span class="st">&#128230; SCORM 1.2 Ready</span>
+    </div>
+</div>
+
+<div class="steps">
+    <div class="stp a" id="si1"><div class="stp-ln"></div><div class="stp-n">1</div><div class="stp-l">Curriculum</div></div>
+    <div class="stp" id="si2"><div class="stp-ln"></div><div class="stp-n">2</div><div class="stp-l">Competencies</div></div>
+    <div class="stp" id="si3"><div class="stp-ln"></div><div class="stp-n">3</div><div class="stp-l">Customize</div></div>
+    <div class="stp" id="si4"><div class="stp-n">4</div><div class="stp-l">Output</div></div>
+</div>
+
+<div class="cnt">
+
+<!-- STEP 1 -->
+<div class="sp a" id="step1">
+<div class="crd">
+    <div class="crd-t">&#128204; Select Your Curriculum</div>
+    <div class="crd-s">Choose subject, grade, and quarter to begin.</div>
+    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
+    <div class="fg"><label>Subject / Learning Area</label><select id="sel-s"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.id }}">{{ s.display_name }}</option>{% endfor %}</select></div>
+    <div class="fr">
+        <div class="fg"><label>Grade Level</label><select id="sel-g" disabled><option value="">-- Choose Grade --</option></select></div>
+        <div class="fg"><label>Quarter</label><select id="sel-q" disabled><option value="">-- Choose Quarter --</option></select></div>
+    </div>
+    <div class="br"><div></div><button class="btn btn-p" id="bn1" disabled>Next: Choose Competencies &#8594;</button></div>
+</div>
+</div>
+
+<!-- STEP 2 -->
+<div class="sp" id="step2">
+<div class="crd">
+    <div class="crd-t">&#127919; Choose Learning Competencies</div>
+    <div class="crd-s" id="s2sub">Select which competencies to include in your lesson plan.</div>
+    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> You can select multiple competencies. Each one will be mapped to learning objectives in your lesson plan. Performance tasks in assessments will align to these.</span></div>
+    <div class="sb"><span class="sc" id="scnt">0 selected</span><div><button class="btn btn-sm" id="bsa">Select All</button> <button class="btn btn-sm" id="bda">Deselect All</button></div></div>
+    <div class="cg" id="cl"></div>
+    <div class="br"><button class="btn" id="bb2">&#8592; Back</button><button class="btn btn-p" id="bn2" disabled>Next: Customize &#8594;</button></div>
+</div>
+</div>
+
+<!-- STEP 3 -->
+<div class="sp" id="step3">
+<div class="crd">
+    <div class="crd-t">&#9881;&#65039; Customize Your Lesson Plan</div>
+    <div class="crd-s">Toggle sections on/off and click &#9660; to customize each one.</div>
+
+    <div id="ttoggles">
+    <div class="tc on" data-s="title_info"><span class="tc-i">&#128196;</span><span class="tc-n">Lesson Plan Header</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="title_info">&#9660;</button></div>
+    <div class="to" id="o-title_info"><div class="fg"><label>Custom Title</label><input type="text" id="f-title" placeholder="Leave blank for auto-generated title"></div><div class="fg"><label>Time Allotment</label><select id="f-time"><option value="30 minutes">30 min</option><option value="45 minutes">45 min</option><option value="60 minutes" selected>60 min</option><option value="90 minutes">90 min</option><option value="120 minutes">120 min</option></select></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">The header includes subject, grade, quarter, domain, and standards automatically from the curriculum data.</span></div></div>
+
+    <div class="tc on" data-s="twenty_first_century_skills"><span class="tc-i">&#127775;</span><span class="tc-n">21st Century Skills</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="twenty_first_century_skills">&#9660;</button></div>
+    <div class="to" id="o-twenty_first_century_skills"><div class="fg"><label>Focus Skills</label><div id="sk-cb"></div></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Skills are loaded from the MATATAG curriculum data for your selected subject. Check the most relevant ones for this lesson.</span></div></div>
+
+    <div class="tc on" data-s="learning_objectives"><span class="tc-i">&#127919;</span><span class="tc-n">Learning Objectives (SWBAT)</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="learning_objectives">&#9660;</button></div>
+    <div class="to" id="o-learning_objectives"><div class="fr"><div class="fg"><label>Number of Objectives</label><select id="f-nobj"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><div class="fg"><label>Custom Objectives (one per line)</label><textarea id="f-cobj" rows="3" placeholder="SWBAT identify the parts of...&#10;SWBAT explain the relationship..."></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">If left blank, objectives are auto-generated from the selected learning competencies using Bloom's taxonomy verbs.</span></div></div>
+
+    <div class="tc on" data-s="materials_technology"><span class="tc-i">&#128221;</span><span class="tc-n">Materials / Technology</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="materials_technology">&#9660;</button></div>
+    <div class="to" id="o-materials_technology"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-digi" checked> Include digital tools</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-trad" checked> Include traditional materials</label><div class="fg"><label>Custom Materials (one per line)</label><textarea id="f-mats" rows="2" placeholder="Science kit&#10;Magnifying glass"></textarea></div></div>
+
+    <div class="tc on" data-s="prior_knowledge"><span class="tc-i">&#128218;</span><span class="tc-n">Prior Knowledge / Prerequisites</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="prior_knowledge">&#9660;</button></div>
+    <div class="to" id="o-prior_knowledge"><div class="fg"><label>Custom Prerequisites (one per line)</label><textarea id="f-prereq" rows="2" placeholder="Students can count to 100"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Listing prerequisites helps teachers identify if students need review before the lesson begins.</span></div></div>
+
+    <div class="tc on" data-s="lesson_procedure"><span class="tc-i">&#128203;</span><span class="tc-n">Lesson Procedure</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="lesson_procedure">&#9660;</button></div>
+    <div class="to" id="o-lesson_procedure"><div class="fg"><label>Instructional Design Model</label></div><div class="mg"><div class="mc sel" data-m="5e"><div class="mc-n">5E Model</div><div class="mc-d">Engage, Explore, Explain, Elaborate, Evaluate</div></div><div class="mc" data-m="4as"><div class="mc-n">4A's Model</div><div class="mc-d">Activity, Analysis, Abstraction, Application</div></div><div class="mc" data-m="deped_dlp"><div class="mc-n">DepEd DLP</div><div class="mc-d">Review, Motivation, Activity, Analysis, Application, Assessment</div></div><div class="mc" data-m="design_thinking"><div class="mc-n">Design Thinking</div><div class="mc-d">Empathize, Define, Ideate, Prototype, Test</div></div></div><label style="font-size:12px;display:flex;gap:6px;margin-top:10px;cursor:pointer"><input type="checkbox" id="f-timing" checked> Include time allocation per phase</label><div class="tip"><span class="ti">&#128161;</span><span class="tt">The <strong>DepEd DLP</strong> format follows the official Daily Lesson Plan structure. The <strong>5E</strong> model is great for inquiry-based science and math lessons.</span></div></div>
+
+    <div class="tc on" data-s="differentiation"><span class="tc-i">&#129309;</span><span class="tc-n">Differentiation / Scaffolding</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="differentiation">&#9660;</button></div>
+    <div class="to" id="o-differentiation"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-ds" checked> Struggling Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-da" checked> Advanced Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-de" checked> English Language Learners</label><div class="fg"><label>Additional Strategies</label><textarea id="f-diff" rows="2" placeholder="Use manipulatives for kinesthetic learners"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Differentiation ensures every student can access the lesson regardless of their current skill level.</span></div></div>
+
+    <div class="tc on" data-s="assessment"><span class="tc-i">&#128202;</span><span class="tc-n">Assessment</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="assessment">&#9660;</button></div>
+    <div class="to" id="o-assessment"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-af" checked> Formative Assessment</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-as" checked> Summative Assessment</label><div class="fg"><label>Custom Assessments</label><textarea id="f-cass" rows="2" placeholder="Group presentation rubric"></textarea></div></div>
+
+    <div class="tc on" data-s="reflection"><span class="tc-i">&#129300;</span><span class="tc-n">Teacher Reflection</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="reflection">&#9660;</button></div>
+    <div class="to" id="o-reflection"><div class="fg"><label>Number of Prompts</label><select id="f-nref"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div class="fg"><label>Custom Prompts</label><textarea id="f-cref" rows="2" placeholder="Did students engage with the activity?"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Reflection prompts help teachers continuously improve their practice through self-evaluation after each lesson.</span></div></div>
+    </div>
+
+    <!-- Assessment Package -->
+    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+        <div class="crd-t">&#128203; Authentic Assessment Package</div>
+        <div class="crd-s">Generate professional assessment tools aligned to the selected competencies.</div>
+        <div class="fg"><label>Assessment Output Mode</label><select id="a-mode"><option value="none">No assessment (Lesson Plan only)</option><option value="incorporate">Include IN the lesson plan</option><option value="separate">Generate as SEPARATE document</option><option value="both">Generate BOTH (combined + separate download)</option></select></div>
+        <div id="a-sec" style="display:none;">
+            <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Performance Task + Rubric is the most common combination. Add Portfolio for long-term tracking, or Self & Peer Assessment for collaborative learning.</span></div>
+            <div class="at-grid">
+                <div class="at on" data-a="performance_task"><span class="at-i">&#127919;</span><div><div class="at-n">Performance Task</div><div class="at-d">Real-world GRASPS scenario</div></div></div>
+                <div class="at on" data-a="rubric"><span class="at-i">&#128200;</span><div><div class="at-n">Scoring Rubric</div><div class="at-d">4-point criteria-based scale</div></div></div>
+                <div class="at" data-a="portfolio"><span class="at-i">&#128194;</span><div><div class="at-n">Portfolio</div><div class="at-d">Student work collection</div></div></div>
+                <div class="at" data-a="project_based"><span class="at-i">&#128736;</span><div><div class="at-n">Project-Based</div><div class="at-d">Multi-day real-world project</div></div></div>
+                <div class="at" data-a="product_based"><span class="at-i">&#127912;</span><div><div class="at-n">Product-Based</div><div class="at-d">Poster, model, presentation</div></div></div>
+                <div class="at" data-a="self_peer"><span class="at-i">&#128101;</span><div><div class="at-n">Self & Peer Assessment</div><div class="at-d">Evaluation forms & reflection</div></div></div>
+            </div>
+            <div class="fg" style="margin-top:10px;"><label>Assessment Context (optional)</label><textarea id="a-ctx" rows="2" placeholder="e.g., Students apply learning to a community garden project..."></textarea></div>
+        </div>
+    </div>
+
+    <!-- AI Toggle -->
+    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;" id="ai-box">
+            <label class="sw"><input type="checkbox" id="f-ai"><span class="sl"></span></label>
+            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">&#129302; Use AI (Claude) for Enhanced Generation</div><div style="font-size:11px;color:var(--text-s);">AI writes detailed, classroom-ready content. Without AI, you get a structured template.</div></div>
+        </div>
+        <div id="ai-opts" style="display:none;padding:10px 4px 0;">
+            <div class="fr"><div class="fg"><label>AI Provider</label><select id="f-aip"><option value="anthropic">Anthropic (Claude)</option><option value="openai">OpenAI (GPT-4)</option></select></div><div class="fg"><label>API Key</label><input type="password" id="f-aik" placeholder="Leave blank for server key"><div class="hn" style="color:var(--success);">&#9989; Server key pre-configured</div></div></div>
+        </div>
+    </div>
+
+    <div class="br"><button class="btn" id="bb3">&#8592; Back</button><button class="btn btn-g" id="bgen">&#9889; Generate Lesson Plan</button></div>
+</div>
+</div>
+
+<!-- STEP 4 -->
+<div class="sp" id="step4">
+<div class="crd">
+    <div class="crd-t" id="out-t">&#128196; Your Generated Lesson Plan</div>
+    <div class="crd-s" id="out-s"></div>
+    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button></div>
+    <div class="ob" id="out-b"></div>
+    <div class="oa">
+        <button class="btn" id="b-copy">&#128203; Copy</button>
+        <button class="btn" id="b-dl">&#128229; Download .md</button>
+        <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
+        <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
+        <button class="btn" id="b-pr">&#128424; Print</button>
+        <button class="btn btn-p" id="b-new">&#43; Create Another</button>
+    </div>
+    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip file can be uploaded directly to Moodle (3-5), Canvas, Brightspace, or any SCORM 1.2 compliant LMS. Go to your course > Add Activity > SCORM Package > Upload the .zip file.</span></div>
+</div>
+</div>
+
+</div>
+
+<!-- Progress -->
+<div class="po" id="po"><div class="pb"><div class="pb-t">&#9889; Generating Lesson Plan</div><div class="pb-s" id="ps">Please wait...</div><div class="pb-p" id="pp">0%</div><div class="pb-bg"><div class="pb-fl" id="pf"></div></div><div class="pb-st" id="pt">Preparing curriculum data...</div></div></div>
+
+<div class="ft">MATATAG AI Lesson Plan Generator &bull; Philippine DepEd Curriculum &bull; SCORM 1.2 Compliant</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="";
+
+function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
+
+const S=$("#sel-s"),G=$("#sel-g"),Q=$("#sel-q");
+
+S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose Grade --</option>';G.disabled=true;Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(`/api/grades/${this.value}`).then(r=>r.json()).then(g=>{g.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.match(/^[0-9]/)?`Grade ${v}`:v;G.appendChild(o);});G.disabled=false;});fetch(`/api/curriculum-context/${this.value}`).then(r=>r.json()).then(c=>{skData=c.skills||[];const b=$("#sk-cb");b.innerHTML="";skData.forEach(s=>{const l=document.createElement("label");l.style.cssText="font-size:12px;display:flex;gap:6px;margin-bottom:3px;cursor:pointer;";l.innerHTML=`<input type="checkbox" class="skc" value="${s.skill_name}"> ${s.skill_name}`;b.appendChild(l);});});});
+
+G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(`/api/quarters/${S.value}/${this.value}`).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Quarter ${v}`;Q.appendChild(o);});Q.disabled=false;});});
+
+Q.addEventListener("change",function(){$("#bn1").disabled=!this.value;});
+
+$("#bn1").addEventListener("click",function(){const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(u).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});});
+
+function renderC(){const l=$("#cl");l.innerHTML="";if(!cData.length){l.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-s)">No competencies found.</div>';return;}cData.forEach(c=>{const d=document.createElement("div");d.className="cc";d.dataset.id=c.id;const cb=document.createElement("input");cb.type="checkbox";const info=document.createElement("div");info.innerHTML=`<div class="cc-c">${c.lc_id||"LC-"+c.id}</div><div class="cc-d">${c.learning_competency}</div><div class="cc-m">${[c.domain,c.blooms_level?"Bloom's: "+c.blooms_level:""].filter(Boolean).join(" | ")}</div>`;d.appendChild(cb);d.appendChild(info);d.addEventListener("click",e=>{if(e.target!==cb)cb.checked=!cb.checked;if(cb.checked){selC.add(c.id);d.classList.add("sel");}else{selC.delete(c.id);d.classList.remove("sel");}upC();});l.appendChild(d);});upC();}
+function upC(){$("#scnt").textContent=`${selC.size} of ${cData.length} selected`;$("#bn2").disabled=selC.size===0;}
+
+$("#bsa").addEventListener("click",()=>{$$(".cc").forEach(d=>{d.querySelector("input").checked=true;d.classList.add("sel");selC.add(parseInt(d.dataset.id));});upC();});
+$("#bda").addEventListener("click",()=>{$$(".cc").forEach(d=>{d.querySelector("input").checked=false;d.classList.remove("sel");});selC.clear();upC();});
+$("#bb2").addEventListener("click",()=>go(1));
+$("#bn2").addEventListener("click",()=>go(3));
+$("#bb3").addEventListener("click",()=>go(2));
+
+// Toggle sections
+$$("#ttoggles .tc").forEach(c=>{c.addEventListener("click",function(e){if(e.target.closest(".tc-x"))return;this.classList.toggle("on");});});
+$$(".tc-x").forEach(b=>{b.addEventListener("click",function(e){e.stopPropagation();const o=$(`#o-${this.dataset.s}`);o.classList.toggle("op");this.classList.toggle("op");});});
+
+// Model cards
+$$(".mc").forEach(c=>{c.addEventListener("click",function(){$$(".mc").forEach(x=>x.classList.remove("sel"));this.classList.add("sel");});});
+
+// Assessment types
+$$(".at").forEach(c=>{c.addEventListener("click",function(){this.classList.toggle("on");});});
+$("#a-mode").addEventListener("change",function(){$("#a-sec").style.display=this.value!=="none"?"block":"none";});
+
+// AI
+$("#f-ai").addEventListener("change",function(){$("#ai-opts").style.display=this.checked?"block":"none";$("#ai-box").style.borderColor=this.checked?"var(--c1)":"var(--border)";});
+
+// Progress - adapts speed based on AI vs template mode
+const pStepsFast=[{p:20,t:"Loading curriculum data..."},{p:50,t:"Building lesson plan..."},{p:80,t:"Formatting output..."},{p:95,t:"Almost done..."}];
+const pStepsAI=[{p:3,t:"Loading curriculum data..."},{p:8,t:"Reading learning competencies..."},{p:12,t:"Gathering content standards..."},{p:16,t:"Building AI prompt..."},{p:20,t:"Sending to AI (Claude)..."},{p:25,t:"AI is writing your lesson plan..."},{p:30,t:"Generating lesson header..."},{p:38,t:"Writing learning objectives..."},{p:46,t:"Creating lesson procedure..."},{p:54,t:"Detailing teacher & student activities..."},{p:62,t:"Adding differentiation strategies..."},{p:70,t:"Building assessment section..."},{p:78,t:"Writing teacher reflection..."},{p:85,t:"AI is finalizing content..."},{p:90,t:"Formatting output..."},{p:93,t:"Almost done..."}];
+function showP(isAI){
+    const steps=isAI?pStepsAI:pStepsFast;
+    const interval=isAI?1800:200;
+    const est=isAI?"Estimated time: 15-30 seconds":"Estimated time: under 2 seconds";
+    $("#po").classList.add("a");
+    $("#pp").textContent="0%";$("#pf").style.width="0%";
+    $("#ps").textContent=est;
+    let i=0;
+    const iv=setInterval(()=>{if(i<steps.length){$("#pp").textContent=steps[i].p+"%";$("#pf").style.width=steps[i].p+"%";$("#pt").textContent=steps[i].t;i++;}},interval);
+    return function(){clearInterval(iv);$("#pp").textContent="100%";$("#pf").style.width="100%";$("#pt").textContent="Done! Loading your lesson plan...";setTimeout(()=>$("#po").classList.remove("a"),500);};
+}
+
+// GENERATE
+$("#bgen").addEventListener("click",function(){
+if(!selC.size)return;
+const gm=()=>{const s=$(".mc.sel");return s?s.dataset.m:"5e";};
+const ln=id=>($(id)?.value||"").split("\n").map(s=>s.trim()).filter(Boolean);
+const on=s=>$(`#ttoggles .tc[data-s="${s}"]`)?.classList.contains("on");
+const am=$("#a-mode").value;
+const at=Array.from($$(".at.on")).map(c=>c.dataset.a);
+
+const cfg={
+title_info:{enabled:on("title_info"),customizable_fields:{custom_title:$("#f-title")?.value||"",time_allotment:$("#f-time")?.value||"60 minutes"}},
+twenty_first_century_skills:{enabled:on("twenty_first_century_skills"),customizable_fields:{focus_skills:Array.from($$(".skc:checked")).map(c=>c.value)}},
+learning_objectives:{enabled:on("learning_objectives"),customizable_fields:{num_objectives:parseInt($("#f-nobj")?.value||"3"),custom_objectives:ln("#f-cobj")}},
+materials_technology:{enabled:on("materials_technology"),customizable_fields:{include_digital_tools:$("#f-digi")?.checked!==false,include_traditional:$("#f-trad")?.checked!==false,custom_materials:ln("#f-mats")}},
+prior_knowledge:{enabled:on("prior_knowledge"),customizable_fields:{custom_prerequisites:ln("#f-prereq")}},
+lesson_procedure:{enabled:on("lesson_procedure"),customizable_fields:{model:gm(),include_timing:$("#f-timing")?.checked!==false,custom_activities:{}}},
+differentiation:{enabled:on("differentiation"),customizable_fields:{include_struggling:$("#f-ds")?.checked!==false,include_advanced:$("#f-da")?.checked!==false,include_ell:$("#f-de")?.checked!==false,custom_strategies:ln("#f-diff")}},
+assessment:{enabled:on("assessment"),customizable_fields:{include_formative:$("#f-af")?.checked!==false,include_summative:$("#f-as")?.checked!==false,custom_assessments:ln("#f-cass")}},
+reflection:{enabled:on("reflection"),customizable_fields:{num_prompts:parseInt($("#f-nref")?.value||"3"),custom_prompts:ln("#f-cref")}},
+};
+
+const ai=$("#f-ai").checked,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic",ids=Array.from(selC);
+const done=showP(ai);
+const ps=[fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
+const needA=am!=="none"&&at.length>0;
+if(needA)ps.push(fetch("/api/generate-assessment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+
+Promise.all(ps).then(rs=>{done();const lp=rs[0],as=needA?rs[1]:null;
+setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";
+const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text;
+$("#out-s").textContent=`${sn} - ${gn} | ${selC.size} competencies | ${new Date().toLocaleString()}`;
+if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
+if(am==="incorporate"&&rawAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.remove("on");$("#b-dla").style.display="none";$("#out-t").textContent="\u{1F4C4} Lesson Plan + Assessment";}
+else if(am==="separate"&&rawAS){$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.add("on");$("#b-dla").style.display="inline-flex";$("#out-t").textContent="\u{1F4C4} Your Generated Lesson Plan";setTab("lp");}
+else if(am==="both"&&rawAS){const c=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;$("#out-b").innerHTML=md2h(c);rawLP=c;$("#out-tabs").classList.remove("on");$("#b-dla").style.display="inline-flex";$("#out-t").textContent="\u{1F4C4} Lesson Plan + Assessment";}
+else{$("#out-b").innerHTML=md2h(rawLP);$("#out-tabs").classList.remove("on");$("#b-dla").style.display="none";$("#out-t").textContent="\u{1F4C4} Your Generated Lesson Plan";}
+go(4);},700);
+}).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
+});
+
+function setTab(t){if(t==="lp"){$("#t-lp").className="tab a";$("#t-as").className="tab";$("#out-b").innerHTML=md2h(rawLP);}else{$("#t-lp").className="tab";$("#t-as").className="tab a";$("#out-b").innerHTML=md2h(rawAS);}}
+$("#t-lp").addEventListener("click",()=>setTab("lp"));
+$("#t-as").addEventListener("click",()=>setTab("assess"));
+
+function md2h(m){if(!m)return"";let h=m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+h=h.replace(/^&gt; (.+)$/gm,"<blockquote>$1</blockquote>");h=h.replace(/<\/blockquote>\n<blockquote>/g,"<br>");
+h=h.replace(/^---$/gm,"<hr>");
+h=h.replace(/- \[ \]/g,"\u2610");h=h.replace(/- \[x\]/g,"\u2611");
+h=h.replace(/^### (.+)$/gm,"<h3>$1</h3>");h=h.replace(/^## (.+)$/gm,"<h2>$1</h2>");h=h.replace(/^# (.+)$/gm,"<h1>$1</h1>");
+h=h.replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>");h=h.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");h=h.replace(/\*(.+?)\*/g,"<em>$1</em>");
+h=h.replace(/^\|(.+)\|$/gm,function(m){const c=m.split("|").filter(c=>c.trim());if(c.every(c=>/^[\s\-:]+$/.test(c)))return"<!--s-->";return"<tr>"+c.map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>";});
+h=h.replace(/((<tr>.*?<\/tr>\n?)+)/g,"<table>$1</table>");h=h.replace(/<!--s-->\n?/g,"");
+h=h.replace(/^[-*] (.+)$/gm,"<li>$1</li>");h=h.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>");h=h.replace(/((<li>.*?<\/li>\n?)+)/g,"<ul>$1</ul>");
+h=h.replace(/^(?!<[a-z\/])((?!<).+)$/gm,"<p>$1</p>");h=h.replace(/<p>\s*<\/p>/g,"");return h;}
+
+// Actions
+$("#b-copy").addEventListener("click",function(){navigator.clipboard.writeText(rawLP).then(()=>{this.textContent="\u2705 Copied!";setTimeout(()=>this.textContent="\u{1F4CB} Copy",2000);});});
+$("#b-pr").addEventListener("click",()=>window.print());
+$("#b-dl").addEventListener("click",()=>{dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);});
+$("#b-dla").addEventListener("click",()=>{dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
+
+function dl(txt,fn){const b=new Blob([txt],{type:"text/markdown"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fn.replace(/\s+/g,"_");a.click();}
+
+// SCORM Download
+$("#b-scorm").addEventListener("click",function(){
+    const sn=S.options[S.selectedIndex]?.text||"Lesson";
+    const gn=G.value||"";
+    const title=`${sn} Grade ${gn} Q${Q.value||""}`;
+    this.textContent="Building SCORM...";this.disabled=true;
+    fetch("/api/download-scorm",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||""})
+    }).then(r=>{if(!r.ok)throw new Error("Failed");return r.blob();}).then(b=>{
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(b);
+        a.download=`SCORM_${title.replace(/\s+/g,"_")}.zip`;
+        a.click();
+        this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;
+    }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
+});
+
+$("#b-new").addEventListener("click",()=>{rawAS="";go(1);});
+});
+</script>
+</body>
+</html>
