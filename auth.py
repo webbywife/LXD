@@ -55,7 +55,7 @@ def login_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
-            return redirect(url_for("auth.login", next=request.url))
+            return redirect(url_for("auth.login", next=request.path))
         return f(*args, **kwargs)
     return wrapped
 
@@ -65,7 +65,7 @@ def admin_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
-            return redirect(url_for("auth.login", next=request.url))
+            return redirect(url_for("auth.login", next=request.path))
         if session.get("user_role") != "admin":
             flash("Admin access required.", "error")
             return redirect(url_for("generator"))
