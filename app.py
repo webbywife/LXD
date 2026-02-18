@@ -18,7 +18,8 @@ from curriculum_loader import (
 )
 from lesson_generator import (
     generate_lesson_plan, generate_lesson_plan_topic,
-    generate_assessment, generate_quiz,
+    generate_assessment, generate_assessment_topic,
+    generate_quiz, generate_quiz_topic,
     get_template_sections, get_procedure_models,
     TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES, QUIZ_TYPES
 )
@@ -248,6 +249,76 @@ def api_generate_topic():
     return jsonify({"content": content})
 
 
+@app.route("/api/generate-assessment-topic", methods=["POST"])
+@login_required
+def api_generate_assessment_topic():
+    """Generate authentic assessment for a topic-based lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    topic = data.get("topic", "").strip()
+    subject_name = data.get("subject_name", "").strip()
+    if not topic:
+        return jsonify({"error": "Topic is required"}), 400
+    if not subject_name:
+        return jsonify({"error": "Subject is required"}), 400
+
+    topic_context = {
+        "topic": topic,
+        "subject_name": subject_name,
+        "grade": data.get("grade", "").strip(),
+        "competencies_text": data.get("competencies_text", "").strip(),
+    }
+    assessment_config = data.get("assessment_config", {})
+    use_ai = data.get("use_ai", False)
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = generate_assessment_topic(
+        topic_context, assessment_config,
+        use_ai=use_ai, api_key=api_key, ai_provider=ai_provider
+    )
+    if error:
+        return jsonify({"error": error}), 400
+    return jsonify({"content": content})
+
+
+@app.route("/api/generate-quiz-topic", methods=["POST"])
+@login_required
+def api_generate_quiz_topic():
+    """Generate a standalone quiz for a topic-based lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    topic = data.get("topic", "").strip()
+    subject_name = data.get("subject_name", "").strip()
+    if not topic:
+        return jsonify({"error": "Topic is required"}), 400
+    if not subject_name:
+        return jsonify({"error": "Subject is required"}), 400
+
+    topic_context = {
+        "topic": topic,
+        "subject_name": subject_name,
+        "grade": data.get("grade", "").strip(),
+        "competencies_text": data.get("competencies_text", "").strip(),
+    }
+    quiz_config = data.get("quiz_config", {})
+    use_ai = data.get("use_ai", False)
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = generate_quiz_topic(
+        topic_context, quiz_config,
+        use_ai=use_ai, api_key=api_key, ai_provider=ai_provider
+    )
+    if error:
+        return jsonify({"error": error}), 400
+    return jsonify({"content": content})
+
+
 @app.route("/api/rate-lesson", methods=["POST"])
 @login_required
 def api_rate_lesson():
@@ -369,12 +440,12 @@ def api_download_scorm():
     title = data.get("title", "MATATAG Lesson Plan")
     lesson_plan_md = data.get("lesson_plan", "")
     assessment_md = data.get("assessment", "")
-    quiz_md = data.get("quiz", "")
 
-    if not lesson_plan_md and not assessment_md and not quiz_md:
+    if not lesson_plan_md and not assessment_md:
         return jsonify({"error": "No content to package"}), 400
 
-    pkg = build_scorm_package(title, lesson_plan_md or None, assessment_md or None, quiz_md or None)
+    # Quiz is a standalone LMS activity — not included in the SCORM package
+    pkg = build_scorm_package(title, lesson_plan_md or None, assessment_md or None, None)
     safe_title = re.sub(r'[^a-zA-Z0-9_-]', '_', title)[:50]
 
     return send_file(

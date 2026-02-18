@@ -349,7 +349,7 @@ textarea{resize:vertical;min-height:60px;}
         <div class="crd-s">Generate a downloadable quiz based on the selected competencies.</div>
         <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;margin-bottom:10px;" id="quiz-box">
             <label class="sw"><input type="checkbox" id="f-quiz"><span class="sl"></span></label>
-            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">Enable Quiz Generation</div><div style="font-size:11px;color:var(--text-s);">Creates a separate quiz with answer key from the lesson content.</div></div>
+            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">Enable Quiz Generation</div><div style="font-size:11px;color:var(--text-s);">Creates a standalone quiz with answer key. Download separately for LMS upload (not in SCORM).</div></div>
         </div>
         <div id="quiz-opts" style="display:none;">
             <div class="fr">
@@ -362,7 +362,7 @@ textarea{resize:vertical;min-height:60px;}
                 <div class="qt" data-qt="identification"><span style="font-size:18px;">&#9999;&#65039;</span><div><div class="qt-n">Identification</div><div class="qt-d">Fill-in-the-blank</div></div></div>
                 <div class="qt" data-qt="matching"><span style="font-size:18px;">&#128279;</span><div><div class="qt-n">Matching Type</div><div class="qt-d">Two-column matching</div></div></div>
             </div>
-            <div class="tip" style="margin-top:10px;"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> The quiz includes an Answer Key at the end. With AI enabled, questions will be specific and content-rich. Without AI, you get a structured template.</span></div>
+            <div class="tip" style="margin-top:10px;"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> The quiz is a SEPARATE downloadable activity — not included in the SCORM package. Use the "Download Quiz (LMS)" button to save it, then upload to Moodle, Canvas, or Brightspace as a Quiz activity.</span></div>
         </div>
     </div>
 
@@ -394,11 +394,11 @@ textarea{resize:vertical;min-height:60px;}
         <button class="btn" id="b-dl">&#128229; Download .md</button>
         <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
         <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
-        <button class="btn" id="b-dlq" style="display:none">&#128221; Quiz .md</button>
+        <button class="btn" id="b-dlq" style="display:none">&#128221; Download Quiz (LMS)</button>
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
-    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip file can be uploaded directly to Moodle (3-5), Canvas, Brightspace, or any SCORM 1.2 compliant LMS. Go to your course > Add Activity > SCORM Package > Upload the .zip file.</span></div>
+    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip contains the lesson plan and assessment (if generated). Upload via Add Activity &gt; SCORM Package in Moodle, Canvas, or Brightspace. <strong>Note:</strong> The quiz is a separate LMS activity — use "Download Quiz (LMS)" to save it independently.</span></div>
 
     <!-- Rating Widget -->
     <div id="rating-section" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
@@ -454,11 +454,7 @@ function updateTopicNextBtn(){
     const tg=($("#t-grade")?.value||"").trim();
     $("#bn1").disabled=!(t&&ts&&tg);
 }
-function updateStep3ForMode(){
-    const isT=genMode==="topic";
-    $("#assess-wrap").style.display=isT?"none":"block";
-    $("#quiz-wrap").style.display=isT?"none":"block";
-}
+function updateStep3ForMode(){}
 
 $$(".mode-tab").forEach(t=>{t.addEventListener("click",function(){switchMode(this.dataset.mode);});});
 ["t-topic","t-grade"].forEach(id=>{const el=$("#"+id);if(el)el.addEventListener("input",()=>{if(genMode==="topic")updateTopicNextBtn();});});
@@ -523,8 +519,10 @@ function showP(isAI){
     $("#po").classList.add("a");
     $("#pp").textContent="0%";$("#pf").style.width="0%";
     $("#ps").textContent=est;
-    let i=0;
-    const iv=setInterval(()=>{if(i<steps.length){$("#pp").textContent=steps[i].p+"%";$("#pf").style.width=steps[i].p+"%";$("#pt").textContent=steps[i].t;i++;}},interval);
+    let i=0,curP=0;
+    const waitMsgs=["AI is still writing...","Almost there, please wait...","Finalizing your content...","Reviewing and polishing..."];
+    let wm=0;
+    const iv=setInterval(()=>{if(i<steps.length){curP=steps[i].p;$("#pp").textContent=curP+"%";$("#pf").style.width=curP+"%";$("#pt").textContent=steps[i].t;i++;}else if(curP<99){curP=Math.min(99,parseFloat((curP+0.3).toFixed(1)));$("#pp").textContent=Math.floor(curP)+"%";$("#pf").style.width=curP+"%";$("#pt").textContent=waitMsgs[wm++%waitMsgs.length];}},interval);
     return function(){clearInterval(iv);$("#pp").textContent="100%";$("#pf").style.width="100%";$("#pt").textContent="Done! Loading your lesson plan...";setTimeout(()=>$("#po").classList.remove("a"),500);};
 }
 
@@ -572,9 +570,9 @@ if(genMode==="curriculum"&&!selC.size)return;
 const gm=()=>{const s=$(".mc.sel");return s?s.dataset.m:"5e";};
 const ln=id=>($(id)?.value||"").split("\n").map(s=>s.trim()).filter(Boolean);
 const on=s=>$(`#ttoggles .tc[data-s="${s}"]`)?.classList.contains("on");
-const am=genMode==="topic"?"none":$("#a-mode").value;
+const am=$("#a-mode").value;
 const at=Array.from($$(".at.on")).map(c=>c.dataset.a);
-const wantQuiz=genMode==="topic"?false:$("#f-quiz").checked;
+const wantQuiz=$("#f-quiz").checked;
 const quizTypes=Array.from($$(".qt.on")).map(c=>c.dataset.qt);
 
 const cfg={
@@ -596,16 +594,23 @@ if(genMode==="topic"){
     const ctx=window._topicCtx||{};
     if(!ctx.topic||!ctx.subject_name)return;
     const done=showP(true);
-    fetch(aurl("/api/generate-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()).then(lp=>{done();
-    setTimeout(()=>{rawLP=lp.content||"";rawAS="";rawQZ="";
+    const tps=[fetch(aurl("/api/generate-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
+    const tNeedA=am!=="none"&&at.length>0;
+    if(tNeedA)tps.push(fetch(aurl("/api/generate-assessment-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+    if(wantQuiz&&quizTypes.length>0)tps.push(fetch(aurl("/api/generate-quiz-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",quiz_config:{types:quizTypes,num_questions:parseInt($("#f-qnum")?.value||"5")},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+    Promise.all(tps).then(trs=>{done();
+    const tlp=trs[0];const tas=tNeedA?trs[1]:null;const tqzIdx=tNeedA?2:1;const tqz=(wantQuiz&&quizTypes.length>0)?trs[tqzIdx]:null;
+    setTimeout(()=>{rawLP=tlp.content||"";rawAS=tas?.content||"";rawQZ=tqz?.content||"";
     $("#out-s").textContent=`Topic: ${ctx.topic} | ${ctx.subject_name}${ctx.grade?" Grade "+ctx.grade:""} | ${new Date().toLocaleString()}`;
-    if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
-    $("#out-tabs").classList.remove("on");
-    $("#b-dla").style.display="none";
-    $("#b-dlq").style.display="none";
-    $("#out-t").textContent="\u{1F4C4} Lesson Plan";
-    setTab("lp");
-    go(4);},700);
+    if(tlp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${tlp.error}</div>`;go(4);return;}
+    const tHasAS=!!rawAS;const tHasQZ=!!rawQZ;
+    if(am==="incorporate"&&tHasAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
+    if(tHasAS||tHasQZ){$("#out-tabs").classList.add("on");$("#t-as").style.display=tHasAS?"inline-flex":"none";$("#t-qz").style.display=tHasQZ?"inline-flex":"none";}else{$("#out-tabs").classList.remove("on");}
+    $("#b-dla").style.display=(tHasAS&&am!=="incorporate")?"inline-flex":"none";$("#b-dlq").style.display=tHasQZ?"inline-flex":"none";
+    if(am==="both"&&tHasAS){rawLP=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
+    let tParts=["Lesson Plan"];if(rawAS)tParts.push("Assessment");if(tHasQZ)tParts.push("Quiz");
+    $("#out-t").textContent="\u{1F4C4} "+tParts.join(" + ");
+    setTab("lp");go(4);},700);
     }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
     return;
 }
@@ -706,21 +711,21 @@ $("#b-dl").addEventListener("click",()=>{
     if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawLP,`Lesson_Plan_${t}.md`);}
     else dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);
 });
-$("#b-dla").addEventListener("click",()=>{dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
-$("#b-dlq").addEventListener("click",()=>{dl(rawQZ,`Quiz_${S.value}_G${G.value}_Q${Q.value}.md`);});
+$("#b-dla").addEventListener("click",()=>{if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawAS,`Assessment_${t}.md`);}else dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
+$("#b-dlq").addEventListener("click",()=>{if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawQZ,`Quiz_${t}.md`);}else dl(rawQZ,`Quiz_${S.value}_G${G.value}_Q${Q.value}.md`);});
 
 function dl(txt,fn){const b=new Blob([txt],{type:"text/markdown"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fn.replace(/\s+/g,"_");a.click();}
 
 // SCORM Download
 $("#b-scorm").addEventListener("click",function(){
-    const sn=S.options[S.selectedIndex]?.text||"Lesson";
-    const gn=G.value||"";
-    const title=`${sn} Grade ${gn} Q${Q.value||""}`;
+    let title;
+    if(genMode==="topic"){const ctx=window._topicCtx||{};title=`${ctx.topic||"Lesson"} ${ctx.grade||""}`.trim();}
+    else{const sn=S.options[S.selectedIndex]?.text||"Lesson";const gn=G.value||"";title=`${sn} Grade ${gn} Q${Q.value||""}`;}
     this.textContent="Building SCORM...";this.disabled=true;
     fetch(aurl("/api/download-scorm"),{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||"",quiz:rawQZ||""})
+        body:JSON.stringify({title:title,lesson_plan:rawLP,assessment:rawAS||""})
     }).then(r=>{if(!r.ok)throw new Error("Failed");return r.blob();}).then(b=>{
         const a=document.createElement("a");
         a.href=URL.createObjectURL(b);

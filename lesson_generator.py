@@ -1721,6 +1721,251 @@ def generate_lesson_plan_topic(topic_context, template_config, use_ai=False,
     return content, None
 
 
+def build_assessment_topic_ai_prompt(topic_context, assessment_config):
+    """Build AI prompt for topic-based authentic assessment generation."""
+    topic = topic_context.get("topic", "")
+    subject = topic_context.get("subject_name", "")
+    grade = topic_context.get("grade", "")
+    competencies_text = topic_context.get("competencies_text", "")
+
+    selected_types = assessment_config.get("types", ["performance_task", "rubric"])
+    custom_context = assessment_config.get("custom_context", "")
+    type_labels = [ASSESSMENT_TYPES[t]["label"] for t in selected_types if t in ASSESSMENT_TYPES]
+
+    comp_section = f"\nLearning Objectives / Competencies:\n{competencies_text}" if competencies_text else ""
+
+    prompt = f"""You are an expert assessment specialist. Generate a DETAILED authentic assessment package for the following lesson topic.
+
+=== TOPIC DATA ===
+Topic: {topic}
+Subject / Learning Area: {subject}
+Grade Level: {grade}{comp_section}
+=== END TOPIC DATA ===
+
+{f"Additional Context: {custom_context}" if custom_context else ""}
+
+Generate the following assessment types: {', '.join(type_labels)}
+
+For EACH assessment type, provide:
+- Complete, ready-to-use assessment materials
+- Clear instructions for both teacher and students
+- Specific criteria aligned to the learning objectives
+- Scoring guides with point values
+- Real-world, engaging contexts appropriate for {grade} students
+
+For Performance Tasks: Include a GRASPS scenario (Goal, Role, Audience, Situation, Product, Standards)
+For Rubrics: Use a 4-point scale (Exemplary, Proficient, Developing, Beginning) with specific descriptors
+For Portfolios: Include required entries, reflection prompts, and criteria
+For Projects: Include phases, timeline, deliverables, and assessment criteria
+For Products: Include multiple product options with checklists
+For Self/Peer Assessment: Include ready-to-print forms with rating scales
+
+Use markdown formatting. Make everything specific to {topic} for {grade} students.
+"""
+    return prompt
+
+
+def generate_assessment_topic(topic_context, assessment_config,
+                               use_ai=False, api_key=None, ai_provider="anthropic"):
+    """Generate authentic assessment for a topic-based lesson plan."""
+    topic = topic_context.get("topic", "").strip()
+    if not topic:
+        return None, "Topic is required."
+
+    local_context = {
+        "subject": topic_context.get("subject_name", ""),
+        "grade": topic_context.get("grade", ""),
+        "quarter": "",
+        "domain": "",
+        "content_topic": topic,
+        "content_standard": "",
+        "performance_standard": "",
+        "competencies": [],
+    }
+
+    if use_ai and api_key:
+        prompt = build_assessment_topic_ai_prompt(topic_context, assessment_config)
+        if ai_provider == "anthropic":
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=api_key)
+                message = client.messages.create(
+                    model="claude-sonnet-4-5-20250929",
+                    max_tokens=4096,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                content = message.content[0].text
+            except ImportError:
+                content = "ERROR: anthropic package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        elif ai_provider == "openai":
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert assessment specialist."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=4096
+                )
+                content = response.choices[0].message.content
+            except ImportError:
+                content = "ERROR: openai package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        else:
+            content = "ERROR: Unknown AI provider."
+
+        if content.startswith("ERROR:"):
+            ai_error = content
+            content = generate_authentic_assessment_local(local_context, assessment_config)
+            content = (
+                "> **Note:** AI generation failed — showing template-based output instead.\n"
+                f"> *Reason: {ai_error.replace('ERROR: ', '')}*\n\n"
+            ) + content
+    else:
+        content = generate_authentic_assessment_local(local_context, assessment_config)
+
+    return content, None
+
+
+def build_quiz_topic_ai_prompt(topic_context, quiz_config):
+    """Build AI prompt for topic-based quiz generation (standalone LMS activity)."""
+    topic = topic_context.get("topic", "")
+    subject = topic_context.get("subject_name", "")
+    grade = topic_context.get("grade", "")
+    competencies_text = topic_context.get("competencies_text", "")
+
+    selected_types = quiz_config.get("types", ["multiple_choice", "true_false"])
+    num_questions = quiz_config.get("num_questions", 5)
+
+    comp_section = f"\nLearning Objectives / Competencies:\n{competencies_text}" if competencies_text else ""
+
+    type_instructions = []
+    item_num = 1
+    for t in selected_types:
+        if t == "multiple_choice":
+            type_instructions.append(
+                f"## I. Multiple Choice ({num_questions} items, starting at #{item_num})\n"
+                f"- Provide a question stem + 4 options (A-D)\n"
+                f"- Include plausible distractors"
+            )
+            item_num += num_questions
+        elif t == "true_false":
+            type_instructions.append(
+                f"## II. True or False ({num_questions} items, starting at #{item_num})\n"
+                f"- Write clear, unambiguous statements\n"
+                f"- Mix true and false answers"
+            )
+            item_num += num_questions
+        elif t == "identification":
+            type_instructions.append(
+                f"## III. Identification ({num_questions} items, starting at #{item_num})\n"
+                f"- Provide a clue/description, student writes the answer\n"
+                f"- Use underscores for the blank"
+            )
+            item_num += num_questions
+        elif t == "matching":
+            type_instructions.append(
+                f"## IV. Matching Type ({num_questions} items, starting at #{item_num})\n"
+                f"- Create Column A (terms) and Column B (definitions) as a table\n"
+                f"- Shuffle Column B so items don't match directly"
+            )
+            item_num += num_questions
+
+    prompt = f"""You are an expert quiz maker. Generate a READY-TO-USE quiz for the following topic. This quiz is a STANDALONE LMS activity (not part of the lesson plan).
+
+=== TOPIC DATA ===
+Topic: {topic}
+Subject / Learning Area: {subject}
+Grade Level: {grade}{comp_section}
+=== END TOPIC DATA ===
+
+Generate a quiz with the following sections:
+
+{chr(10).join(type_instructions)}
+
+IMPORTANT:
+- Start with a header table showing Subject, Grade, Topic
+- Number items continuously across all sections
+- All questions must directly assess knowledge of {topic}
+- Use clear, age-appropriate language for {grade} students
+- At the END, include a complete "## Answer Key" section with all correct answers
+- Use markdown formatting throughout
+"""
+    return prompt
+
+
+def generate_quiz_topic(topic_context, quiz_config,
+                        use_ai=False, api_key=None, ai_provider="anthropic"):
+    """Generate a standalone quiz for a topic-based lesson plan (LMS activity)."""
+    topic = topic_context.get("topic", "").strip()
+    if not topic:
+        return None, "Topic is required."
+
+    local_context = {
+        "subject": topic_context.get("subject_name", ""),
+        "grade": topic_context.get("grade", ""),
+        "quarter": "",
+        "domain": "",
+        "content_topic": topic,
+        "content_standard": "",
+        "performance_standard": "",
+        "competencies": [],
+    }
+
+    if use_ai and api_key:
+        prompt = build_quiz_topic_ai_prompt(topic_context, quiz_config)
+        if ai_provider == "anthropic":
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=api_key)
+                message = client.messages.create(
+                    model="claude-sonnet-4-5-20250929",
+                    max_tokens=4096,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                content = message.content[0].text
+            except ImportError:
+                content = "ERROR: anthropic package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        elif ai_provider == "openai":
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert quiz maker for LMS activities."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=4096
+                )
+                content = response.choices[0].message.content
+            except ImportError:
+                content = "ERROR: openai package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        else:
+            content = "ERROR: Unknown AI provider."
+
+        if content.startswith("ERROR:"):
+            ai_error = content
+            content = generate_quiz_local(local_context, quiz_config)
+            content = (
+                "> **Note:** AI generation failed — showing template-based quiz instead.\n"
+                f"> *Reason: {ai_error.replace('ERROR: ', '')}*\n\n"
+            ) + content
+    else:
+        content = generate_quiz_local(local_context, quiz_config)
+
+    return content, None
+
+
 def generate_lesson_plan(subject_id, competency_ids, template_config, use_ai=False,
                           api_key=None, ai_provider="anthropic"):
     """Main entry point: generate a lesson plan."""
