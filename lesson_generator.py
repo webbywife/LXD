@@ -1350,6 +1350,377 @@ def generate_quiz(subject_id, competency_ids, quiz_config,
     return content, None
 
 
+def build_topic_ai_prompt(topic_context, template_config):
+    """Build the AI prompt for topic-based lesson plan generation."""
+    topic = topic_context.get("topic", "")
+    subject = topic_context.get("subject_name", "")
+    grade = topic_context.get("grade", "")
+    competencies_text = topic_context.get("competencies_text", "")
+
+    enabled_sections = {k: v for k, v in template_config.items() if v.get("enabled", True)}
+    proc_config = template_config.get("lesson_procedure", {})
+    proc_fields = proc_config.get("customizable_fields", {})
+    model_key = proc_fields.get("model", "5e")
+    model_info = PROCEDURE_MODELS.get(model_key, PROCEDURE_MODELS["5e"])
+
+    prompt = f"""You are an expert curriculum specialist and instructional designer.
+Generate a detailed, classroom-ready lesson plan for the topic below.
+Every activity, question, and assessment must directly relate to the specified topic.
+
+=== TOPIC DATA ===
+Topic: {topic}
+Subject / Learning Area: {subject}
+Grade Level: {grade}
+{f"Specific Competencies / Objectives:{chr(10)}{competencies_text}" if competencies_text else ""}
+=== END TOPIC DATA ===
+
+Generate a COMPLETE lesson plan with the following sections (generate ONLY the sections listed below):
+
+"""
+
+    section_instructions = []
+
+    if "title_info" in enabled_sections:
+        fields = enabled_sections["title_info"].get("customizable_fields", {})
+        time = fields.get("time_allotment", "60 minutes")
+        custom_title = fields.get("custom_title", "")
+        title_note = f' Use this title: "{custom_title}"' if custom_title else f" Create an engaging, descriptive title about {topic}."
+        section_instructions.append(
+            f"## 1. LESSON PLAN HEADER\n"
+            f"- Title:{title_note}\n"
+            f"- Subject: {subject}\n"
+            f"- Grade Level: {grade}\n"
+            f"- Time Allotment: {time}\n"
+            f"- Topic: {topic}"
+        )
+
+    if "twenty_first_century_skills" in enabled_sections:
+        section_instructions.append(
+            f"## 2. 21ST CENTURY SKILLS FOCUS\n"
+            f"Select 3-4 relevant 21st century skills for this lesson on {topic}.\n"
+            f"For each skill, briefly explain HOW the lesson develops it."
+        )
+
+    if "learning_objectives" in enabled_sections:
+        fields = enabled_sections["learning_objectives"].get("customizable_fields", {})
+        num = fields.get("num_objectives", 3)
+        custom = fields.get("custom_objectives", [])
+        obj_note = f" Include these objectives: {'; '.join(custom)}. Add more as needed." if custom else ""
+        section_instructions.append(
+            f"## 3. LEARNING OBJECTIVES (SWBAT)\n"
+            f"Write {num} clear, measurable objectives using 'Students Will Be Able To...' format.\n"
+            f"Align with appropriate Bloom's taxonomy levels for {subject} at {grade}.{obj_note}\n"
+            f"Each objective must be specific and assessable."
+        )
+
+    if "materials_technology" in enabled_sections:
+        fields = enabled_sections["materials_technology"].get("customizable_fields", {})
+        include_digital = fields.get("include_digital_tools", True)
+        include_trad = fields.get("include_traditional", True)
+        custom_mats = fields.get("custom_materials", [])
+        mat_parts = []
+        if include_trad:
+            mat_parts.append("traditional classroom materials")
+        if include_digital:
+            mat_parts.append("digital tools and technology resources")
+        if custom_mats:
+            mat_parts.append(f"Include these specific items: {', '.join(custom_mats)}")
+        section_instructions.append(
+            f"## 4. MATERIALS / TECHNOLOGY\n"
+            f"List all needed {' and '.join(mat_parts)} for teaching {topic}.\n"
+            f"Be specific and consider resources available in typical classrooms."
+        )
+
+    if "prior_knowledge" in enabled_sections:
+        fields = enabled_sections["prior_knowledge"].get("customizable_fields", {})
+        custom_prereqs = fields.get("custom_prerequisites", [])
+        prereq_note = f" Include: {'; '.join(custom_prereqs)}." if custom_prereqs else ""
+        section_instructions.append(
+            f"## 5. PRIOR KNOWLEDGE / PREREQUISITES\n"
+            f"List what students should already know before learning {topic}.{prereq_note}"
+        )
+
+    if "lesson_procedure" in enabled_sections:
+        include_timing = proc_fields.get("include_timing", True)
+        timing_note = " Include suggested time allocation for each phase." if include_timing else ""
+        custom_activities = proc_fields.get("custom_activities", {})
+        activity_note = ""
+        if custom_activities:
+            parts = [f"  - {phase}: {act}" for phase, act in custom_activities.items()]
+            activity_note = "\nInclude these specific activities:\n" + "\n".join(parts)
+        section_instructions.append(
+            f"## 6. LESSON PROCEDURE ({model_info['label']})\n"
+            f"Use the {model_info['label']} instructional model.\n"
+            f"For each phase ({', '.join(model_info['phases'])}), provide:\n"
+            f"- Clear teacher actions and instructions\n"
+            f"- Student activities and expected responses\n"
+            f"- Key questions to ask\n"
+            f"- Transition cues{timing_note}{activity_note}"
+        )
+
+    if "differentiation" in enabled_sections:
+        fields = enabled_sections["differentiation"].get("customizable_fields", {})
+        diff_parts = []
+        if fields.get("include_struggling", True):
+            diff_parts.append("Struggling Learners: specific scaffolding strategies, simplified tasks, visual aids")
+        if fields.get("include_advanced", True):
+            diff_parts.append("Advanced Learners: extension activities, higher-order thinking challenges")
+        if fields.get("include_ell", True):
+            diff_parts.append("English Language Learners: vocabulary support, visual/contextual clues")
+        custom_strats = fields.get("custom_strategies", [])
+        if custom_strats:
+            diff_parts.append(f"Additional strategies: {'; '.join(custom_strats)}")
+        section_instructions.append(
+            f"## 7. DIFFERENTIATION / SCAFFOLDING\n"
+            f"Provide specific strategies for:\n" +
+            "\n".join(f"- {p}" for p in diff_parts)
+        )
+
+    if "assessment" in enabled_sections:
+        fields = enabled_sections["assessment"].get("customizable_fields", {})
+        assess_parts = []
+        if fields.get("include_formative", True):
+            assess_parts.append("Formative Assessment: ongoing checks for understanding during the lesson")
+        if fields.get("include_summative", True):
+            assess_parts.append("Summative Assessment: end-of-lesson evaluation")
+        custom_assess = fields.get("custom_assessments", [])
+        if custom_assess:
+            assess_parts.append(f"Include these specific assessments: {'; '.join(custom_assess)}")
+        section_instructions.append(
+            f"## 8. ASSESSMENT\n"
+            f"Provide detailed assessment strategies:\n" +
+            "\n".join(f"- {p}" for p in assess_parts) +
+            f"\nEnsure assessments directly measure the learning objectives."
+        )
+
+    if "reflection" in enabled_sections:
+        fields = enabled_sections["reflection"].get("customizable_fields", {})
+        num_prompts = fields.get("num_prompts", 3)
+        custom_prompts = fields.get("custom_prompts", [])
+        reflection_note = f" Include these reflection prompts: {'; '.join(custom_prompts)}." if custom_prompts else ""
+        section_instructions.append(
+            f"## 9. TEACHER REFLECTION\n"
+            f"Provide {num_prompts} reflection prompts for the teacher.{reflection_note}"
+        )
+
+    prompt += "\n\n".join(section_instructions)
+    prompt += f"""
+
+IMPORTANT GUIDELINES:
+- All content must be appropriate for {subject} at {grade}
+- Activities should be engaging and practical
+- Use markdown formatting for clear structure
+- Be specific and practical — a teacher should be able to use this plan directly
+"""
+    return prompt
+
+
+def _generate_topic_local(topic_context, template_config):
+    """Generate a topic-based lesson plan using template approach (no AI)."""
+    topic = topic_context.get("topic", "Custom Topic")
+    subject = topic_context.get("subject_name", "")
+    grade = topic_context.get("grade", "")
+
+    enabled = {k: v for k, v in template_config.items() if v.get("enabled", True)}
+    proc_fields = template_config.get("lesson_procedure", {}).get("customizable_fields", {})
+    model_key = proc_fields.get("model", "5e")
+    model_info = PROCEDURE_MODELS.get(model_key, PROCEDURE_MODELS["5e"])
+
+    sections = []
+
+    if "title_info" in enabled:
+        fields = enabled["title_info"].get("customizable_fields", {})
+        time_allot = fields.get("time_allotment", "60 minutes")
+        custom_title = fields.get("custom_title", "")
+        title = custom_title if custom_title else topic
+        sections.append(f"""## Lesson Plan
+
+| | |
+|---|---|
+| **Title** | {title} |
+| **Subject** | {subject} |
+| **Grade Level** | {grade} |
+| **Topic** | {topic} |
+| **Time Allotment** | {time_allot} |
+""")
+
+    if "twenty_first_century_skills" in enabled:
+        sections.append("## 21st Century Skills Focus\n")
+        sections.append("- **Critical Thinking**: Students analyze and evaluate information related to the topic")
+        sections.append("- **Communication**: Students present and discuss their understanding")
+        sections.append("- **Collaboration**: Students work together in group activities")
+        sections.append("")
+
+    if "learning_objectives" in enabled:
+        fields = enabled["learning_objectives"].get("customizable_fields", {})
+        custom = fields.get("custom_objectives", [])
+        num = fields.get("num_objectives", 3)
+        sections.append("## Learning Objectives (SWBAT)\n")
+        sections.append("At the end of this lesson, students will be able to:\n")
+        if custom:
+            for i, obj in enumerate(custom, 1):
+                sections.append(f"{i}. {obj}")
+        else:
+            sections.append(f"1. Identify and describe key concepts related to {topic}")
+            sections.append(f"2. Explain the importance and application of {topic}")
+            if num >= 3:
+                sections.append(f"3. Apply knowledge of {topic} to solve problems or create outputs")
+            if num >= 4:
+                sections.append(f"4. Evaluate and analyze examples related to {topic}")
+        sections.append("")
+
+    if "materials_technology" in enabled:
+        fields = enabled["materials_technology"].get("customizable_fields", {})
+        custom_mats = fields.get("custom_materials", [])
+        sections.append("## Materials / Technology\n")
+        if custom_mats:
+            for m in custom_mats:
+                sections.append(f"- {m}")
+        else:
+            sections.append("- Textbook / reference materials")
+            sections.append("- Manila paper, markers, and writing materials")
+            sections.append("- Visual aids related to the topic")
+            if fields.get("include_digital_tools", True):
+                sections.append("- Laptop/projector for multimedia presentation (if available)")
+        sections.append("")
+
+    if "prior_knowledge" in enabled:
+        fields = enabled["prior_knowledge"].get("customizable_fields", {})
+        custom_prereqs = fields.get("custom_prerequisites", [])
+        sections.append("## Prior Knowledge / Prerequisites\n")
+        sections.append("Students should already be able to:\n")
+        if custom_prereqs:
+            for p in custom_prereqs:
+                sections.append(f"- {p}")
+        else:
+            sections.append(f"- Demonstrate basic understanding of {subject}")
+            sections.append(f"- Apply foundational concepts relevant to {topic}")
+        sections.append("")
+
+    if "lesson_procedure" in enabled:
+        include_timing = proc_fields.get("include_timing", True)
+        custom_activities = proc_fields.get("custom_activities", {})
+        sections.append(f"## Lesson Procedure ({model_info['label']})\n")
+        for phase in model_info["phases"]:
+            sections.append(f"### {phase}")
+            if include_timing:
+                sections.append(f"*Suggested time: ___ minutes*\n")
+            if phase in custom_activities:
+                sections.append(f"{custom_activities[phase]}\n")
+            else:
+                sections.append(f"**Teacher Activity:**\n- [Describe teacher actions for {phase} phase related to {topic}]\n")
+                sections.append(f"**Student Activity:**\n- [Describe student activities for {phase} phase]\n")
+                sections.append(f"**Key Questions:**\n- [List guiding questions about {topic}]\n")
+        sections.append("")
+
+    if "differentiation" in enabled:
+        fields = enabled["differentiation"].get("customizable_fields", {})
+        sections.append("## Differentiation / Scaffolding\n")
+        if fields.get("include_struggling", True):
+            sections.append("### Struggling Learners")
+            sections.append("- Provide step-by-step visual guides")
+            sections.append("- Use peer tutoring and collaborative grouping")
+            sections.append("- Simplify tasks while maintaining learning objectives\n")
+        if fields.get("include_advanced", True):
+            sections.append("### Advanced Learners")
+            sections.append("- Provide extension activities with higher-order thinking")
+            sections.append("- Offer open-ended problems for deeper exploration\n")
+        if fields.get("include_ell", True):
+            sections.append("### English Language Learners")
+            sections.append("- Use bilingual vocabulary cards")
+            sections.append("- Provide visual and contextual clues\n")
+        sections.append("")
+
+    if "assessment" in enabled:
+        fields = enabled["assessment"].get("customizable_fields", {})
+        sections.append("## Assessment\n")
+        if fields.get("include_formative", True):
+            sections.append("### Formative Assessment (During Lesson)")
+            sections.append("- Observation of student participation")
+            sections.append("- Exit ticket / quick check questions\n")
+        if fields.get("include_summative", True):
+            sections.append("### Summative Assessment")
+            sections.append(f"- Written quiz or activity sheet on {topic}")
+            sections.append("- Portfolio entry or project output\n")
+        sections.append("")
+
+    if "reflection" in enabled:
+        fields = enabled["reflection"].get("customizable_fields", {})
+        num = fields.get("num_prompts", 3)
+        custom = fields.get("custom_prompts", [])
+        sections.append("## Teacher Reflection\n")
+        if custom:
+            for p in custom:
+                sections.append(f"- {p}")
+        else:
+            default_prompts = [
+                "What percentage of students met the learning objectives?",
+                "Which part of the lesson was most effective?",
+                "What adjustments should I make for the next lesson?",
+            ]
+            for p in default_prompts[:num]:
+                sections.append(f"- {p}")
+        sections.append("")
+
+    return "\n".join(sections)
+
+
+def generate_lesson_plan_topic(topic_context, template_config, use_ai=False,
+                                api_key=None, ai_provider="anthropic"):
+    """Main entry point: generate a topic-based lesson plan."""
+    topic = topic_context.get("topic", "").strip()
+    if not topic:
+        return None, "Topic is required."
+
+    if use_ai and api_key:
+        prompt = build_topic_ai_prompt(topic_context, template_config)
+        if ai_provider == "anthropic":
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=api_key)
+                message = client.messages.create(
+                    model="claude-sonnet-4-5-20250929",
+                    max_tokens=4096,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                content = message.content[0].text
+            except ImportError:
+                content = "ERROR: anthropic package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        elif ai_provider == "openai":
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert curriculum specialist and instructional designer."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=4096
+                )
+                content = response.choices[0].message.content
+            except ImportError:
+                content = "ERROR: openai package not installed."
+            except Exception as e:
+                content = f"ERROR: AI generation failed: {str(e)}"
+        else:
+            content = "ERROR: Unknown AI provider."
+
+        if content.startswith("ERROR:"):
+            ai_error = content
+            content = _generate_topic_local(topic_context, template_config)
+            content = (
+                "> **Note:** AI generation failed — showing template-based output instead.\n"
+                f"> *Reason: {ai_error.replace('ERROR: ', '')}*\n\n"
+            ) + content
+    else:
+        content = _generate_topic_local(topic_context, template_config)
+
+    return content, None
+
+
 def generate_lesson_plan(subject_id, competency_ids, template_config, use_ai=False,
                           api_key=None, ai_provider="anthropic"):
     """Main entry point: generate a lesson plan."""

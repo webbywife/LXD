@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="auth-token" content="{{ auth_token }}">
-<title>MATATAG AI Lesson Plan Generator</title>
+<title>SKOOLED-AI Lesson Plan Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -193,6 +193,10 @@ textarea{resize:vertical;min-height:60px;}
 .tabs.on{display:flex;}
 .tab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;}
 .tab.a{background:var(--c2);color:#fff;border-color:var(--c2);}
+.mode-tab{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;flex:1;text-align:center;}
+.mode-tab:hover{border-color:var(--c1);}
+.mode-tab.a{background:var(--c1);color:#fff;border-color:var(--c1);}
+.star{cursor:pointer;color:#dfe6e9;font-size:28px;transition:color .15s;}
 
 .ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:20px;}
 
@@ -217,7 +221,7 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 </div>
 <div class="hdr">
-    <h1>MATATAG AI Lesson Plan Generator</h1>
+    <h1>SKOOLED-AI Lesson Plan Generator</h1>
     <p>DepEd-Aligned Curriculum Content Development System</p>
     <div class="stats">
         <span class="st">&#128218; 3,400+ Competencies</span>
@@ -239,14 +243,36 @@ textarea{resize:vertical;min-height:60px;}
 <!-- STEP 1 -->
 <div class="sp a" id="step1">
 <div class="crd">
-    <div class="crd-t">&#128204; Select Your Curriculum</div>
-    <div class="crd-s">Choose subject, grade, and quarter to begin.</div>
-    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
-    <div class="fg"><label>Subject / Learning Area</label><select id="sel-s"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.id }}">{{ s.display_name }}</option>{% endfor %}</select></div>
-    <div class="fr">
-        <div class="fg"><label>Grade Level</label><select id="sel-g" disabled><option value="">-- Choose Grade --</option></select></div>
-        <div class="fg"><label>Quarter</label><select id="sel-q" disabled><option value="">-- Choose Quarter --</option></select></div>
+    <div class="crd-t">&#128204; Step 1: Choose Your Approach</div>
+    <div class="crd-s">Select from the MATATAG curriculum or enter a custom topic.</div>
+
+    <!-- Mode Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;">
+        <button class="mode-tab a" data-mode="curriculum" id="mtab-c">&#128218; Select from Curriculum</button>
+        <button class="mode-tab" data-mode="topic" id="mtab-t">&#9998;&#65039; Enter Custom Topic</button>
     </div>
+
+    <!-- Curriculum Mode -->
+    <div id="mode-curriculum">
+        <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
+        <div class="fg"><label>Subject / Learning Area</label><select id="sel-s"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.id }}">{{ s.display_name }}</option>{% endfor %}</select></div>
+        <div class="fr">
+            <div class="fg"><label>Grade Level</label><select id="sel-g" disabled><option value="">-- Choose Grade --</option></select></div>
+            <div class="fg"><label>Quarter</label><select id="sel-q" disabled><option value="">-- Choose Quarter --</option></select></div>
+        </div>
+    </div>
+
+    <!-- Topic Mode -->
+    <div id="mode-topic" style="display:none;">
+        <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Enter any topic and subject to generate a lesson plan without selecting from the curriculum. Great for custom or supplementary lessons.</span></div>
+        <div class="fg"><label>Topic / Lesson Title *</label><input type="text" id="t-topic" placeholder="e.g., The Water Cycle, Fractions, Philippine Independence"></div>
+        <div class="fr">
+            <div class="fg"><label>Subject / Learning Area *</label><select id="sel-ts"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.display_name }}">{{ s.display_name }}</option>{% endfor %}</select></div>
+            <div class="fg"><label>Grade Level *</label><input type="text" id="t-grade" placeholder="e.g., Grade 5, Grade 8"></div>
+        </div>
+        <div class="fg"><label>Learning Competencies / Objectives (optional)</label><textarea id="t-comps" rows="3" placeholder="e.g., Students will identify the stages of the water cycle&#10;Students will explain how evaporation works"></textarea></div>
+    </div>
+
     <div class="br"><div></div><button class="btn btn-p" id="bn1" disabled>Next: Choose Competencies &#8594;</button></div>
 </div>
 </div>
@@ -299,7 +325,7 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 
     <!-- Assessment Package -->
-    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+    <div id="assess-wrap" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
         <div class="crd-t">&#128203; Authentic Assessment Package</div>
         <div class="crd-s">Generate professional assessment tools aligned to the selected competencies.</div>
         <div class="fg"><label>Assessment Output Mode</label><select id="a-mode"><option value="none">No assessment (Lesson Plan only)</option><option value="incorporate">Include IN the lesson plan</option><option value="separate">Generate as SEPARATE document</option><option value="both">Generate BOTH (combined + separate download)</option></select></div>
@@ -318,7 +344,7 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 
     <!-- Quiz Generation -->
-    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+    <div id="quiz-wrap" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
         <div class="crd-t">&#128221; Quiz Generation</div>
         <div class="crd-s">Generate a downloadable quiz based on the selected competencies.</div>
         <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;margin-bottom:10px;" id="quiz-box">
@@ -373,6 +399,22 @@ textarea{resize:vertical;min-height:60px;}
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
     <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip file can be uploaded directly to Moodle (3-5), Canvas, Brightspace, or any SCORM 1.2 compliant LMS. Go to your course > Add Activity > SCORM Package > Upload the .zip file.</span></div>
+
+    <!-- Rating Widget -->
+    <div id="rating-section" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+        <div class="crd-t">&#11088; Rate This Lesson Plan</div>
+        <div class="crd-s">Help us improve by sharing your feedback.</div>
+        <div id="star-row" style="display:flex;gap:6px;margin:10px 0;">
+            <span class="star" data-v="1">&#9733;</span>
+            <span class="star" data-v="2">&#9733;</span>
+            <span class="star" data-v="3">&#9733;</span>
+            <span class="star" data-v="4">&#9733;</span>
+            <span class="star" data-v="5">&#9733;</span>
+        </div>
+        <div class="fg"><label>Comment (optional)</label><textarea id="r-comment" rows="2" placeholder="What did you like? What could be improved?"></textarea></div>
+        <button class="btn btn-p" id="r-submit" disabled>Submit Feedback</button>
+        <div id="r-msg" style="display:none;color:var(--success);font-size:13px;margin-top:8px;font-weight:600;">&#10003; Thank you for your feedback!</div>
+    </div>
 </div>
 </div>
 
@@ -381,16 +423,46 @@ textarea{resize:vertical;min-height:60px;}
 <!-- Progress -->
 <div class="po" id="po"><div class="pb"><div class="pb-t">&#9889; Generating Lesson Plan</div><div class="pb-s" id="ps">Please wait...</div><div class="pb-p" id="pp">0%</div><div class="pb-bg"><div class="pb-fl" id="pf"></div></div><div class="pb-st" id="pt">Preparing curriculum data...</div></div></div>
 
-<div class="ft">MATATAG AI Lesson Plan Generator &bull; Philippine DepEd Curriculum &bull; SCORM 1.2 Compliant</div>
+<div class="ft">SKOOLED-AI Lesson Plan Generator &bull; Philippine DepEd Curriculum &bull; SCORM 1.2 Compliant</div>
 
 <script>
 document.addEventListener("DOMContentLoaded",function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
 function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
-let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",activeTab="lp";
+let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",activeTab="lp",genMode="curriculum";
 
 function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
+
+function switchMode(m){
+    genMode=m;
+    $("#mode-curriculum").style.display=m==="curriculum"?"block":"none";
+    $("#mode-topic").style.display=m==="topic"?"block":"none";
+    $$(".mode-tab").forEach(t=>t.classList.toggle("a",t.dataset.mode===m));
+    if(m==="curriculum"){
+        const hasQ=Q.options.length>1;
+        $("#bn1").disabled=!(S.value&&G.value&&(Q.value||!hasQ));
+        $("#bn1").textContent="Next: Choose Competencies \u2192";
+    }else{
+        $("#bn1").textContent="Next: Customize \u2192";
+        updateTopicNextBtn();
+    }
+}
+function updateTopicNextBtn(){
+    const t=($("#t-topic")?.value||"").trim();
+    const ts=($("#sel-ts")?.value||"");
+    const tg=($("#t-grade")?.value||"").trim();
+    $("#bn1").disabled=!(t&&ts&&tg);
+}
+function updateStep3ForMode(){
+    const isT=genMode==="topic";
+    $("#assess-wrap").style.display=isT?"none":"block";
+    $("#quiz-wrap").style.display=isT?"none":"block";
+}
+
+$$(".mode-tab").forEach(t=>{t.addEventListener("click",function(){switchMode(this.dataset.mode);});});
+["t-topic","t-grade"].forEach(id=>{const el=$("#"+id);if(el)el.addEventListener("input",()=>{if(genMode==="topic")updateTopicNextBtn();});});
+const TS=$("#sel-ts");if(TS)TS.addEventListener("change",()=>{if(genMode==="topic")updateTopicNextBtn();});
 
 const S=$("#sel-s"),G=$("#sel-g"),Q=$("#sel-q");
 
@@ -400,7 +472,20 @@ G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Q
 
 Q.addEventListener("change",function(){$("#bn1").disabled=!this.value;});
 
-$("#bn1").addEventListener("click",function(){const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(aurl(u)).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});});
+$("#bn1").addEventListener("click",function(){
+    if(genMode==="topic"){
+        const topic=($("#t-topic")?.value||"").trim();
+        const tsubj=($("#sel-ts")?.value||"");
+        const tgrade=($("#t-grade")?.value||"").trim();
+        const tcomps=($("#t-comps")?.value||"").trim();
+        if(!topic||!tsubj)return;
+        window._topicCtx={topic,subject_name:tsubj,grade:tgrade,competencies_text:tcomps};
+        updateStep3ForMode();
+        go(3);
+        return;
+    }
+    const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(aurl(u)).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});
+});
 
 function renderC(){const l=$("#cl");l.innerHTML="";if(!cData.length){l.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-s)">No competencies found.</div>';return;}cData.forEach(c=>{const d=document.createElement("div");d.className="cc";d.dataset.id=c.id;const cb=document.createElement("input");cb.type="checkbox";const info=document.createElement("div");info.innerHTML=`<div class="cc-c">${c.lc_id||"LC-"+c.id}</div><div class="cc-d">${c.learning_competency}</div><div class="cc-m">${[c.domain,c.blooms_level?"Bloom's: "+c.blooms_level:""].filter(Boolean).join(" | ")}</div>`;d.appendChild(cb);d.appendChild(info);d.addEventListener("click",e=>{if(e.target!==cb)cb.checked=!cb.checked;if(cb.checked){selC.add(c.id);d.classList.add("sel");}else{selC.delete(c.id);d.classList.remove("sel");}upC();});l.appendChild(d);});upC();}
 function upC(){$("#scnt").textContent=`${selC.size} of ${cData.length} selected`;$("#bn2").disabled=selC.size===0;}
@@ -409,7 +494,7 @@ $("#bsa").addEventListener("click",()=>{$$(".cc").forEach(d=>{d.querySelector("i
 $("#bda").addEventListener("click",()=>{$$(".cc").forEach(d=>{d.querySelector("input").checked=false;d.classList.remove("sel");});selC.clear();upC();});
 $("#bb2").addEventListener("click",()=>go(1));
 $("#bn2").addEventListener("click",()=>go(3));
-$("#bb3").addEventListener("click",()=>go(2));
+$("#bb3").addEventListener("click",()=>go(genMode==="topic"?1:2));
 
 // Toggle sections
 $$("#ttoggles .tc").forEach(c=>{c.addEventListener("click",function(e){if(e.target.closest(".tc-x"))return;this.classList.toggle("on");});});
@@ -483,13 +568,13 @@ function renderTabbed(html,container){
 
 // GENERATE
 $("#bgen").addEventListener("click",function(){
-if(!selC.size)return;
+if(genMode==="curriculum"&&!selC.size)return;
 const gm=()=>{const s=$(".mc.sel");return s?s.dataset.m:"5e";};
 const ln=id=>($(id)?.value||"").split("\n").map(s=>s.trim()).filter(Boolean);
 const on=s=>$(`#ttoggles .tc[data-s="${s}"]`)?.classList.contains("on");
-const am=$("#a-mode").value;
+const am=genMode==="topic"?"none":$("#a-mode").value;
 const at=Array.from($$(".at.on")).map(c=>c.dataset.a);
-const wantQuiz=$("#f-quiz").checked;
+const wantQuiz=genMode==="topic"?false:$("#f-quiz").checked;
 const quizTypes=Array.from($$(".qt.on")).map(c=>c.dataset.qt);
 
 const cfg={
@@ -504,7 +589,29 @@ assessment:{enabled:on("assessment"),customizable_fields:{include_formative:$("#
 reflection:{enabled:on("reflection"),customizable_fields:{num_prompts:parseInt($("#f-nref")?.value||"3"),custom_prompts:ln("#f-cref")}},
 };
 
-const ai=true,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic",ids=Array.from(selC);
+const ai=true,ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic";
+
+// ── Topic Mode ───────────────────────────────────────────────
+if(genMode==="topic"){
+    const ctx=window._topicCtx||{};
+    if(!ctx.topic||!ctx.subject_name)return;
+    const done=showP(true);
+    fetch(aurl("/api/generate-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()).then(lp=>{done();
+    setTimeout(()=>{rawLP=lp.content||"";rawAS="";rawQZ="";
+    $("#out-s").textContent=`Topic: ${ctx.topic} | ${ctx.subject_name}${ctx.grade?" Grade "+ctx.grade:""} | ${new Date().toLocaleString()}`;
+    if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
+    $("#out-tabs").classList.remove("on");
+    $("#b-dla").style.display="none";
+    $("#b-dlq").style.display="none";
+    $("#out-t").textContent="\u{1F4C4} Lesson Plan";
+    setTab("lp");
+    go(4);},700);
+    }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
+    return;
+}
+
+// ── Curriculum Mode ──────────────────────────────────────────
+const ids=Array.from(selC);
 const done=showP(true);
 const ps=[fetch(aurl("/api/generate"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:S.value,competency_ids:ids,template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
 const needA=am!=="none"&&at.length>0;
@@ -595,7 +702,10 @@ $("#b-copy").addEventListener("click",function(){
     navigator.clipboard.writeText(txt).then(()=>{this.textContent="\u2705 Copied!";setTimeout(()=>this.textContent="\u{1F4CB} Copy",2000);});
 });
 $("#b-pr").addEventListener("click",()=>window.print());
-$("#b-dl").addEventListener("click",()=>{dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);});
+$("#b-dl").addEventListener("click",()=>{
+    if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawLP,`Lesson_Plan_${t}.md`);}
+    else dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);
+});
 $("#b-dla").addEventListener("click",()=>{dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
 $("#b-dlq").addEventListener("click",()=>{dl(rawQZ,`Quiz_${S.value}_G${G.value}_Q${Q.value}.md`);});
 
@@ -620,7 +730,26 @@ $("#b-scorm").addEventListener("click",function(){
     }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
 });
 
-$("#b-new").addEventListener("click",()=>{rawAS="";rawQZ="";go(1);});
+$("#b-new").addEventListener("click",()=>{rawAS="";rawQZ="";ratingVal=0;$$(".star").forEach(s=>s.style.color="#dfe6e9");$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";go(1);});
+
+// Rating widget
+let ratingVal=0;
+const stars=$$(".star");
+stars.forEach(s=>{s.style.color="#dfe6e9";});
+stars.forEach(s=>{
+    s.addEventListener("mouseenter",function(){const v=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<v?"var(--accent)":"#dfe6e9");});
+    s.addEventListener("mouseleave",()=>{stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":"#dfe6e9");});
+    s.addEventListener("click",function(){ratingVal=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":"#dfe6e9");$("#r-submit").disabled=false;});
+});
+$("#r-submit").addEventListener("click",function(){
+    if(!ratingVal)return;
+    this.disabled=true;
+    const sn=genMode==="topic"?(window._topicCtx?.subject_name||""):(S.options[S.selectedIndex]?.text||"");
+    const gn=genMode==="topic"?(window._topicCtx?.grade||""):(G.value||"");
+    const qn=genMode==="topic"?"":(Q.value||"");
+    const lt=genMode==="topic"?(window._topicCtx?.topic||""):"";
+    fetch(aurl("/api/rate-lesson"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rating:ratingVal,comment:$("#r-comment")?.value||"",subject:sn,grade:gn,quarter:qn,lesson_title:lt,gen_mode:genMode})}).then(()=>{$("#r-msg").style.display="block";}).catch(()=>{$("#r-msg").style.display="block";});
+});
 });
 </script>
 </body>

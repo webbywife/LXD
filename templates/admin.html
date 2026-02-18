@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - MATATAG AI</title>
+<title>Admin Panel - SKOOLED-AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--c1:#00bbd6;--c1d:#009bb3;--c2:#237194;--c2d:#1a5670;--accent:#faa32b;--accent-lt:#fff8ed;--white:#ffffff;--text:#2d3436;--text-s:#636e72;--border:#dfe6e9;--bg:#f1f1f2;--success:#00b894;--danger:#e74c3c;--warning:#fdcb6e;}
@@ -58,6 +58,9 @@ tr:hover td{background:#f8fbfc;}
 .actions{display:flex;gap:4px;flex-wrap:wrap;}
 
 .ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:30px;}
+.stat-ratings .stat-n{color:var(--accent);}
+.stat-avg .stat-n{color:var(--success);}
+.stars{color:var(--accent);font-size:14px;letter-spacing:1px;}
 
 @media(max-width:768px){
     table{font-size:12px;}
@@ -103,6 +106,18 @@ tr:hover td{background:#f8fbfc;}
         <div class="stat stat-admin">
             <div class="stat-n">{{ stats.admins }}</div>
             <div class="stat-l">Admins</div>
+        </div>
+    </div>
+
+    <!-- Rating Stats -->
+    <div class="stats" style="grid-template-columns:1fr 1fr;max-width:400px;margin-bottom:16px;">
+        <div class="stat stat-ratings">
+            <div class="stat-n">{{ rating_stats.total_ratings if rating_stats is defined else 0 }}</div>
+            <div class="stat-l">Total Ratings</div>
+        </div>
+        <div class="stat stat-avg">
+            <div class="stat-n">{{ rating_stats.avg_rating if rating_stats is defined else 0 }}</div>
+            <div class="stat-l">Avg Rating / 5</div>
         </div>
     </div>
 
@@ -156,6 +171,42 @@ tr:hover td{background:#f8fbfc;}
     </div>
 </div>
 
-<div class="ft">MATATAG AI Admin Panel &bull; Logged in as {{ session.get('user_name', 'Admin') }}</div>
+    <!-- Ratings Table -->
+    {% if ratings is defined and ratings %}
+    <div class="crd" style="margin-top:20px;">
+        <div class="crd-t">Lesson Plan Ratings &amp; Feedback</div>
+        <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Subject</th>
+                    <th>Grade</th>
+                    <th>Mode</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in ratings %}
+                <tr>
+                    <td><strong>{{ r.user_name }}</strong></td>
+                    <td><span class="stars">{% for i in range(r.rating) %}&#9733;{% endfor %}{% for i in range(5 - r.rating) %}&#9734;{% endfor %}</span></td>
+                    <td>{{ r.comment or '-' }}</td>
+                    <td>{{ r.subject or '-' }}</td>
+                    <td>{{ r.grade or '-' }}</td>
+                    <td><span class="badge {{ 'badge-approved' if r.gen_mode == 'topic' else 'badge-user' }}">{{ r.gen_mode }}</span></td>
+                    <td>{{ r.created_at.strftime('%b %d, %Y') if r.created_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="ft">SKOOLED-AI Admin Panel &bull; Logged in as {{ session.get('user_name', 'Admin') }}</div>
 </body>
 </html>

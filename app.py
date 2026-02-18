@@ -1,5 +1,5 @@
 """
-MATATAG AI Lesson Plan Generator - Standalone Web Application
+SKOOLED-AI Lesson Plan Generator - Standalone Web Application
 DepEd-aligned lesson plan content generator based on MATATAG Curriculum.
 """
 
@@ -17,7 +17,8 @@ from curriculum_loader import (
     DB_PATH, SUBJECT_DISPLAY
 )
 from lesson_generator import (
-    generate_lesson_plan, generate_assessment, generate_quiz,
+    generate_lesson_plan, generate_lesson_plan_topic,
+    generate_assessment, generate_quiz,
     get_template_sections, get_procedure_models,
     TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES, QUIZ_TYPES
 )
@@ -205,6 +206,84 @@ def api_generate():
         return jsonify({"error": error}), 400
 
     return jsonify({"content": content})
+
+
+@app.route("/api/generate-topic", methods=["POST"])
+@login_required
+def api_generate_topic():
+    """Generate a topic-based lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    topic = data.get("topic", "").strip()
+    subject_name = data.get("subject_name", "").strip()
+    grade = data.get("grade", "").strip()
+    competencies_text = data.get("competencies_text", "").strip()
+    template_config = data.get("template_config", TEMPLATE_SECTIONS)
+    use_ai = data.get("use_ai", False)
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    if not topic:
+        return jsonify({"error": "Topic is required"}), 400
+    if not subject_name:
+        return jsonify({"error": "Subject is required"}), 400
+
+    topic_context = {
+        "topic": topic,
+        "subject_name": subject_name,
+        "grade": grade,
+        "competencies_text": competencies_text,
+    }
+
+    content, error = generate_lesson_plan_topic(
+        topic_context, template_config,
+        use_ai=use_ai, api_key=api_key, ai_provider=ai_provider
+    )
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({"content": content})
+
+
+@app.route("/api/rate-lesson", methods=["POST"])
+@login_required
+def api_rate_lesson():
+    """Save a lesson plan rating and optional comment."""
+    from auth import get_db
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    rating = data.get("rating")
+    if not isinstance(rating, int) or rating < 1 or rating > 5:
+        return jsonify({"error": "Rating must be an integer between 1 and 5"}), 400
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO lesson_ratings
+                   (user_id, user_name, rating, comment, subject, grade, quarter, lesson_title, gen_mode)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (
+                    session["user_id"],
+                    session.get("user_name", ""),
+                    rating,
+                    data.get("comment", ""),
+                    data.get("subject", ""),
+                    data.get("grade", ""),
+                    data.get("quarter", ""),
+                    data.get("lesson_title", ""),
+                    data.get("gen_mode", "curriculum"),
+                )
+            )
+    finally:
+        conn.close()
+
+    return jsonify({"message": "Rating saved. Thank you for your feedback!"})
 
 
 @app.route("/api/generate-assessment", methods=["POST"])

@@ -1,5 +1,5 @@
 """
-Authentication module for MATATAG AI Lesson Plan Generator.
+Authentication module for SKOOLED-AI Lesson Plan Generator.
 MySQL-backed user auth with signed URL tokens.
 Cloudways Nginx strips Cookie headers, so we pass auth via URL tokens.
 """
@@ -33,7 +33,7 @@ def get_db():
 
 
 def init_db():
-    """Create users table if it doesn't exist."""
+    """Create database tables if they don't exist."""
     conn = get_db()
     try:
         with conn.cursor() as cur:
@@ -46,6 +46,22 @@ def init_db():
                     role ENUM('user', 'admin') DEFAULT 'user',
                     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS lesson_ratings (
+                    id           INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id      INT NOT NULL,
+                    user_name    VARCHAR(255) NOT NULL,
+                    rating       TINYINT NOT NULL,
+                    comment      TEXT,
+                    subject      VARCHAR(255),
+                    grade        VARCHAR(100),
+                    quarter      VARCHAR(100),
+                    lesson_title VARCHAR(500),
+                    gen_mode     ENUM('curriculum','topic') DEFAULT 'curriculum',
+                    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
     finally:
@@ -239,7 +255,29 @@ def admin_panel():
         conn.close()
 
     stats = {"total": total, "pending": pending, "approved": approved, "admins": admins}
-    return render_template("admin.html", users=users, stats=stats)
+
+    rating_stats = {"total_ratings": 0, "avg_rating": 0}
+    ratings = []
+    try:
+        conn = get_db()
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS cnt FROM lesson_ratings")
+            rating_stats["total_ratings"] = cur.fetchone()["cnt"]
+            cur.execute("SELECT AVG(rating) AS avg FROM lesson_ratings")
+            avg = cur.fetchone()["avg"]
+            rating_stats["avg_rating"] = round(float(avg), 1) if avg else 0
+            cur.execute(
+                "SELECT id, user_name, rating, comment, subject, grade, quarter, "
+                "lesson_title, gen_mode, created_at FROM lesson_ratings "
+                "ORDER BY created_at DESC LIMIT 100"
+            )
+            ratings = cur.fetchall()
+        conn.close()
+    except Exception:
+        pass
+
+    return render_template("admin.html", users=users, stats=stats,
+                           rating_stats=rating_stats, ratings=ratings)
 
 
 @auth_bp.route("/admin/approve/<int:user_id>", methods=["POST"])
