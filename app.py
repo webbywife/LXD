@@ -6,6 +6,8 @@ DepEd-aligned lesson plan content generator based on MATATAG Curriculum.
 import os
 import re
 import json
+import zipfile
+from io import BytesIO
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for, g
 
@@ -20,6 +22,7 @@ from lesson_generator import (
     generate_lesson_plan, generate_lesson_plan_topic,
     generate_assessment, generate_assessment_topic,
     generate_quiz, generate_quiz_topic,
+    convert_quiz_to_gift, convert_quiz_to_qti,
     get_template_sections, get_procedure_models,
     TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES, QUIZ_TYPES
 )
@@ -427,6 +430,85 @@ def api_generate_quiz():
         return jsonify({"error": error}), 400
 
     return jsonify({"content": content})
+
+
+def _build_qti_zip(title, qti_xml):
+    """Wrap QTI XML in an IMS Content Package ZIP (required by Canvas/Brightspace)."""
+    safe_title = title.replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+    manifest = f'''<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="quiz_manifest"
+    xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata>
+    <schema>IMS Content</schema>
+    <schemaversion>1.1.3</schemaversion>
+  </metadata>
+  <organizations/>
+  <resources>
+    <resource identifier="quiz_resource" type="imsqti_xmlv1p2" href="quiz.xml">
+      <file href="quiz.xml"/>
+    </resource>
+  </resources>
+</manifest>'''
+    buf = BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("imsmanifest.xml", manifest.encode("utf-8"))
+        zf.writestr("quiz.xml", qti_xml.encode("utf-8") if isinstance(qti_xml, str) else qti_xml)
+    buf.seek(0)
+    return buf
+
+
+@app.route("/api/export-quiz-gift", methods=["POST"])
+@login_required
+def api_export_quiz_gift():
+    """Convert generated quiz markdown to Moodle GIFT format and return as .txt download."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    quiz_md = data.get("quiz_md", "").strip()
+    if not quiz_md:
+        return jsonify({"error": "No quiz content provided"}), 400
+
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = convert_quiz_to_gift(quiz_md, api_key=api_key, ai_provider=ai_provider)
+    if error:
+        return jsonify({"error": error}), 400
+
+    title = data.get("title", "quiz")
+    safe = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
+    buf = BytesIO(content.encode("utf-8"))
+    buf.seek(0)
+    return send_file(buf, mimetype="text/plain", as_attachment=True,
+                     download_name=f"Quiz_{safe}_GIFT.txt")
+
+
+@app.route("/api/export-quiz-qti", methods=["POST"])
+@login_required
+def api_export_quiz_qti():
+    """Convert generated quiz markdown to IMS QTI 1.2 ZIP package for Canvas/Brightspace."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    quiz_md = data.get("quiz_md", "").strip()
+    if not quiz_md:
+        return jsonify({"error": "No quiz content provided"}), 400
+
+    title = data.get("title", "Quiz")
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    qti_xml, error = convert_quiz_to_qti(title, quiz_md, api_key=api_key, ai_provider=ai_provider)
+    if error:
+        return jsonify({"error": error}), 400
+
+    buf = _build_qti_zip(title, qti_xml)
+    safe = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
+    return send_file(buf, mimetype="application/zip", as_attachment=True,
+                     download_name=f"Quiz_{safe}_QTI.zip")
 
 
 @app.route("/api/download-scorm", methods=["POST"])

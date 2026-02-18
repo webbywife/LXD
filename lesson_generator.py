@@ -1966,6 +1966,225 @@ def generate_quiz_topic(topic_context, quiz_config,
     return content, None
 
 
+## ============================================================
+## QUIZ FORMAT CONVERTERS (GIFT / QTI 1.2)
+## ============================================================
+
+def convert_quiz_to_gift(quiz_md, api_key=None, ai_provider="anthropic"):
+    """Convert markdown quiz content to Moodle GIFT format using AI."""
+    if not quiz_md or not quiz_md.strip():
+        return None, "No quiz content provided."
+
+    prompt = """Convert the following quiz from Markdown format to Moodle GIFT format.
+
+GIFT FORMAT SYNTAX REFERENCE:
+
+// Multiple choice (= correct answer, ~ wrong answers)
+::Q1:: What is the capital of the Philippines? {=Manila ~Cebu ~Davao ~Quezon City}
+
+// True/False
+::Q2:: The sun is a star. {TRUE}
+::Q3:: Water has two oxygen atoms. {FALSE}
+
+// Short answer (identification)
+::Q4:: The chemical symbol for water is ___. {=H2O =h2o}
+
+// Matching type
+::Q5:: Match each term to its definition. {
+=Evaporation -> Liquid changing to gas
+=Condensation -> Gas changing to liquid
+=Precipitation -> Water falling from clouds
+}
+
+CONVERSION RULES:
+1. Number questions sequentially: Q1, Q2, Q3, etc.
+2. Find correct answers in the "## Answer Key" section of the markdown
+3. Copy EXACT question text — do not paraphrase or shorten
+4. For multiple choice: first option after { must be =correct, others use ~
+5. Skip header tables, direction lines ("**Directions:**"), and section headings
+6. Escape special characters: { → \\{ } → \\} ~ → \\~ = → \\= # → \\#
+7. Output ONLY valid GIFT text — no markdown, no code fences, no explanation
+
+QUIZ TO CONVERT:
+""" + quiz_md
+
+    if ai_provider == "anthropic":
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = message.content[0].text
+        except ImportError:
+            return None, "anthropic package not installed."
+        except Exception as e:
+            return None, f"AI conversion failed: {str(e)}"
+    elif ai_provider == "openai":
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a quiz format converter. Output only the requested format, nothing else."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=4096
+            )
+            content = response.choices[0].message.content
+        except ImportError:
+            return None, "openai package not installed."
+        except Exception as e:
+            return None, f"AI conversion failed: {str(e)}"
+    else:
+        return None, "Unknown AI provider."
+
+    # Strip any code fences the AI may have wrapped around the output
+    lines = content.split("\n")
+    lines = [l for l in lines if not l.strip().startswith("```")]
+    return "\n".join(lines).strip(), None
+
+
+def convert_quiz_to_qti(title, quiz_md, api_key=None, ai_provider="anthropic"):
+    """Convert markdown quiz content to IMS QTI 1.2 XML using AI."""
+    if not quiz_md or not quiz_md.strip():
+        return None, "No quiz content provided."
+
+    safe_title = title.replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
+    prompt = f"""Convert the following quiz to IMS QTI 1.2 XML format, compatible with Canvas, Brightspace (D2L), and any QTI 1.2 LMS.
+
+REQUIRED QTI 1.2 STRUCTURE:
+<?xml version="1.0" encoding="UTF-8"?>
+<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">
+  <assessment title="Quiz Title" ident="assessment1">
+    <section ident="root_section">
+
+      <!-- MULTIPLE CHOICE -->
+      <item title="Question 1" ident="q1">
+        <presentation>
+          <material><mattext texttype="text/plain">Question text?</mattext></material>
+          <response_lid ident="response1" rcardinality="Single">
+            <render_choice>
+              <response_label ident="A"><material><mattext>Choice A</mattext></material></response_label>
+              <response_label ident="B"><material><mattext>Choice B</mattext></material></response_label>
+              <response_label ident="C"><material><mattext>Choice C</mattext></material></response_label>
+              <response_label ident="D"><material><mattext>Choice D</mattext></material></response_label>
+            </render_choice>
+          </response_lid>
+        </presentation>
+        <resprocessing>
+          <outcomes><decvar maxvalue="1" minvalue="0" varname="SCORE" vartype="Decimal"/></outcomes>
+          <respcondition continue="No">
+            <conditionvar><varequal respident="response1">A</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">1</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+      <!-- TRUE/FALSE -->
+      <item title="Question 2" ident="q2">
+        <presentation>
+          <material><mattext texttype="text/plain">Statement here.</mattext></material>
+          <response_lid ident="response2" rcardinality="Single">
+            <render_choice>
+              <response_label ident="TRUE"><material><mattext>True</mattext></material></response_label>
+              <response_label ident="FALSE"><material><mattext>False</mattext></material></response_label>
+            </render_choice>
+          </response_lid>
+        </presentation>
+        <resprocessing>
+          <outcomes><decvar maxvalue="1" minvalue="0" varname="SCORE" vartype="Decimal"/></outcomes>
+          <respcondition continue="No">
+            <conditionvar><varequal respident="response2">TRUE</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">1</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+      <!-- SHORT ANSWER -->
+      <item title="Question 3" ident="q3">
+        <presentation>
+          <material><mattext texttype="text/plain">Fill in: ___</mattext></material>
+          <response_str ident="response3" rcardinality="Single">
+            <render_fib><response_label ident="answer"/></render_fib>
+          </response_str>
+        </presentation>
+        <resprocessing>
+          <outcomes><decvar maxvalue="1" minvalue="0" varname="SCORE" vartype="Decimal"/></outcomes>
+          <respcondition continue="No">
+            <conditionvar><varequal respident="response3" case="No">correct answer</varequal></conditionvar>
+            <setvar action="Set" varname="SCORE">1</setvar>
+          </respcondition>
+        </resprocessing>
+      </item>
+
+    </section>
+  </assessment>
+</questestinterop>
+
+CONVERSION RULES:
+1. Use the Answer Key section to determine the correct answer for each question
+2. Assign ident="q1", "q2", etc. sequentially across all question types
+3. Escape XML characters: & → &amp; < → &lt; > → &gt; " → &quot;
+4. For matching: convert each match pair to a separate short-answer item
+5. Skip header tables, direction lines, and section headings
+6. Output ONLY valid XML starting with <?xml — no markdown, no code fences, no commentary
+
+Quiz title: {safe_title}
+
+QUIZ TO CONVERT:
+{quiz_md}"""
+
+    if ai_provider == "anthropic":
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = message.content[0].text
+        except ImportError:
+            return None, "anthropic package not installed."
+        except Exception as e:
+            return None, f"AI conversion failed: {str(e)}"
+    elif ai_provider == "openai":
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a quiz format converter. Output only valid XML, nothing else."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=4096
+            )
+            content = response.choices[0].message.content
+        except ImportError:
+            return None, "openai package not installed."
+        except Exception as e:
+            return None, f"AI conversion failed: {str(e)}"
+    else:
+        return None, "Unknown AI provider."
+
+    # Strip code fences
+    lines = content.split("\n")
+    lines = [l for l in lines if not l.strip().startswith("```")]
+    content = "\n".join(lines).strip()
+    # Ensure output starts with XML declaration
+    if not content.startswith("<?xml"):
+        idx = content.find("<?xml")
+        if idx > 0:
+            content = content[idx:]
+    return content, None
+
+
 def generate_lesson_plan(subject_id, competency_ids, template_config, use_ai=False,
                           api_key=None, ai_provider="anthropic"):
     """Main entry point: generate a lesson plan."""

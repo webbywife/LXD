@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="auth-token" content="{{ auth_token }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>SKOOLED-AI Lesson Plan Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -394,7 +395,12 @@ textarea{resize:vertical;min-height:60px;}
         <button class="btn" id="b-dl">&#128229; Download .md</button>
         <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
         <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
-        <button class="btn" id="b-dlq" style="display:none">&#128221; Download Quiz (LMS)</button>
+        <span id="quiz-dl-grp" style="display:none;gap:4px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:600;color:var(--text-s);padding:2px 2px;font-family:'Poppins',sans-serif;">Quiz&#x25BE;</span>
+            <button class="btn btn-sm" id="b-dlq-md" title="Human-readable reference">&#128221; .md</button>
+            <button class="btn btn-sm" id="b-dlq-gift" title="Import into Moodle">&#128171; Moodle GIFT</button>
+            <button class="btn btn-sm" id="b-dlq-qti" title="Import into Canvas or Brightspace">&#128230; QTI (Canvas/D2L)</button>
+        </span>
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
@@ -606,7 +612,7 @@ if(genMode==="topic"){
     const tHasAS=!!rawAS;const tHasQZ=!!rawQZ;
     if(am==="incorporate"&&tHasAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
     if(tHasAS||tHasQZ){$("#out-tabs").classList.add("on");$("#t-as").style.display=tHasAS?"inline-flex":"none";$("#t-qz").style.display=tHasQZ?"inline-flex":"none";}else{$("#out-tabs").classList.remove("on");}
-    $("#b-dla").style.display=(tHasAS&&am!=="incorporate")?"inline-flex":"none";$("#b-dlq").style.display=tHasQZ?"inline-flex":"none";
+    $("#b-dla").style.display=(tHasAS&&am!=="incorporate")?"inline-flex":"none";$("#quiz-dl-grp").style.display=tHasQZ?"inline-flex":"none";
     if(am==="both"&&tHasAS){rawLP=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
     let tParts=["Lesson Plan"];if(rawAS)tParts.push("Assessment");if(tHasQZ)tParts.push("Quiz");
     $("#out-t").textContent="\u{1F4C4} "+tParts.join(" + ");
@@ -652,7 +658,7 @@ if(showTabs||(am==="separate"&&hasAS)){
 
 // Show/hide download buttons
 $("#b-dla").style.display=(hasAS&&am!=="incorporate")?"inline-flex":"none";
-$("#b-dlq").style.display=hasQZ?"inline-flex":"none";
+$("#quiz-dl-grp").style.display=hasQZ?"inline-flex":"none";
 
 if(am==="both"&&hasAS){
     const c=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;
@@ -712,7 +718,28 @@ $("#b-dl").addEventListener("click",()=>{
     else dl(rawLP,`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.md`);
 });
 $("#b-dla").addEventListener("click",()=>{if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawAS,`Assessment_${t}.md`);}else dl(rawAS,`Assessment_${S.value}_G${G.value}_Q${Q.value}.md`);});
-$("#b-dlq").addEventListener("click",()=>{if(genMode==="topic"){const t=(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_");dl(rawQZ,`Quiz_${t}.md`);}else dl(rawQZ,`Quiz_${S.value}_G${G.value}_Q${Q.value}.md`);});
+
+function quizTitle(){if(genMode==="topic")return(window._topicCtx?.topic||"Quiz");return`${S.options[S.selectedIndex]?.text||"Quiz"}_G${G.value}_Q${Q.value}`;}
+function quizFn(){return quizTitle().replace(/\s+/g,"_");}
+
+// .md download (reference copy)
+$("#b-dlq-md").addEventListener("click",()=>{dl(rawQZ,`Quiz_${quizFn()}.md`);});
+
+// Moodle GIFT download
+function exportQuizFormat(fmt){
+    const url=fmt==="gift"?"/api/export-quiz-gift":"/api/export-quiz-qti";
+    const btnId=fmt==="gift"?"#b-dlq-gift":"#b-dlq-qti";
+    const btn=$(btnId),orig=btn.textContent;
+    btn.textContent="Converting...";btn.disabled=true;
+    const ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic";
+    fetch(aurl(url),{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({quiz_md:rawQZ,title:quizTitle(),api_key:ak,ai_provider:ap})
+    }).then(r=>{if(!r.ok)return r.json().then(e=>{throw new Error(e.error||"Failed");});return r.blob();})
+    .then(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`Quiz_${quizFn()}${fmt==="gift"?"_GIFT.txt":"_QTI.zip"}`;a.click();btn.textContent=orig;btn.disabled=false;})
+    .catch(e=>{btn.textContent=orig;btn.disabled=false;alert("Export failed: "+e.message);});
+}
+$("#b-dlq-gift").addEventListener("click",()=>exportQuizFormat("gift"));
+$("#b-dlq-qti").addEventListener("click",()=>exportQuizFormat("qti"));
 
 function dl(txt,fn){const b=new Blob([txt],{type:"text/markdown"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fn.replace(/\s+/g,"_");a.click();}
 
@@ -735,7 +762,7 @@ $("#b-scorm").addEventListener("click",function(){
     }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
 });
 
-$("#b-new").addEventListener("click",()=>{rawAS="";rawQZ="";ratingVal=0;$$(".star").forEach(s=>s.style.color="#dfe6e9");$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";go(1);});
+$("#b-new").addEventListener("click",()=>{rawLP="";rawAS="";rawQZ="";ratingVal=0;$$(".star").forEach(s=>s.style.color="#dfe6e9");$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";$("#quiz-dl-grp").style.display="none";$("#b-dla").style.display="none";go(1);});
 
 // Rating widget
 let ratingVal=0;
