@@ -236,7 +236,7 @@ body::before{
 
 /* ── Feature Cards ── */
 .feat-grid{
-    display:grid;grid-template-columns:repeat(3,1fr);
+    display:grid;grid-template-columns:repeat(4,1fr);
     gap:14px;margin-top:56px;
 }
 .feat-card{
@@ -249,7 +249,16 @@ body::before{
 .feat-tag{
     font-size:10px;font-weight:600;letter-spacing:.35em;
     text-transform:uppercase;color:var(--accent);margin-bottom:9px;
+    display:inline-block;
 }
+.feat-tag-new{
+    background:rgba(250,163,43,0.18);color:#faa32b;
+    border:1px solid rgba(250,163,43,0.35);
+    border-radius:4px;padding:1px 7px;
+    letter-spacing:.25em;
+}
+.feat-card-new{border-color:rgba(250,163,43,0.22);}
+.feat-card-new:hover{border-color:rgba(250,163,43,0.55);}
 .feat-card h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:9px;letter-spacing:-.02em;}
 .feat-card p{font-size:13px;color:var(--dim);line-height:1.72;font-weight:300;}
 
@@ -326,8 +335,10 @@ body::before{
 .rv.on{opacity:1;transform:translateY(0);}
 
 /* ── Responsive ── */
+@media(max-width:1100px){
+    .feat-grid{grid-template-columns:repeat(2,1fr);}
+}
 @media(max-width:900px){
-    .feat-grid{grid-template-columns:1fr 1fr;}
     .steps-grid{grid-template-columns:1fr 1fr;}
     .testi-grid{grid-template-columns:1fr 1fr;}
 }
@@ -376,7 +387,7 @@ body::before{
         <div class="hero-text">
             <span class="hero-eyebrow">DepEd MATATAG Curriculum &nbsp;//&nbsp; Philippine K&#8209;10</span>
             <h1>Lesson Plans,<br><em>Powered by AI.</em><br>Aligned to DepEd.</h1>
-            <p class="hero-sub">Generate complete, classroom-ready lesson plans in minutes. Built for Filipino teachers, grounded in the official MATATAG curriculum with 3,489+ learning competencies.</p>
+            <p class="hero-sub">Generate complete, classroom-ready lesson plans in minutes — plus 16 interactive games and PowerPoint slides, auto-filled from your lesson. Built for Filipino teachers on the official MATATAG curriculum.</p>
             <div class="hero-ctas">
                 {% if session.get('user_id') %}
                 <a href="{{ turl('generator') }}" class="btn-p">Open Generator &rarr;</a>
@@ -481,15 +492,15 @@ body::before{
                 <h3>SCORM 1.2 Export</h3>
                 <p>Package the full lesson plan and assessment as a SCORM 1.2 .zip. Upload directly to Moodle, Canvas, or Brightspace as a course activity.</p>
             </div>
-            <div class="feat-card rv">
+            <div class="feat-card feat-card-new rv">
                 <div class="feat-icon">&#127918;</div>
-                <div class="feat-tag">NEW</div>
+                <div class="feat-tag feat-tag-new">NEW</div>
                 <h3>16 Interactive Games</h3>
                 <p>One click opens a full Activities page auto-populated from your lesson — Wheel of Names, Crossword, Word Search, Jeopardy, Kahoot-Style Quiz, Hangman, Bingo, Memory Cards, and 8 more.</p>
             </div>
-            <div class="feat-card rv">
+            <div class="feat-card feat-card-new rv">
                 <div class="feat-icon">&#127912;</div>
-                <div class="feat-tag">NEW</div>
+                <div class="feat-tag feat-tag-new">NEW</div>
                 <h3>PowerPoint Export</h3>
                 <p>Download your lesson plan as a branded .pptx slide deck with SKOOLED&#8209;AI's navy and cyan theme — ready to present in class without any reformatting.</p>
             </div>
@@ -587,7 +598,7 @@ body::before{
 
 <!-- FOOTER -->
 <footer class="footer">
-    SKOOLED&#8209;AI &nbsp;&bull;&nbsp; Philippine DepEd MATATAG Curriculum &nbsp;&bull;&nbsp; SCORM 1.2 Compliant &nbsp;&bull;&nbsp; &copy; 2026 Skooled AI
+    SKOOLED&#8209;AI &nbsp;&bull;&nbsp; Philippine DepEd MATATAG Curriculum &nbsp;&bull;&nbsp; 16 Interactive Games &nbsp;&bull;&nbsp; PPTX &amp; SCORM Export &nbsp;&bull;&nbsp; &copy; 2026 Skooled AI
 </footer>
 
 <script>
