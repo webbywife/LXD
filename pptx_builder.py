@@ -546,7 +546,7 @@ def build_pptx(lesson_md):
         _slides_bullets(prs, "Learning Objectives",
                         parsed["objectives"],
                         subtitle="Students Will Be Able To (SWBAT)",
-                        max_per=5, bullet_char="▸")
+                        max_per=5)
 
     # 3 — Materials (2-column)
     if parsed["materials"]:
