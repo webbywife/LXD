@@ -1211,13 +1211,20 @@ $("#b-save-lp").addEventListener("click", async function(){
   msg.style.display = "none";
 
   // Build a readable title from the current form state
-  const subjectEl = $("#f-sub") || $("#f-topic-sub");
-  const gradeEl   = $("#f-grd") || $("#f-topic-grd");
-  const qtrEl     = $("#f-qtr");
-  const subject   = subjectEl?.options[subjectEl.selectedIndex]?.text || subjectEl?.value || "";
-  const grade     = gradeEl?.value || "";
-  const quarter   = qtrEl?.value || "";
-  const title     = [subject, grade ? "Grade "+grade : "", quarter ? "Q"+quarter : ""].filter(Boolean).join(" · ") || "Lesson Plan";
+  let subject = "", grade = "", quarter = "";
+  if(genMode === "topic"){
+    const ctx = window._topicCtx || {};
+    const topicLabel = ctx.topic || "";
+    const subLabel   = ctx.subject_name || $("#sel-ts")?.value || "";
+    subject = topicLabel ? (topicLabel + (subLabel ? " — " + subLabel : "")) : subLabel;
+    grade   = ctx.grade || $("#t-grade")?.value || "";
+  } else {
+    const S2 = $("#sel-s"), G2 = $("#sel-g"), Q2 = $("#sel-q");
+    subject = S2?.options[S2.selectedIndex]?.text || "";
+    grade   = G2?.value || "";
+    quarter = Q2?.value || "";
+  }
+  const title = [subject, grade ? "Grade "+grade : "", quarter ? "Q"+quarter : ""].filter(Boolean).join(" · ") || "Lesson Plan";
 
   try {
     const resp = await fetch(aurl("/api/save-lesson-plan"), {
@@ -1316,11 +1323,17 @@ async function loadLP(token){
     }));
     // Close modal and show step 4
     $("#my-lps-overlay").style.display = "none";
-    // Update tabs
+    // Update tabs visibility
     const hasAS = !!rawAS;
     const hasQZ = !!rawQZ;
     $("#t-as").style.display = hasAS ? "" : "none";
     $("#t-qz").style.display = hasQZ ? "" : "none";
+    $("#t-ppst").style.display = "none";
+    // Set subtitle
+    const parts = [data.subject, data.grade?"Grade "+data.grade:"", data.quarter?"Q"+data.quarter:""].filter(Boolean);
+    const outSub = $("#out-s");
+    if(outSub) outSub.textContent = parts.join(" · ");
+    // Render and navigate
     setTab("lp");
     go(4);
     $("#out-t").textContent = "📄 " + (data.title || "Lesson Plan");

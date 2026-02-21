@@ -158,6 +158,26 @@ def _log_activity(action_type, detail="", subject="", grade=""):
         pass  # Logging must never break user-facing functionality
 
 
+# ── Error handlers: always return JSON for /api/* routes ────
+@app.errorhandler(404)
+def err_404(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Not found"}), 404
+    return str(e), 404
+
+@app.errorhandler(405)
+def err_405(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Method not allowed"}), 405
+    return str(e), 405
+
+@app.errorhandler(500)
+def err_500(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Internal server error"}), 500
+    return str(e), 500
+
+
 # ── Routes ──────────────────────────────────────────────────
 
 @app.route("/")
