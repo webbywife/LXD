@@ -77,6 +77,28 @@ def init_db():
                     INDEX idx_syl_owner (owner_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            # Migrate syllabi — add new columns if not exist
+            for sql in [
+                "ALTER TABLE syllabi ADD COLUMN revision INT NOT NULL DEFAULT 1",
+                "ALTER TABLE syllabi ADD COLUMN revision_comment TEXT",
+                "ALTER TABLE syllabi ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+            ]:
+                try: cur.execute(sql)
+                except Exception: pass  # already exists
+
+            # Revision history table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS syllabus_revisions (
+                    id             INT AUTO_INCREMENT PRIMARY KEY,
+                    syllabus_token VARCHAR(64) NOT NULL,
+                    revision       INT NOT NULL,
+                    syllabus_json  LONGTEXT NOT NULL,
+                    comment        TEXT,
+                    revised_by     VARCHAR(255),
+                    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_srev_token (syllabus_token)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS activity_log (
                     id          INT AUTO_INCREMENT PRIMARY KEY,

@@ -37,6 +37,12 @@ from syllabus_generator import generate_syllabus as _gen_syllabus
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 
+# Fix external URL generation when behind Cloudways / Nginx reverse proxy.
+# ProxyFix reads X-Forwarded-Proto/Host headers so url_for(_external=True)
+# produces https://skooled-ai.webprvw.xyz/... instead of http://127.0.0.1:...
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 # Register auth blueprint
 app.register_blueprint(auth_bp)
 
@@ -783,8 +789,8 @@ def api_save_syllabus():
     try:
         with conn.cursor() as cur:
             cur.execute(
-                """INSERT INTO syllabi (token, owner_id, owner_name, course_title, syllabus_json)
-                   VALUES (%s, %s, %s, %s, %s)""",
+                """INSERT INTO syllabi (token, owner_id, owner_name, course_title, syllabus_json, revision, revision_comment)
+                   VALUES (%s, %s, %s, %s, %s, 1, '')""",
                 (
                     token,
                     session.get("user_id", 0),
@@ -799,6 +805,130 @@ def api_save_syllabus():
     share_url = url_for("syllabus_view", token=token, _external=True)
     _log_activity("syllabus_share", course_title, subject=syllabus.get("program", ""))
     return jsonify({"token": token, "url": share_url})
+
+
+@app.route("/api/my-syllabi")
+@login_required
+def api_my_syllabi():
+    """Return the current user's saved syllabi, newest first."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT token, course_title, revision, revision_comment,
+                          created_at, updated_at
+                   FROM syllabi
+                   WHERE owner_id = %s
+                   ORDER BY COALESCE(updated_at, created_at) DESC
+                   LIMIT 50""",
+                (session["user_id"],),
+            )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    result = []
+    for r in rows:
+        result.append({
+            "token": r["token"],
+            "course_title": r["course_title"] or "Untitled",
+            "revision": r["revision"] or 1,
+            "revision_comment": r["revision_comment"] or "",
+            "created_at": r["created_at"].isoformat() if r["created_at"] else "",
+            "updated_at": r["updated_at"].isoformat() if r["updated_at"] else "",
+        })
+    return jsonify(result)
+
+
+@app.route("/api/load-syllabus/<token>")
+@login_required
+def api_load_syllabus(token):
+    """Load a syllabus for editing (owner only)."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT token, syllabus_json, revision, revision_comment, updated_at
+                   FROM syllabi WHERE token = %s AND owner_id = %s""",
+                (token, session["user_id"]),
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+
+    if not row:
+        return jsonify({"error": "Not found or not owner"}), 404
+
+    return jsonify({
+        "token": row["token"],
+        "syllabus": json.loads(row["syllabus_json"]),
+        "revision": row["revision"] or 1,
+        "revision_comment": row["revision_comment"] or "",
+        "updated_at": row["updated_at"].isoformat() if row["updated_at"] else "",
+    })
+
+
+@app.route("/api/update-syllabus/<token>", methods=["POST"])
+@login_required
+def api_update_syllabus(token):
+    """Update an existing syllabus and archive the previous version."""
+    from auth import get_db
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    syllabus = data.get("syllabus")
+    comment = data.get("comment", "")
+    if not syllabus:
+        return jsonify({"error": "No syllabus content provided"}), 400
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            # Verify ownership and get current state
+            cur.execute(
+                "SELECT id, syllabus_json, revision FROM syllabi WHERE token = %s AND owner_id = %s",
+                (token, session["user_id"]),
+            )
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found or not owner"}), 404
+
+            old_revision = row["revision"] or 1
+            old_json = row["syllabus_json"]
+
+            # Archive the old version
+            cur.execute(
+                """INSERT INTO syllabus_revisions
+                   (syllabus_token, revision, syllabus_json, comment, revised_by)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (token, old_revision, old_json, comment, session.get("user_name", "")),
+            )
+
+            # Update the current record
+            course_title = syllabus.get("course_title", "Untitled Syllabus")
+            new_revision = old_revision + 1
+            cur.execute(
+                """UPDATE syllabi
+                   SET syllabus_json = %s, course_title = %s,
+                       revision = %s, revision_comment = %s,
+                       updated_at = NOW()
+                   WHERE token = %s AND owner_id = %s""",
+                (
+                    json.dumps(syllabus), course_title,
+                    new_revision, comment,
+                    token, session["user_id"],
+                ),
+            )
+    finally:
+        conn.close()
+
+    share_url = url_for("syllabus_view", token=token, _external=True)
+    _log_activity("syllabus_update", f"Rev {new_revision}: {comment or '(no comment)'}",
+                  subject=syllabus.get("program", ""))
+    return jsonify({"token": token, "url": share_url, "revision": new_revision})
 
 
 @app.route("/syllabus/view/<token>")

@@ -262,6 +262,16 @@ textarea{resize:vertical;min-height:60px;}
 .sec-regen-btn:hover{border-color:var(--c1);color:var(--c1);}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;gap:8px;}
 .sec-hdr h2{margin:0;}
+
+/* Resume Banner */
+.resume-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 18px;border-radius:12px;background:rgba(0,187,214,0.1);border:1.5px solid rgba(0,187,214,0.35);margin:0 0 14px;flex-wrap:wrap;}
+.resume-banner-text{font-size:12px;color:var(--c2);font-weight:500;}
+.resume-banner-text strong{color:var(--c1);}
+.resume-banner-actions{display:flex;gap:8px;flex-shrink:0;}
+.rbtn-cont{padding:6px 16px;border-radius:8px;border:none;background:var(--c1);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.rbtn-cont:hover{background:var(--c1d);}
+.rbtn-dismiss{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-s);font-size:12px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.rbtn-dismiss:hover{border-color:var(--c1);color:var(--c2);}
 </style>
 </head>
 <body>
@@ -297,6 +307,16 @@ textarea{resize:vertical;min-height:60px;}
 </div>
 
 <div class="cnt">
+
+<!-- Resume Banner (shown when saved content < 24h exists) -->
+<div class="resume-banner" id="resume-banner" style="display:none;">
+  <div class="resume-banner-text"><strong id="rb-label">Previous session</strong> &nbsp;·&nbsp; <span id="rb-time"></span> &mdash; Continue from last session?</div>
+  <div class="resume-banner-actions">
+    <button class="rbtn-cont" id="rb-continue">Continue</button>
+    <button class="rbtn-dismiss" id="rb-dismiss">Dismiss</button>
+  </div>
+</div>
+
 
 <!-- STEP 1 -->
 <div class="sp a" id="step1">
@@ -543,6 +563,66 @@ const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
 function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
 let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",rawPPST="",activeTab="lp",genMode="curriculum";
 
+// ── Local Storage Keys ──────────────────────────────────────────────────
+const GEN_DRAFT_KEY   = 'skooled_gen_draft';
+const GEN_CONTENT_KEY = 'skooled_gen_content';
+
+// ── Form Draft ─────────────────────────────────────────────────────────
+let _genDraftTimer = null;
+function saveGenDraft(){
+  const state={
+    mode:    genMode,
+    subject: $("#sel-s")?.value||"",
+    grade:   $("#sel-g")?.value||"",
+    quarter: $("#sel-q")?.value||"",
+    topic:   $("#t-topic")?.value||"",
+    topicGrade:   $("#t-grade")?.value||"",
+    topicSubject: $("#sel-ts")?.value||"",
+    competencies: $("#t-comps")?.value||"",
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(GEN_DRAFT_KEY, JSON.stringify(state));
+}
+function scheduleGenDraft(){ clearTimeout(_genDraftTimer); _genDraftTimer=setTimeout(saveGenDraft,1500); }
+
+function restoreFormInputs(state){
+  if(!state) return;
+  if(state.mode==="topic"){
+    switchMode("topic");
+    if($("#t-topic")) $("#t-topic").value=state.topic||"";
+    if($("#t-grade")) $("#t-grade").value=state.topicGrade||"";
+    if($("#sel-ts")){ $("#sel-ts").value=state.topicSubject||""; }
+    if($("#t-comps")) $("#t-comps").value=state.competencies||"";
+    updateTopicNextBtn();
+    return;
+  }
+  if(!state.subject) return;
+  switchMode("curriculum");
+  const S2=$("#sel-s"),G2=$("#sel-g"),Q2=$("#sel-q");
+  S2.value=state.subject;
+  S2.dispatchEvent(new Event("change")); // triggers grade fetch
+  setTimeout(()=>{
+    if(state.grade){ G2.value=state.grade; G2.dispatchEvent(new Event("change")); }
+    setTimeout(()=>{
+      if(state.quarter) Q2.value=state.quarter;
+      const hasQ=Q2.options.length>1;
+      $("#bn1").disabled=!(S2.value&&G2.value&&(Q2.value||!hasQ));
+    },700);
+  },700);
+}
+
+// ── Content Save / Restore ──────────────────────────────────────────────
+function saveGenContent(label){
+  localStorage.setItem(GEN_CONTENT_KEY, JSON.stringify({rawLP,rawAS,rawQZ,label,savedAt:new Date().toISOString()}));
+}
+
+function timeAgo(iso){
+  const s=Math.floor((Date.now()-new Date(iso).getTime())/1000);
+  if(s<60) return s+"s ago";
+  if(s<3600) return Math.floor(s/60)+"m ago";
+  return Math.floor(s/3600)+"h ago";
+}
+
 function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
 
 function switchMode(m){
@@ -567,9 +647,9 @@ function updateTopicNextBtn(){
 }
 function updateStep3ForMode(){}
 
-$$(".mode-tab").forEach(t=>{t.addEventListener("click",function(){switchMode(this.dataset.mode);});});
-["t-topic","t-grade"].forEach(id=>{const el=$("#"+id);if(el)el.addEventListener("input",()=>{if(genMode==="topic")updateTopicNextBtn();});});
-const TS=$("#sel-ts");if(TS)TS.addEventListener("change",()=>{if(genMode==="topic")updateTopicNextBtn();});
+$$(".mode-tab").forEach(t=>{t.addEventListener("click",function(){switchMode(this.dataset.mode); scheduleGenDraft();});});
+["t-topic","t-grade"].forEach(id=>{const el=$("#"+id);if(el)el.addEventListener("input",()=>{if(genMode==="topic")updateTopicNextBtn(); scheduleGenDraft();});});
+const TS=$("#sel-ts");if(TS)TS.addEventListener("change",()=>{if(genMode==="topic")updateTopicNextBtn(); scheduleGenDraft();});
 
 const S=$("#sel-s"),G=$("#sel-g"),Q=$("#sel-q");
 
@@ -577,7 +657,8 @@ S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose G
 
 G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/quarters/${S.value}/${this.value}`)).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Quarter ${v}`;Q.appendChild(o);});Q.disabled=false;});});
 
-Q.addEventListener("change",function(){$("#bn1").disabled=!this.value;});
+Q.addEventListener("change",function(){$("#bn1").disabled=!this.value; scheduleGenDraft();});
+if($("#t-comps")) $("#t-comps").addEventListener("input", scheduleGenDraft);
 
 $("#bn1").addEventListener("click",function(){
     if(genMode==="topic"){
@@ -715,7 +796,8 @@ if(genMode==="topic"){
     Promise.all(tps).then(trs=>{done();
     const tlp=trs[0];const tas=tNeedA?trs[1]:null;const tqzIdx=tNeedA?2:1;const tqz=(wantQuiz&&quizTypes.length>0)?trs[tqzIdx]:null;
     setTimeout(()=>{rawLP=tlp.content||"";rawAS=tas?.content||"";rawQZ=tqz?.content||"";
-    $("#out-s").textContent=`Topic: ${ctx.topic} | ${ctx.subject_name}${ctx.grade?" Grade "+ctx.grade:""} | ${new Date().toLocaleString()}`;
+    const _outLabel=`Topic: ${ctx.topic} | ${ctx.subject_name}${ctx.grade?" Grade "+ctx.grade:""}`;
+    $("#out-s").textContent=_outLabel+" | "+new Date().toLocaleString();
     if(tlp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${tlp.error}</div>`;go(4);return;}
     const tHasAS=!!rawAS;const tHasQZ=!!rawQZ;
     if(am==="incorporate"&&tHasAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
@@ -724,6 +806,7 @@ if(genMode==="topic"){
     if(am==="both"&&tHasAS){rawLP=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
     let tParts=["Lesson Plan"];if(rawAS)tParts.push("Assessment");if(tHasQZ)tParts.push("Quiz");
     $("#out-t").textContent="\u{1F4C4} "+tParts.join(" + ");
+    saveGenContent(_outLabel);
     setTab("lp");go(4);},700);
     }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
     return;
@@ -745,7 +828,8 @@ const qz=(wantQuiz&&quizTypes.length>0)?rs[qzIdx]:null;
 
 setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";rawQZ=qz?.content||"";
 const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text;
-$("#out-s").textContent=`${sn} - ${gn} | ${selC.size} competencies | ${new Date().toLocaleString()}`;
+const _outLabel=`${sn} - ${gn} | ${selC.size} competencies`;
+$("#out-s").textContent=_outLabel+" | "+new Date().toLocaleString();
 if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
 
 // Determine tabs visibility
@@ -778,6 +862,8 @@ let titleParts=["Lesson Plan"];
 if(rawAS)titleParts.push("Assessment");
 if(hasQZ)titleParts.push("Quiz");
 $("#out-t").textContent="\u{1F4C4} "+titleParts.join(" + ");
+
+saveGenContent(_outLabel);
 
 // Render with section tabs
 setTab("lp");
@@ -880,7 +966,7 @@ $("#b-scorm").addEventListener("click",function(){
     }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
 });
 
-$("#b-new").addEventListener("click",()=>{rawLP="";rawAS="";rawQZ="";rawPPST="";ratingVal=0;$$(".star").forEach(s=>s.style.color=starEmpty);$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";$("#quiz-dl-grp").style.display="none";$("#b-dla").style.display="none";$("#t-ppst").style.display="none";$("#b-dlp").style.display="none";$("#regen-panel").style.display="none";go(1);});
+$("#b-new").addEventListener("click",()=>{rawLP="";rawAS="";rawQZ="";rawPPST="";ratingVal=0;$$(".star").forEach(s=>s.style.color=starEmpty);$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";$("#quiz-dl-grp").style.display="none";$("#b-dla").style.display="none";$("#t-ppst").style.display="none";$("#b-dlp").style.display="none";$("#regen-panel").style.display="none";localStorage.removeItem(GEN_CONTENT_KEY);go(1);});
 
 // ── Google Doc Export ────────────────────────────────────────
 function mdToDocHtml(md){
@@ -1067,6 +1153,40 @@ $("#r-submit").addEventListener("click",function(){
     const lt=genMode==="topic"?(window._topicCtx?.topic||""):"";
     fetch(aurl("/api/rate-lesson"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rating:ratingVal,comment:$("#r-comment")?.value||"",subject:sn,grade:gn,quarter:qn,lesson_title:lt,gen_mode:genMode})}).then(()=>{$("#r-msg").style.display="block";}).catch(()=>{$("#r-msg").style.display="block";});
 });
+
+// ── Resume Banner ────────────────────────────────────────────
+(function(){
+  const raw = localStorage.getItem(GEN_CONTENT_KEY);
+  if(!raw) return;
+  try{
+    const saved = JSON.parse(raw);
+    const age = Date.now() - new Date(saved.savedAt).getTime();
+    if(age > 86400000){ localStorage.removeItem(GEN_CONTENT_KEY); return; } // > 24h
+    const banner = $("#resume-banner");
+    if(!banner) return;
+    $("#rb-label").textContent = saved.label || "Previous session";
+    $("#rb-time").textContent = timeAgo(saved.savedAt);
+    banner.style.display = "flex";
+    $("#rb-continue").addEventListener("click",()=>{
+      rawLP = saved.rawLP || ""; rawAS = saved.rawAS || ""; rawQZ = saved.rawQZ || "";
+      banner.style.display = "none";
+      go(4);
+      setTab("lp");
+    });
+    $("#rb-dismiss").addEventListener("click",()=>{
+      localStorage.removeItem(GEN_CONTENT_KEY);
+      banner.style.display = "none";
+    });
+  }catch(e){ localStorage.removeItem(GEN_CONTENT_KEY); }
+})();
+
+// ── Restore Form Draft on Load ────────────────────────────────
+(function(){
+  const raw = localStorage.getItem(GEN_DRAFT_KEY);
+  if(!raw) return;
+  try{ restoreFormInputs(JSON.parse(raw)); }catch(e){ localStorage.removeItem(GEN_DRAFT_KEY); }
+})();
+
 });
 </script>
 </body>
