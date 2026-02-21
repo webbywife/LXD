@@ -80,6 +80,14 @@ a{text-decoration:none;color:inherit;}
 .stat-admin .stat-n{color:var(--accent);}
 .stat-ratings .stat-n{color:var(--warm);}
 .stat-avg .stat-n{color:var(--success);}
+.stat-gen .stat-n{color:#9b59b6;}
+.stat-dl .stat-n{color:#3498db;}
+.action-chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.03em;}
+.chip-lesson{background:rgba(0,187,214,0.12);color:#005f72;}
+.chip-topic{background:rgba(155,89,182,0.12);color:#6c3483;}
+.chip-assessment{background:rgba(250,163,43,0.13);color:#7a5200;}
+.chip-quiz{background:rgba(0,184,148,0.12);color:#006b54;}
+.chip-download{background:rgba(52,152,219,0.12);color:#1a5276;}
 
 /* Card */
 .crd{
@@ -186,17 +194,40 @@ tr:hover td{background:rgba(0,187,214,0.04);}
         </div>
     </div>
 
-    <!-- Rating Stats -->
-    <div class="stats" style="grid-template-columns:1fr 1fr;max-width:360px;margin-bottom:24px;">
+    <!-- Activity Stats -->
+    <span class="sec-label" style="margin-top:8px;display:block;">Activity</span>
+    <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+        <div class="stat stat-gen">
+            <div class="stat-n">{{ activity_stats.generations if activity_stats is defined else 0 }}</div>
+            <div class="stat-l">Lessons Generated</div>
+        </div>
+        <div class="stat stat-dl">
+            <div class="stat-n">{{ activity_stats.downloads if activity_stats is defined else 0 }}</div>
+            <div class="stat-l">Downloads</div>
+        </div>
         <div class="stat stat-ratings">
             <div class="stat-n">{{ rating_stats.total_ratings if rating_stats is defined else 0 }}</div>
-            <div class="stat-l">Total Ratings</div>
+            <div class="stat-l">Ratings Submitted</div>
         </div>
         <div class="stat stat-avg">
             <div class="stat-n">{{ rating_stats.avg_rating if rating_stats is defined else 0 }}</div>
             <div class="stat-l">Avg Rating / 5</div>
         </div>
     </div>
+    {% if activity_stats is defined and activity_stats.by_type %}
+    <div class="crd" style="margin-bottom:16px;">
+        <div class="crd-t">Breakdown by Action</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        {% for action, count in activity_stats.by_type.items() %}
+            {% set chip_class = 'chip-download' if 'download' in action else ('chip-quiz' if 'quiz' in action else ('chip-assessment' if 'assessment' in action else ('chip-topic' if 'topic' in action else 'chip-lesson'))) %}
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:10px;padding:10px 16px;text-align:center;min-width:120px;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--navy);">{{ count }}</div>
+                <div style="margin-top:4px;"><span class="action-chip {{ chip_class }}">{{ action.replace('_',' ').title() }}</span></div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Users Table -->
     <span class="sec-label">User Management</span>
@@ -249,6 +280,75 @@ tr:hover td{background:rgba(0,187,214,0.04);}
     </div>
 
     <!-- Ratings Table -->
+    <!-- Per-User Activity Summary -->
+    {% if user_activity is defined and user_activity %}
+    <span class="sec-label" style="margin-top:24px;display:block;">Activity per Teacher</span>
+    <div class="crd">
+        <div class="crd-t">Usage by Teacher</div>
+        <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Lessons Generated</th>
+                    <th>Downloads</th>
+                    <th>Total Actions</th>
+                    <th>Last Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in user_activity %}
+                <tr>
+                    <td><strong>{{ u.user_name }}</strong></td>
+                    <td>{{ u.generations or 0 }}</td>
+                    <td>{{ u.downloads or 0 }}</td>
+                    <td><strong>{{ u.total }}</strong></td>
+                    <td style="color:var(--text-s);font-size:12px;">{{ u.last_active.strftime('%b %d, %Y %H:%M') if u.last_active else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Activity Log -->
+    {% if activity_log is defined and activity_log %}
+    <span class="sec-label" style="margin-top:24px;display:block;">Recent Activity Log</span>
+    <div class="crd">
+        <div class="crd-t">Last 100 Actions</div>
+        <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Action</th>
+                    <th>Detail / Topic</th>
+                    <th>Subject</th>
+                    <th>Grade</th>
+                    <th>Date &amp; Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in activity_log %}
+                <tr>
+                    <td><strong>{{ a.user_name }}</strong></td>
+                    <td>
+                        {% set chip_class = 'chip-download' if 'download' in a.action_type else ('chip-quiz' if 'quiz' in a.action_type else ('chip-assessment' if 'assessment' in a.action_type else ('chip-topic' if 'topic' in a.action_type else 'chip-lesson'))) %}
+                        <span class="action-chip {{ chip_class }}">{{ a.action_type.replace('_',' ').title() }}</span>
+                    </td>
+                    <td style="font-size:12px;max-width:200px;color:var(--text-s);">{{ a.detail or '—' }}</td>
+                    <td style="font-size:12px;">{{ a.subject or '—' }}</td>
+                    <td style="font-size:12px;">{{ a.grade or '—' }}</td>
+                    <td style="color:var(--text-s);font-size:12px;">{{ a.created_at.strftime('%b %d %H:%M') if a.created_at else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+
     {% if ratings is defined and ratings %}
     <span class="sec-label" style="margin-top:24px;display:block;">Lesson Feedback</span>
     <div class="crd">

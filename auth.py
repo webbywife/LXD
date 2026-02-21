@@ -64,6 +64,21 @@ def init_db():
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activity_log (
+                    id          INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id     INT NOT NULL,
+                    user_name   VARCHAR(255) NOT NULL,
+                    action_type VARCHAR(60) NOT NULL,
+                    detail      VARCHAR(500),
+                    subject     VARCHAR(255),
+                    grade       VARCHAR(100),
+                    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_al_user (user_id),
+                    INDEX idx_al_action (action_type),
+                    INDEX idx_al_created (created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
     finally:
         conn.close()
 
@@ -276,8 +291,49 @@ def admin_panel():
     except Exception:
         pass
 
+    activity_stats = {"total": 0, "generations": 0, "downloads": 0, "by_type": {}}
+    activity_log = []
+    user_activity = []
+    try:
+        conn = get_db()
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS cnt FROM activity_log")
+            activity_stats["total"] = cur.fetchone()["cnt"]
+            cur.execute("""SELECT COUNT(*) AS cnt FROM activity_log
+                WHERE action_type IN ('lesson_generate','topic_generate',
+                    'assessment_generate','quiz_generate')""")
+            activity_stats["generations"] = cur.fetchone()["cnt"]
+            cur.execute("""SELECT COUNT(*) AS cnt FROM activity_log
+                WHERE action_type IN ('download_pptx','download_scorm',
+                    'download_gift','download_qti')""")
+            activity_stats["downloads"] = cur.fetchone()["cnt"]
+            cur.execute("""SELECT action_type, COUNT(*) AS cnt
+                FROM activity_log GROUP BY action_type ORDER BY cnt DESC""")
+            activity_stats["by_type"] = {r["action_type"]: r["cnt"] for r in cur.fetchall()}
+            cur.execute("""
+                SELECT al.user_name, al.action_type, al.detail, al.subject, al.grade, al.created_at
+                FROM activity_log al ORDER BY al.created_at DESC LIMIT 100
+            """)
+            activity_log = cur.fetchall()
+            cur.execute("""
+                SELECT user_name,
+                    SUM(action_type IN ('lesson_generate','topic_generate',
+                        'assessment_generate','quiz_generate')) AS generations,
+                    SUM(action_type IN ('download_pptx','download_scorm',
+                        'download_gift','download_qti')) AS downloads,
+                    COUNT(*) AS total,
+                    MAX(created_at) AS last_active
+                FROM activity_log GROUP BY user_name ORDER BY total DESC LIMIT 30
+            """)
+            user_activity = cur.fetchall()
+        conn.close()
+    except Exception:
+        pass
+
     return render_template("admin.html", users=users, stats=stats,
-                           rating_stats=rating_stats, ratings=ratings)
+                           rating_stats=rating_stats, ratings=ratings,
+                           activity_stats=activity_stats, activity_log=activity_log,
+                           user_activity=user_activity)
 
 
 @auth_bp.route("/admin/approve/<int:user_id>", methods=["POST"])

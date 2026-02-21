@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 /* Anti-flicker: apply saved theme before paint */
-(function(){var t=localStorage.getItem('sa-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+(function(){var t=localStorage.getItem('sa-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
 </script>
 <style>
 /* ── Reset ── */
@@ -615,7 +615,7 @@ function setTheme(t){
 }
 
 // Apply saved preference (anti-flicker script already set data-theme attr)
-setTheme(localStorage.getItem('sa-theme')||'dark');
+setTheme(localStorage.getItem('sa-theme')||'light');
 
 tbtn.addEventListener('click',function(){
     setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');

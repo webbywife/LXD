@@ -117,6 +117,34 @@ def add_security_headers(response):
     return response
 
 
+# ── Activity Logging ────────────────────────────────────────
+
+def _log_activity(action_type, detail="", subject="", grade=""):
+    """Log a user activity silently — never blocks the main request."""
+    try:
+        from auth import get_db
+        conn = get_db()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO activity_log
+                       (user_id, user_name, action_type, detail, subject, grade)
+                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    (
+                        session.get("user_id", 0),
+                        session.get("user_name", "Unknown"),
+                        action_type,
+                        str(detail)[:500],
+                        str(subject)[:255],
+                        str(grade)[:100],
+                    )
+                )
+        finally:
+            conn.close()
+    except Exception:
+        pass  # Logging must never break user-facing functionality
+
+
 # ── Routes ──────────────────────────────────────────────────
 
 @app.route("/")
@@ -212,6 +240,7 @@ def api_generate():
     if error:
         return jsonify({"error": error}), 400
 
+    _log_activity("lesson_generate", subject_id, subject=subject_id)
     return jsonify({"content": content})
 
 
@@ -252,6 +281,7 @@ def api_generate_topic():
     if error:
         return jsonify({"error": error}), 400
 
+    _log_activity("topic_generate", topic, subject=subject_name, grade=grade)
     return jsonify({"content": content})
 
 
@@ -287,6 +317,8 @@ def api_generate_assessment_topic():
     )
     if error:
         return jsonify({"error": error}), 400
+    _log_activity("assessment_generate", topic, subject=subject_name,
+                  grade=topic_context.get("grade", ""))
     return jsonify({"content": content})
 
 
@@ -322,6 +354,8 @@ def api_generate_quiz_topic():
     )
     if error:
         return jsonify({"error": error}), 400
+    _log_activity("quiz_generate", topic, subject=subject_name,
+                  grade=topic_context.get("grade", ""))
     return jsonify({"content": content})
 
 
@@ -484,6 +518,7 @@ def api_export_quiz_gift():
     safe = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
     buf = BytesIO(content.encode("utf-8"))
     buf.seek(0)
+    _log_activity("download_gift", data.get("title", "quiz"))
     return send_file(buf, mimetype="text/plain", as_attachment=True,
                      download_name=f"Quiz_{safe}_GIFT.txt")
 
@@ -510,6 +545,7 @@ def api_export_quiz_qti():
 
     buf = _build_qti_zip(title, qti_xml)
     safe = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
+    _log_activity("download_qti", title)
     return send_file(buf, mimetype="application/zip", as_attachment=True,
                      download_name=f"Quiz_{safe}_QTI.zip")
 
@@ -533,6 +569,7 @@ def api_download_scorm():
     pkg = build_scorm_package(title, lesson_plan_md or None, assessment_md or None, None)
     safe_title = re.sub(r'[^a-zA-Z0-9_-]', '_', title)[:50]
 
+    _log_activity("download_scorm", title)
     return send_file(
         pkg,
         mimetype='application/zip',
@@ -652,6 +689,7 @@ def api_download_pptx():
     safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
 
     buf = build_pptx(lesson_md)
+    _log_activity("download_pptx", title)
     return send_file(
         buf,
         mimetype="application/vnd.openxmlformats-officedocument.presentationml.presentation",
