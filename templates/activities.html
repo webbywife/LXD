@@ -99,7 +99,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .match-item.sel{border-color:var(--cyan);background:rgba(0,187,214,0.12);}
 .match-item.matched{border-color:var(--green);background:rgba(0,184,148,0.1);cursor:default;}
 .match-item.wrong{border-color:#e74c3c;animation:shake .3s;}
-@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
 
 /* Fill Blanks */
 .fb-sent{font-size:15px;margin-bottom:14px;line-height:1.8;}
@@ -246,6 +246,42 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   .game-tab.active{border-left:none;border-bottom-color:var(--cyan);}
   .game-tab .gb{display:none;}
 }
+
+/* ── POLISH ADDITIONS ─────────────────────────────────────── */
+
+/* Game panel max-width so content doesn't stretch on wide screens */
+.game-panel{max-width:860px;}
+
+/* How-to instruction box */
+.how-to{background:rgba(0,187,214,0.045);border:1px solid rgba(0,187,214,0.22);border-radius:10px;padding:13px 16px;margin-bottom:18px;}
+.how-to-title{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase;margin-bottom:7px;}
+.how-to ol{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px;}
+.how-to li{font-size:13px;color:rgba(255,255,255,0.72);line-height:1.5;}
+.how-to li strong{color:var(--white);}
+.how-to-tip{margin-top:6px;font-size:12px;color:var(--orange);font-style:italic;}
+
+/* Topic/lesson info bar */
+.topic-bar{background:rgba(0,187,214,0.04);border:1px solid var(--border);border-radius:10px;padding:11px 18px;margin-bottom:22px;display:flex;gap:0;flex-wrap:wrap;align-items:stretch;}
+.topic-pill{display:flex;flex-direction:column;gap:2px;padding-right:20px;}
+.topic-pill+.topic-pill{padding-left:20px;border-left:1px solid var(--border);}
+.topic-pill-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;}
+.topic-pill-val{font-size:13px;font-weight:700;color:var(--white);line-height:1.3;}
+
+/* Matching game column headers */
+.match-col-hd{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase;padding-bottom:6px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:4px;}
+
+/* Bingo controls centered */
+.bingo-controls{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
+
+/* Memory card — no forced aspect-ratio so long text fits */
+.mem-card{aspect-ratio:unset;min-height:80px;height:auto;}
+
+/* Game title row */
+.game-hd-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px;}
+.game-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;margin-bottom:0;}
+
+/* Hot Potato selected name highlight */
+.hot-selected-box{background:rgba(250,163,43,0.1);border:1px solid var(--orange);border-radius:10px;padding:10px 18px;text-align:center;margin:10px 0;min-height:44px;display:flex;align-items:center;justify-content:center;}
 </style>
 </head>
 <body>
@@ -301,10 +337,28 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- Game panels (hidden until loaded) -->
   <div id="games-wrap" style="display:none;">
 
+  <!-- Lesson info bar -->
+  <div class="topic-bar" id="topic-bar" style="display:none;">
+    <div class="topic-pill"><div class="topic-pill-lbl">Topic</div><div class="topic-pill-val" id="tb-topic">—</div></div>
+    <div class="topic-pill"><div class="topic-pill-lbl">Subject</div><div class="topic-pill-val" id="tb-subject">—</div></div>
+    <div class="topic-pill"><div class="topic-pill-lbl">Grade</div><div class="topic-pill-val" id="tb-grade">—</div></div>
+    <div class="topic-pill" style="margin-left:auto;padding-left:0;border-left:none;"><div class="topic-pill-lbl">Games Ready</div><div class="topic-pill-val" style="color:var(--green);">16 &#10003;</div></div>
+  </div>
+
   <!-- 1. Wheel of Names -->
   <div class="game-panel active" id="gp-wheel">
     <div class="game-title">&#127744; Wheel of Names</div>
-    <div class="game-desc">Spin the wheel to randomly select a student name or vocabulary word.</div>
+    <div class="game-desc">Randomly pick a student or vocabulary word — great for cold-calling or warm-ups.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Use</div>
+      <ol>
+        <li>The wheel is pre-loaded with <strong>vocabulary words</strong> from your lesson.</li>
+        <li>Click <strong>Spin!</strong> and wait for the wheel to slow down and stop.</li>
+        <li>The pointer on the right indicates the selected word or name.</li>
+        <li>Use the <strong>Edit Names / Words</strong> panel below to add student names or swap in custom entries.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Replace vocabulary words with student names for a fun random cold-call selector!</div>
+    </div>
     <div class="card">
       <canvas id="wheel-canvas" width="380" height="380"></canvas>
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px;">
@@ -326,7 +380,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 2. Crossword -->
   <div class="game-panel" id="gp-crossword">
     <div class="game-title">&#11036; Crossword Puzzle</div>
-    <div class="game-desc">Fill in the crossword using vocabulary from your lesson.</div>
+    <div class="game-desc">A vocabulary crossword auto-generated from your lesson words and definitions.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>Read the clues in the <strong>Across</strong> and <strong>Down</strong> sections below the grid.</li>
+        <li>Click any white square and <strong>type a letter</strong> to fill it in. Use <strong>Tab</strong> to move to the next cell.</li>
+        <li>When finished, click <strong>Check Answers</strong> — correct letters turn green, wrong ones turn red.</li>
+        <li>Stuck? Click <strong>Reveal</strong> to see the full solution, or <strong>Reset</strong> to start over.</li>
+      </ol>
+    </div>
     <div class="card" style="overflow-x:auto;">
       <div id="cw-grid-wrap"></div>
       <div class="cw-clues" id="cw-clues"></div>
@@ -342,7 +405,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 3. Word Search -->
   <div class="game-panel" id="gp-wordsearch">
     <div class="game-title">&#128269; Word Search</div>
-    <div class="game-desc">Find all the vocabulary words hidden in the grid.</div>
+    <div class="game-desc">Hidden vocabulary words — horizontal, vertical, and diagonal.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>Find all the vocabulary words listed below the grid.</li>
+        <li><strong>Click and drag</strong> across letters to select a word (release to check).</li>
+        <li>Words can run horizontally, vertically, or diagonally in any direction.</li>
+        <li>Found words are highlighted green and struck through in the word list.</li>
+        <li>Click <strong>New Puzzle</strong> to generate a fresh layout.</li>
+      </ol>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="ws-found">0</div><div class="hud-l">Found</div></div>
       <div class="hud-item"><div class="hud-v" id="ws-total">0</div><div class="hud-l">Total Words</div></div>
@@ -357,7 +430,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 4. Flashcards -->
   <div class="game-panel" id="gp-flashcards">
     <div class="game-title">&#129354; Vocabulary Flashcards</div>
-    <div class="game-desc">Click a card to flip it and reveal the definition.</div>
+    <div class="game-desc">Self-study cards — see the word, recall the meaning, then flip to check.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Use</div>
+      <ol>
+        <li>The <strong>word</strong> is shown on the front of the card.</li>
+        <li><strong>Click the card</strong> (or the Flip button) to reveal the definition on the back.</li>
+        <li>Use <strong>Prev / Next</strong> to move between cards.</li>
+        <li>Try to say the definition aloud before flipping — it improves retention!</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Go through all cards once, then shuffle by going backwards from the last card.</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="fc-idx">1</div><div class="hud-l">Card</div></div>
       <div class="hud-item"><div class="hud-v" id="fc-total">0</div><div class="hud-l">Total</div></div>
@@ -378,10 +461,23 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 5. Matching Game -->
   <div class="game-panel" id="gp-matching">
     <div class="game-title">&#128279; Matching Game</div>
-    <div class="game-desc">Click a term on the left, then its matching definition on the right.</div>
+    <div class="game-desc">Connect each vocabulary term to its correct definition.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li><strong>Click a TERM</strong> on the left column — it will highlight in cyan.</li>
+        <li>Then <strong>click the matching DEFINITION</strong> on the right column.</li>
+        <li>A correct pair turns <strong>green</strong> and locks in. A wrong pair <strong>shakes red</strong> — try again.</li>
+        <li>Match all pairs to complete the game. Click <strong>Reset</strong> to play again with a new shuffle.</li>
+      </ol>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="mg-score">0</div><div class="hud-l">Matched</div></div>
       <div class="hud-item"><div class="hud-v" id="mg-total">0</div><div class="hud-l">Total</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px;">
+      <div class="match-col-hd">TERMS</div>
+      <div class="match-col-hd">DEFINITIONS</div>
     </div>
     <div class="match-grid" id="mg-grid"></div>
     <button class="btn" id="mg-reset" style="margin-top:14px;">Reset</button>
@@ -391,7 +487,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 6. Fill in the Blanks -->
   <div class="game-panel" id="gp-fillblanks">
     <div class="game-title">&#128221; Fill in the Blanks</div>
-    <div class="game-desc">Type the missing word to complete each sentence.</div>
+    <div class="game-desc">Complete each sentence by typing the correct vocabulary word in the blank.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>Each sentence has a <strong>blank field</strong> (the underlined box) where a word is missing.</li>
+        <li>Type the correct vocabulary word into the blank — spelling matters!</li>
+        <li>Click <strong>Check Answers</strong> to score — correct answers turn green, wrong ones turn red.</li>
+        <li>Click <strong>Reset</strong> to clear all answers and try again.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Answers are case-insensitive — "photosynthesis" and "Photosynthesis" both work.</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="fb-score">0</div><div class="hud-l">Score</div></div>
       <div class="hud-item"><div class="hud-v" id="fb-total">0</div><div class="hud-l">Total</div></div>
@@ -407,7 +513,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 7. Jeopardy -->
   <div class="game-panel" id="gp-jeopardy">
     <div class="game-title">&#127942; Jeopardy Board</div>
-    <div class="game-desc">Click a point value to reveal the question. Answer correctly to earn points!</div>
+    <div class="game-desc">Whole-class quiz game — categories worth increasing points.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>The board has <strong>3 categories</strong> (Vocabulary, Concepts, Application) and 5 point values each.</li>
+        <li>A student or team <strong>picks a category and point value</strong> — teacher clicks the cell.</li>
+        <li>A question pops up. Choose the correct answer to <strong>earn the points</strong>.</li>
+        <li>Used cells grey out. Try to clear the full board for maximum score!</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Split the class into teams and keep score on the board.</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="jep-score">0</div><div class="hud-l">Points</div></div>
     </div>
@@ -425,7 +541,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 8. True or False -->
   <div class="game-panel" id="gp-truefalse">
     <div class="game-title">&#9989; True or False</div>
-    <div class="game-desc">Read the statement and choose True or False.</div>
+    <div class="game-desc">Quick-fire statements from your lesson — decide if each is true or false.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>Read the statement shown in the box carefully.</li>
+        <li>Click <strong>TRUE</strong> &#10003; or <strong>FALSE</strong> &#10007; — instant feedback is shown.</li>
+        <li>The game automatically moves to the next question after each answer.</li>
+        <li>Your final score appears at the end of all questions.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Project this on screen and let students raise hands before revealing the answer.</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="tf-score">0</div><div class="hud-l">Score</div></div>
       <div class="hud-item"><div class="hud-v" id="tf-q-num">1</div><div class="hud-l">Question</div></div>
@@ -443,7 +569,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 9. Drag & Drop Sorting -->
   <div class="game-panel" id="gp-dragdrop">
     <div class="game-title">&#128257; Drag &amp; Drop Sorting</div>
-    <div class="game-desc">Drag the steps into the correct order from top (first) to bottom (last).</div>
+    <div class="game-desc">Arrange the lesson steps in the correct sequence by dragging and dropping.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>The <strong>left panel</strong> has all the steps in a shuffled order.</li>
+        <li><strong>Drag a step</strong> from the left and <strong>drop it onto a numbered slot</strong> on the right (1 = first step).</li>
+        <li>Fill all slots, then click <strong>Check Order</strong> to see which positions are correct (green) or wrong (red).</li>
+        <li>Click <strong>Reset</strong> to start over with a new shuffle.</li>
+      </ol>
+    </div>
     <div class="dnd-container">
       <div class="dnd-pool">
         <div class="dnd-label">Steps (drag to sort)</div>
@@ -464,7 +599,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 10. Memory Card Game -->
   <div class="game-panel" id="gp-memory">
     <div class="game-title">&#129504; Memory Card Game</div>
-    <div class="game-desc">Click cards to flip them. Match each term with its definition.</div>
+    <div class="game-desc">Concentration-style card flip game — match each vocabulary term to its definition.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>All cards are face-down. Each card shows either a <strong>term</strong> or its <strong>definition</strong>.</li>
+        <li><strong>Click a card</strong> to flip it, then click a second card to try to find its match.</li>
+        <li>A matched pair (term + definition) stays <strong>face-up in green</strong>. A non-match flips back over.</li>
+        <li>Find all pairs in as few flips as possible. Click <strong>New Game</strong> to reshuffle.</li>
+      </ol>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="mem-pairs">0</div><div class="hud-l">Matched</div></div>
       <div class="hud-item"><div class="hud-v" id="mem-moves">0</div><div class="hud-l">Flips</div></div>
@@ -477,7 +621,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 11. Word Scramble -->
   <div class="game-panel" id="gp-scramble">
     <div class="game-title">&#128288; Word Scramble</div>
-    <div class="game-desc">Unscramble the letters to spell the vocabulary word.</div>
+    <div class="game-desc">Rearrange the jumbled letters to spell the correct vocabulary word.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>The <strong>scrambled word</strong> is shown in large orange letters.</li>
+        <li>A hint (the definition) appears below — use it if you're stuck.</li>
+        <li>Type your answer in the input field and press <strong>Enter</strong> or click <strong>Submit</strong>.</li>
+        <li>Click <strong>Skip</strong> to move on, or <strong>Reveal</strong> to see the answer and advance.</li>
+      </ol>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="scr-score">0</div><div class="hud-l">Score</div></div>
       <div class="hud-item"><div class="hud-v" id="scr-q">1</div><div class="hud-l">Word</div></div>
@@ -500,7 +653,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 12. Hangman -->
   <div class="game-panel" id="gp-hangman">
     <div class="game-title">&#128123; Hangman</div>
-    <div class="game-desc">Guess the vocabulary word letter by letter before the man is hanged.</div>
+    <div class="game-desc">Guess the hidden vocabulary word one letter at a time — 6 wrong guesses allowed.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>A vocabulary word is hidden — each dash represents one letter.</li>
+        <li>Click letters on the <strong>on-screen keyboard</strong> to guess. Correct guesses appear in the word.</li>
+        <li>Each <strong>wrong guess</strong> adds a part to the hangman figure (6 parts total).</li>
+        <li>Win by revealing the full word before 6 wrong guesses. Click <strong>Next Word</strong> for a new challenge.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: The definition is shown above the word — use it as a clue!</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="hm-wrong">0</div><div class="hud-l">Wrong</div></div>
       <div class="hud-item"><div class="hud-v" id="hm-left">6</div><div class="hud-l">Lives</div></div>
@@ -520,7 +683,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 13. Timeline Challenge -->
   <div class="game-panel" id="gp-timeline">
     <div class="game-title">&#128336; Timeline Challenge</div>
-    <div class="game-desc">Drag the steps into the correct sequential order.</div>
+    <div class="game-desc">Arrange the lesson phases or steps in chronological order.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>The numbered slots above represent the <strong>correct order</strong> (1 = first, last = final).</li>
+        <li>The <strong>pool of steps below</strong> is shuffled — drag each item up to the correct numbered slot.</li>
+        <li>Click <strong>Check Order</strong> — correctly placed steps turn green, wrong ones turn red.</li>
+        <li>Click <strong>Reset</strong> to reshuffle and try again.</li>
+      </ol>
+    </div>
     <div class="tl-slots" id="tl-slots"></div>
     <div class="dnd-label" style="margin-top:14px;">Available Steps (drag up)</div>
     <div class="tl-pool" id="tl-pool"></div>
@@ -534,14 +706,24 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 14. Bingo -->
   <div class="game-panel" id="gp-bingo">
     <div class="game-title">&#127920; Vocabulary Bingo</div>
-    <div class="game-desc">Teacher calls definitions — mark the matching word on your card!</div>
+    <div class="game-desc">Whole-class activity — teacher calls definitions, students mark words on their card.</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>Each student (or group) has a <strong>5×5 Bingo card</strong> with vocabulary words. The center is a FREE space.</li>
+        <li>Teacher clicks <strong>Call Next</strong> — a <strong>definition</strong> is read aloud to the class.</li>
+        <li>Students find the <strong>matching vocabulary word</strong> on their card and <strong>click it</strong> to mark it.</li>
+        <li>Get a full row, column, or diagonal to shout <strong>BINGO!</strong> Click <strong>New Card</strong> for a fresh shuffle.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: The teacher reads the DEFINITION aloud — students find the WORD on their card!</div>
+    </div>
     <div class="caller-box">
-      <div style="font-size:11px;color:var(--grey);margin-bottom:4px;">TEACHER CALLS:</div>
+      <div style="font-size:11px;color:var(--grey);margin-bottom:4px;">TEACHER CALLS OUT THIS DEFINITION:</div>
       <div class="caller-word" id="bingo-called">Press "Call Next" to start</div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <button class="btn btn-c" id="bingo-call">Call Next</button>
-      <button class="btn" id="bingo-new">New Card</button>
+    <div class="bingo-controls">
+      <button class="btn btn-c" id="bingo-call">&#128227; Call Next</button>
+      <button class="btn" id="bingo-new">&#128260; New Card</button>
     </div>
     <div class="bingo-grid" id="bingo-grid"></div>
     <div id="bingo-result" class="result-banner" style="display:none;margin-top:12px;"></div>
@@ -550,7 +732,17 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 15. Kahoot-Style Quiz -->
   <div class="game-panel" id="gp-kahoot">
     <div class="game-title">&#9889; Kahoot-Style Quiz</div>
-    <div class="game-desc">Answer questions as fast as possible for bonus points!</div>
+    <div class="game-desc">Speed-based quiz — answer faster to score more points!</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Play</div>
+      <ol>
+        <li>A multiple-choice question is shown with a <strong>20-second countdown</strong> timer bar at the top.</li>
+        <li>Click one of the <strong>4 colored answer buttons</strong> before time runs out.</li>
+        <li>Faster correct answers earn <strong>more points</strong> (up to 1,000 per question).</li>
+        <li>Click <strong>Next Question →</strong> to continue. Your total score is shown at the end.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Project this on a screen — students shout out answers, teacher clicks for the class.</div>
+    </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="kah-score">0</div><div class="hud-l">Score</div></div>
       <div class="hud-item"><div class="hud-v" id="kah-qnum">1</div><div class="hud-l">Q #</div></div>
@@ -567,17 +759,32 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 16. Hot Potato -->
   <div class="game-panel" id="gp-hotpotato">
     <div class="game-title">&#129365; Hot Potato</div>
-    <div class="game-desc">The selector cycles through names rapidly. Whoever it stops on must answer a question!</div>
-    <div class="hot-timer" id="hot-timer">20</div>
+    <div class="game-desc">A random name selector with countdown — whoever gets picked must answer!</div>
+    <div class="how-to">
+      <div class="how-to-title">&#9654; How to Use in Class</div>
+      <ol>
+        <li>Names cycle through rapidly (like a hot potato being passed). The class watches the highlight.</li>
+        <li>Click <strong>Start</strong> — the countdown begins and names cycle. Students get ready.</li>
+        <li>When time runs out, <strong>the highlighted student</strong> must answer the question shown below.</li>
+        <li>Click <strong>Stop</strong> early to pause on a student, or let the timer run out automatically.</li>
+      </ol>
+      <div class="how-to-tip">&#128161; Tip: Swap vocabulary words for student names using the Wheel of Names editor for a full roster.</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:12px;">
+      <div style="text-align:center;">
+        <div style="font-size:11px;color:var(--grey);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Countdown</div>
+        <div class="hot-timer" id="hot-timer">20</div>
+      </div>
+    </div>
     <div class="hot-names" id="hot-names"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin:14px 0;">
       <button class="btn btn-c" id="hot-start">&#9654; Start</button>
       <button class="btn" id="hot-stop">&#9646;&#9646; Stop</button>
     </div>
-    <div id="hot-selected" style="min-height:24px;text-align:center;font-size:16px;font-weight:700;color:var(--orange);"></div>
+    <div class="hot-selected-box" id="hot-selected"></div>
     <div class="card" style="margin-top:14px;">
-      <div class="card-hd">Current Question</div>
-      <div id="hot-question" style="font-size:15px;"></div>
+      <div class="card-hd">&#10067; Current Question</div>
+      <div id="hot-question" style="font-size:15px;line-height:1.6;"></div>
     </div>
   </div>
 
@@ -627,6 +834,13 @@ function loadData(){
     G=d;
     $('#loader').style.display='none';
     $('#games-wrap').style.display='block';
+    // Populate topic bar
+    if(G.topic||G.subject||G.grade){
+      if(G.topic)$('#tb-topic').textContent=G.topic;
+      if(G.subject)$('#tb-subject').textContent=G.subject;
+      if(G.grade)$('#tb-grade').textContent=G.grade;
+      $('#topic-bar').style.display='flex';
+    }
     initAllGames();
   }).catch(e=>showError(e.message,''));
 }
@@ -1007,16 +1221,14 @@ $('#scr-reveal-btn').addEventListener('click',()=>{
 
 // ─── 12. Hangman ──────────────────────────────────────────────
 let hmWords=[],hmIdx=0,hmWord='',hmGuessed=new Set(),hmWrong=0,hmMaxWrong=6;
+// hmParts: body parts drawn on wrong guesses (gallows is pre-drawn by drawGallows())
 const hmParts=[
-  ()=>{ const s=$('#hm-svg'),ctx=s;
-    const line=(x1,y1,x2,y2)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);s.appendChild(l);};
-    line(10,150,110,150);},  // base
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',40);l.setAttribute('y1',150);l.setAttribute('x2',40);l.setAttribute('y2',10);s.appendChild(l);}, // pole
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',40);l.setAttribute('y1',10);l.setAttribute('x2',80);l.setAttribute('y2',10);s.appendChild(l);}, // top
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',10);l.setAttribute('x2',80);l.setAttribute('y2',30);s.appendChild(l);}, // rope
-  ()=>{const s=$('#hm-svg');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',80);c.setAttribute('cy',42);c.setAttribute('r',12);c.setAttribute('stroke','#faa32b');c.setAttribute('fill','none');s.appendChild(c);}, // head
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',54);l.setAttribute('x2',80);l.setAttribute('y2',100);l.setAttribute('stroke','#faa32b');s.appendChild(l);}, // body
-  ()=>{const s=$('#hm-svg');['60,70','100,70','65,130','95,130'].forEach((pts,i)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');const[x,y]=pts.split(',');l.setAttribute('x1',80);l.setAttribute('y1',i<2?60:100);l.setAttribute('x2',x);l.setAttribute('y2',y);l.setAttribute('stroke','#e74c3c');s.appendChild(l);});} // limbs
+  ()=>{const s=$('#hm-svg');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',80);c.setAttribute('cy',42);c.setAttribute('r',12);c.setAttribute('stroke','#faa32b');c.setAttribute('fill','none');c.setAttribute('stroke-width','3');s.appendChild(c);}, // head
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',54);l.setAttribute('x2',80);l.setAttribute('y2',100);l.setAttribute('stroke','#faa32b');l.setAttribute('stroke-width','3');s.appendChild(l);}, // body
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',60);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // left arm
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',100);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // right arm
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',65);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // left leg
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',95);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // right leg
 ];
 
 function initHangman(){
@@ -1024,11 +1236,22 @@ function initHangman(){
   if(!hmWords.length)hmWords=['example'];
   hmIdx=0;startHangman();
 }
+function drawGallows(){
+  // Draw the static gallows structure (base, pole, crossbeam, rope) — not counted as wrong guesses
+  const s=$('#hm-svg');
+  const line=(x1,y1,x2,y2,col)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);if(col)l.setAttribute('stroke',col);s.appendChild(l);};
+  line(10,150,110,150);  // base
+  line(40,150,40,10);    // pole
+  line(40,10,80,10);     // crossbeam
+  line(80,10,80,30);     // rope
+}
+
 function startHangman(){
   if(hmIdx>=hmWords.length)hmIdx=0;
   hmWord=hmWords[hmIdx].toLowerCase();
   hmGuessed=new Set();hmWrong=0;
   $('#hm-svg').innerHTML='';
+  drawGallows();
   $('#hm-wrong').textContent=0;$('#hm-left').textContent=hmMaxWrong;$('#hm-result').style.display='none';
   const def=G.vocabulary.find(v=>v.word.toLowerCase()===hmWord)?.definition||'';
   $('#hm-hint').textContent=def?'Definition: '+def:'';
