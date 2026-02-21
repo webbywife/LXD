@@ -64,11 +64,16 @@ if not os.path.exists(DB_PATH):
 def restore_session_from_token():
     """Restore session from URL auth token since cookies are stripped by Nginx."""
     if "user_id" in session:
-        # Session already populated (cookie worked or already restored)
+        # Session already populated (cookie worked or already restored).
+        # Verify the URL token; if absent or expired, generate a fresh one
+        # so AUTH_TOKEN in the page meta is always valid for API calls.
         token = request.args.get("_t", "")
-        g.auth_token = token if token else generate_auth_token(
-            session["user_id"], session.get("user_email", ""),
-            session.get("user_name", ""), session.get("user_role", ""))
+        if token and verify_auth_token(token):
+            g.auth_token = token
+        else:
+            g.auth_token = generate_auth_token(
+                session["user_id"], session.get("user_email", ""),
+                session.get("user_name", ""), session.get("user_role", ""))
         return
     token = request.args.get("_t", "")
     if not token:

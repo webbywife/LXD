@@ -1065,6 +1065,10 @@ document.getElementById('btn-my-syllabi').addEventListener('click', async functi
   overlay.classList.add('show');
   try{
     const resp = await fetch(apiUrl('/api/my-syllabi'));
+    if(resp.status === 401){
+      content.innerHTML = '<p style="color:#e74c3c;font-size:13px">Session expired. Please <a href="/login" style="color:var(--cyan)">log in again</a> and return to this page.</p>';
+      return;
+    }
     const list = await resp.json();
     if(!list.length){
       content.innerHTML = '<p style="color:#6b8fa3;font-size:13px;padding:8px 0">No saved syllabi yet. Build and save one first.</p>';
@@ -1082,7 +1086,7 @@ document.getElementById('btn-my-syllabi').addEventListener('click', async functi
       </div>`;
     }).join('');
   }catch(e){
-    content.innerHTML = `<p style="color:#e74c3c">Error: ${esc(e.message)}</p>`;
+    content.innerHTML = `<p style="color:#e74c3c;font-size:13px">Error loading syllabi. Please <a href="/login" style="color:var(--cyan)">refresh your session</a>.</p>`;
   }
 });
 
@@ -1102,6 +1106,7 @@ async function loadSyllabusForEdit(token){
   document.getElementById('my-syllabi-overlay').classList.remove('show');
   try{
     const resp = await fetch(apiUrl('/api/load-syllabus/'+token));
+    if(resp.status === 401){ showToast('Session expired — please log in again.'); return; }
     if(!resp.ok){ showToast('Could not load syllabus'); return; }
     const data = await resp.json();
     const s = data.syllabus;
@@ -1164,6 +1169,7 @@ document.getElementById('btn-update').addEventListener('click', async function()
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({syllabus: s, comment: comment})
     });
+    if(resp.status === 401){ showToast('Session expired — please log in again.'); this.textContent=orig; this.disabled=false; return; }
     const data = await resp.json();
     if(data.error){ showToast('Error: '+data.error); this.textContent=orig; this.disabled=false; return; }
 

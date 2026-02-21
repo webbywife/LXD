@@ -148,10 +148,14 @@ def _token_redirect(endpoint, **kwargs):
 
 
 def login_required(f):
-    """Decorator that requires an authenticated, approved user."""
+    """Decorator that requires an authenticated, approved user.
+    API routes (/api/*) return JSON 401; page routes redirect to login.
+    """
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Authentication required", "login": "/login"}), 401
             return redirect(url_for("auth.login", next=request.path))
         return f(*args, **kwargs)
     return wrapped
