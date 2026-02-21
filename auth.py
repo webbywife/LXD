@@ -301,7 +301,7 @@ def admin_panel():
             activity_stats["total"] = cur.fetchone()["cnt"]
             cur.execute("""SELECT COUNT(*) AS cnt FROM activity_log
                 WHERE action_type IN ('lesson_generate','topic_generate',
-                    'assessment_generate','quiz_generate')""")
+                    'assessment_generate','quiz_generate','syllabus_generate')""")
             activity_stats["generations"] = cur.fetchone()["cnt"]
             cur.execute("""SELECT COUNT(*) AS cnt FROM activity_log
                 WHERE action_type IN ('download_pptx','download_scorm',
@@ -318,7 +318,7 @@ def admin_panel():
             cur.execute("""
                 SELECT user_name,
                     SUM(action_type IN ('lesson_generate','topic_generate',
-                        'assessment_generate','quiz_generate')) AS generations,
+                        'assessment_generate','quiz_generate','syllabus_generate')) AS generations,
                     SUM(action_type IN ('download_pptx','download_scorm',
                         'download_gift','download_qti')) AS downloads,
                     COUNT(*) AS total,

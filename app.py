@@ -31,6 +31,7 @@ from scorm_builder import build_scorm_package
 from auth import auth_bp, login_required, init_db, verify_auth_token, generate_auth_token
 from activities_generator import generate_activity_content as _gen_activity_content
 from pptx_builder import build_pptx
+from syllabus_generator import generate_syllabus as _gen_syllabus
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -696,6 +697,69 @@ def api_download_pptx():
         as_attachment=True,
         download_name=f"LessonPlan_{safe_title}.pptx",
     )
+
+
+@app.route("/syllabus")
+@login_required
+def syllabus():
+    """Syllabus generator page for SHS and College level."""
+    return render_template("syllabus.html")
+
+
+@app.route("/api/generate-syllabus", methods=["POST"])
+@login_required
+def api_generate_syllabus():
+    """Generate an OBE-aligned course syllabus."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    course_title = data.get("course_title", "").strip()
+    if not course_title:
+        return jsonify({"error": "Course title is required"}), 400
+
+    config = {
+        "institution_type": data.get("institution_type", "college"),
+        "school_name": data.get("school_name", ""),
+        "college_dept": data.get("college_dept", ""),
+        "program": data.get("program", ""),
+        "course_code": data.get("course_code", ""),
+        "course_title": course_title,
+        "credits": data.get("credits", "3 units"),
+        "prerequisites": data.get("prerequisites", "None"),
+        "course_type": data.get("course_type", "Core"),
+        "semester": data.get("semester", ""),
+        "num_weeks": int(data.get("num_weeks", 14)),
+        "course_description": data.get("course_description", ""),
+        "program_outcomes": data.get("program_outcomes", ""),
+        "course_outcomes": data.get("course_outcomes", ""),
+        "grading": data.get("grading", {"Activities": 30, "Projects": 30, "Final Project": 40}),
+    }
+
+    use_ai = data.get("use_ai", False)
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    syllabus_dict, warning = _gen_syllabus(
+        config,
+        api_key=api_key if use_ai else "",
+        ai_provider=ai_provider,
+    )
+
+    if syllabus_dict is None:
+        return jsonify({"error": warning or "Syllabus generation failed"}), 500
+
+    _log_activity(
+        "syllabus_generate",
+        course_title,
+        subject=data.get("program", ""),
+        grade=data.get("institution_type", "college"),
+    )
+
+    response = {"syllabus": syllabus_dict}
+    if warning:
+        response["warning"] = warning
+    return jsonify(response)
 
 
 if __name__ == "__main__":

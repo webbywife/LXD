@@ -289,7 +289,12 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 <div class="nav">
   <div class="nav-brand">SKOOLED<span>-AI</span></div>
   <div class="nav-links">
-    <a href="{{ turl('generator') }}">&#8592; Back to Generator</a>
+    <a href="{{ turl('generator') }}">Lesson Generator</a>
+    <a href="{{ turl('activities') }}" style="color:var(--white)">Activities</a>
+    <a href="{{ turl('syllabus') }}">Syllabus</a>
+    {% if session.get('user_role') == 'admin' %}
+    <a href="{{ turl('auth.admin_panel') }}">Admin</a>
+    {% endif %}
     <a href="{{ url_for('auth.logout') }}">Logout</a>
   </div>
 </div>

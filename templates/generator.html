@@ -270,6 +270,8 @@ textarea{resize:vertical;min-height:60px;}
     <span>Welcome, <strong>{{ session.get('user_name', 'User') }}</strong></span>
     <div style="display:flex;gap:12px;">
         <a href="{{ url_for('landing') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Home</a>
+        <a href="{{ turl('activities') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Activities</a>
+        <a href="{{ turl('syllabus') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Syllabus</a>
         {% if session.get('user_role') == 'admin' %}
         <a href="{{ turl('auth.admin_panel') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Admin</a>
         {% endif %}
