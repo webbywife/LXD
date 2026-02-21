@@ -75,6 +75,9 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 <div class="topbar">
   <div class="topbar-brand">SKOOLED<span>-AI</span></div>
   <div class="topbar-actions">
+    {% if can_edit and syllabus_token %}
+    <a href="/syllabus?load={{ syllabus_token }}{% if auth_token %}&_t={{ auth_token }}{% endif %}" class="btn btn-cyan">Edit Syllabus</a>
+    {% endif %}
     <button class="btn btn-outline" onclick="printDoc()">Print / Save PDF</button>
   </div>
 </div>

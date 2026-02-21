@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="auth-token" content="{{ auth_token }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<title>My Syllabi · SKOOLED-AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#090f18;color:#eef2f3;min-height:100vh;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
+
+/* ── Top bar ── */
+.topbar{background:linear-gradient(135deg,#0d1f2d 0%,#0a1929 100%);border-bottom:1px solid rgba(0,187,214,0.18);padding:0 28px;display:flex;align-items:center;gap:0;height:58px;}
+.topbar-brand{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.04em;white-space:nowrap;margin-right:32px;}
+.topbar-brand span{color:#00bbd6;}
+.nav-links{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-link{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:rgba(238,242,243,0.7);transition:.18s;white-space:nowrap;}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.07);}
+.nav-link.active{color:#00bbd6;}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.btn-new{padding:8px 18px;background:#00bbd6;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.18s;white-space:nowrap;}
+.btn-new:hover{background:#009bb3;}
+.btn-logout{padding:6px 14px;background:transparent;border:1px solid rgba(255,255,255,0.18);color:rgba(238,242,243,0.65);border-radius:8px;font-size:12px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.18s;}
+.btn-logout:hover{border-color:rgba(255,255,255,0.45);color:#fff;}
+
+/* ── Page layout ── */
+.page{max-width:1100px;margin:0 auto;padding:40px 24px 80px;}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:36px;}
+.page-title{font-size:26px;font-weight:700;letter-spacing:-0.04em;}
+.page-sub{font-size:13px;color:rgba(238,242,243,0.5);margin-top:4px;font-weight:400;}
+.count-badge{font-size:12px;font-weight:600;color:#00bbd6;background:rgba(0,187,214,0.12);border:1px solid rgba(0,187,214,0.25);border-radius:20px;padding:3px 12px;white-space:nowrap;}
+
+/* ── Loading / empty states ── */
+.state-box{text-align:center;padding:80px 24px;color:rgba(238,242,243,0.38);}
+.state-icon{font-size:40px;margin-bottom:16px;}
+.state-title{font-size:16px;font-weight:600;margin-bottom:8px;color:rgba(238,242,243,0.6);}
+.state-sub{font-size:13px;line-height:1.7;}
+.state-box a,.state-box .btn-new-inline{color:#00bbd6;text-decoration:none;font-weight:600;}
+.state-box .btn-new-inline{background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;}
+
+/* ── Grid ── */
+.syl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+
+/* ── Syllabus card ── */
+.syl-card{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;padding:22px 24px;
+  display:flex;flex-direction:column;gap:0;
+  transition:border-color .2s,transform .2s;
+}
+.syl-card:hover{border-color:rgba(0,187,214,0.32);transform:translateY(-2px);}
+.syl-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.syl-type-pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:5px;white-space:nowrap;flex-shrink:0;}
+.pill-college{background:rgba(0,187,214,0.14);color:#00bbd6;border:1px solid rgba(0,187,214,0.28);}
+.pill-shs{background:rgba(250,163,43,0.14);color:#faa32b;border:1px solid rgba(250,163,43,0.28);}
+.syl-rev{font-size:10px;font-weight:600;color:rgba(238,242,243,0.38);white-space:nowrap;}
+.syl-title{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-bottom:5px;line-height:1.35;color:#eef2f3;}
+.syl-school{font-size:11px;color:rgba(238,242,243,0.42);margin-bottom:10px;}
+.syl-meta{display:flex;gap:14px;font-size:11px;color:rgba(238,242,243,0.38);margin-bottom:16px;flex-wrap:wrap;}
+.syl-meta span{display:flex;align-items:center;gap:4px;}
+.syl-owner{font-size:11px;font-weight:600;color:rgba(0,187,214,0.75);background:rgba(0,187,214,0.08);border-radius:4px;padding:2px 7px;width:fit-content;margin-bottom:12px;}
+.syl-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;}
+.syl-btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;border:none;transition:.18s;white-space:nowrap;}
+.syl-btn-view{background:rgba(255,255,255,0.07);color:#eef2f3;border:1px solid rgba(255,255,255,0.14);}
+.syl-btn-view:hover{background:rgba(255,255,255,0.13);}
+.syl-btn-edit{background:rgba(0,187,214,0.15);color:#00bbd6;border:1px solid rgba(0,187,214,0.3);}
+.syl-btn-edit:hover{background:rgba(0,187,214,0.28);}
+.syl-btn-share{background:transparent;color:rgba(238,242,243,0.55);border:1px solid rgba(255,255,255,0.1);}
+.syl-btn-share:hover{color:#eef2f3;border-color:rgba(255,255,255,0.28);}
+.syl-btn-del{background:transparent;color:rgba(231,76,60,0.55);border:1px solid rgba(231,76,60,0.2);}
+.syl-btn-del:hover{background:rgba(231,76,60,0.1);color:#e74c3c;border-color:rgba(231,76,60,0.4);}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:#1a2f40;border:1px solid rgba(0,187,214,0.35);color:#eef2f3;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Confirm overlay ── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.confirm-overlay.show{opacity:1;pointer-events:all;}
+.confirm-box{background:#0d1f2d;border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:32px 36px;max-width:380px;text-align:center;}
+.confirm-box h3{font-size:16px;font-weight:700;margin-bottom:10px;}
+.confirm-box p{font-size:13px;color:rgba(238,242,243,0.55);margin-bottom:24px;line-height:1.7;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;}
+.confirm-btns button{padding:9px 22px;border-radius:9px;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;border:none;transition:.18s;}
+.btn-cancel{background:rgba(255,255,255,0.07);color:#eef2f3;border:1px solid rgba(255,255,255,0.14);}
+.btn-cancel:hover{background:rgba(255,255,255,0.13);}
+.btn-confirm-del{background:#c0392b;color:#fff;}
+.btn-confirm-del:hover{background:#e74c3c;}
+
+@media(max-width:640px){
+  .page{padding:24px 14px 60px;}
+  .syl-grid{grid-template-columns:1fr;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">SKOOLED<span>-AI</span></div>
+  <nav class="nav-links">
+    <a href="{{ turl('generator') }}" class="nav-link">Lesson Generator</a>
+    <a href="{{ turl('activities') }}" class="nav-link">Activities</a>
+    <a href="{{ turl('syllabus') }}" class="nav-link">Syllabus Builder</a>
+    <a href="{{ turl('syllabi_dashboard') }}" class="nav-link active">My Syllabi</a>
+    {% if session.get('user_role') == 'admin' %}
+    <a href="{{ turl('auth.admin_panel') }}" class="nav-link">Admin</a>
+    {% endif %}
+  </nav>
+  <div class="nav-right">
+    <button class="btn-new" onclick="window.location.href='{{ turl('syllabus') }}'">+ New Syllabus</button>
+    <a href="{{ url_for('auth.logout') }}"><button class="btn-logout">Logout</button></a>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{% if is_admin %}All Syllabi{% else %}My Syllabi{% endif %}</h1>
+      <p class="page-sub">{% if is_admin %}All syllabi across all users{% else %}Your saved and shared syllabi{% endif %}</p>
+    </div>
+    <span class="count-badge" id="count-badge">Loading…</span>
+  </div>
+
+  <div id="syl-state" class="state-box" style="display:none">
+    <div class="state-icon">📄</div>
+    <div class="state-title">No syllabi yet</div>
+    <p class="state-sub">You haven't built any syllabi. <a href="{{ turl('syllabus') }}">Create one now →</a></p>
+  </div>
+
+  <div id="syl-loading" class="state-box">
+    <div class="state-icon">⏳</div>
+    <div class="state-title">Loading…</div>
+  </div>
+
+  <div class="syl-grid" id="syl-grid"></div>
+</div>
+
+<!-- Confirm delete overlay -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h3>Delete Syllabus?</h3>
+    <p id="confirm-msg">This will permanently remove the syllabus and its shared link.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+      <button class="btn-confirm-del" id="confirm-del">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const AUTH_TOKEN = document.querySelector('meta[name="auth-token"]').content;
+const IS_ADMIN = {{ 'true' if is_admin else 'false' }};
+
+function apiUrl(p){ return AUTH_TOKEN ? p+'?_t='+encodeURIComponent(AUTH_TOKEN) : p; }
+
+function toast(msg, dur=2800){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtDate(iso){
+  if(!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function fmtTimeAgo(iso){
+  if(!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if(diff < 60) return 'just now';
+  if(diff < 3600) return Math.floor(diff/60)+'m ago';
+  if(diff < 86400) return Math.floor(diff/3600)+'h ago';
+  if(diff < 604800) return Math.floor(diff/86400)+'d ago';
+  return fmtDate(iso);
+}
+
+// ── Render cards ──────────────────────────────────────────
+function renderCards(list){
+  const grid = document.getElementById('syl-grid');
+  const state = document.getElementById('syl-state');
+  document.getElementById('syl-loading').style.display = 'none';
+  document.getElementById('count-badge').textContent = list.length + ' syllab' + (list.length===1?'us':'i');
+
+  if(!list.length){ state.style.display=''; return; }
+
+  grid.innerHTML = list.map(s => {
+    const isSHS = (s.course_title||'').toLowerCase().includes('shs') ||
+                  (s.owner_name||'').toLowerCase().includes('shs');
+    // Derive type from the card data (we'll check inline)
+    const typeClass = 'pill-college'; // default; server passes institution_type if needed
+    const dtDisplay = fmtTimeAgo(s.updated_at || s.created_at);
+    const createdDisplay = fmtDate(s.created_at);
+    const viewUrl = '/syllabus/view/' + esc(s.token);
+    const canEdit = IS_ADMIN || s.is_owner;
+
+    return `<div class="syl-card" id="card-${esc(s.token)}">
+      <div class="syl-card-top">
+        <span class="syl-type-pill pill-college">Syllabus</span>
+        <span class="syl-rev">Rev ${s.revision}</span>
+      </div>
+      <div class="syl-title">${esc(s.course_title)}</div>
+      <div class="syl-school">${s.revision_comment ? esc(s.revision_comment) : '&nbsp;'}</div>
+      <div class="syl-meta">
+        <span>📅 ${createdDisplay}</span>
+        <span>🕒 ${dtDisplay}</span>
+      </div>
+      ${IS_ADMIN && s.owner_name ? `<div class="syl-owner">👤 ${esc(s.owner_name)}</div>` : ''}
+      <div class="syl-actions">
+        <button class="syl-btn syl-btn-view" onclick="window.open('${viewUrl}','_blank')">View</button>
+        ${canEdit ? `<button class="syl-btn syl-btn-edit" onclick="editSyllabus('${esc(s.token)}')">Edit</button>` : ''}
+        <button class="syl-btn syl-btn-share" onclick="copyLink('${esc(s.token)}')">Copy Link</button>
+        ${canEdit ? `<button class="syl-btn syl-btn-del" onclick="confirmDelete('${esc(s.token)}','${esc(s.course_title)}')">Delete</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Load syllabi ──────────────────────────────────────────
+async function loadSyllabi(){
+  try{
+    const resp = await fetch(apiUrl('/api/my-syllabi'));
+    if(resp.status === 401){
+      document.getElementById('syl-loading').innerHTML = '<div class="state-icon">🔒</div><div class="state-title">Session expired</div><p class="state-sub">Please <a href="/login">log in again</a>.</p>';
+      document.getElementById('count-badge').textContent = '—';
+      return;
+    }
+    const list = await resp.json();
+    renderCards(list);
+  }catch(e){
+    document.getElementById('syl-loading').innerHTML = '<div class="state-icon">⚠️</div><div class="state-title">Error loading syllabi</div><p class="state-sub">'+e.message+'</p>';
+    document.getElementById('count-badge').textContent = '—';
+  }
+}
+
+// ── Edit ──────────────────────────────────────────────────
+function editSyllabus(token){
+  const base = AUTH_TOKEN ? '/syllabus?_t='+encodeURIComponent(AUTH_TOKEN)+'&load='+token
+                          : '/syllabus?load='+token;
+  window.location.href = base;
+}
+
+// ── Copy link ─────────────────────────────────────────────
+function copyLink(token){
+  const url = window.location.origin + '/syllabus/view/' + token;
+  navigator.clipboard.writeText(url).then(()=>toast('Link copied!')).catch(()=>{
+    prompt('Copy this link:', url);
+  });
+}
+
+// ── Delete ────────────────────────────────────────────────
+let _pendingDelete = null;
+
+function confirmDelete(token, title){
+  _pendingDelete = token;
+  document.getElementById('confirm-msg').textContent =
+    'Delete "' + title + '"? This will remove it and its shared link permanently.';
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+
+document.getElementById('confirm-cancel').onclick = function(){
+  document.getElementById('confirm-overlay').classList.remove('show');
+  _pendingDelete = null;
+};
+
+document.getElementById('confirm-del').onclick = async function(){
+  if(!_pendingDelete) return;
+  const token = _pendingDelete;
+  document.getElementById('confirm-overlay').classList.remove('show');
+  _pendingDelete = null;
+
+  try{
+    const resp = await fetch(apiUrl('/api/delete-syllabus/'+token), {method:'DELETE'});
+    if(resp.status === 401){ toast('Session expired — please log in again.'); return; }
+    const data = await resp.json();
+    if(data.ok){
+      const card = document.getElementById('card-'+token);
+      if(card){ card.style.opacity='0'; card.style.transform='scale(.95)'; card.style.transition='.25s'; setTimeout(()=>card.remove(), 280); }
+      toast('Syllabus deleted.');
+      // Update count
+      const remaining = document.querySelectorAll('.syl-card').length - 1;
+      document.getElementById('count-badge').textContent = remaining + ' syllab' + (remaining===1?'us':'i');
+      if(!remaining) document.getElementById('syl-state').style.display='';
+    } else {
+      toast(data.error || 'Delete failed.');
+    }
+  }catch(e){ toast('Error: '+e.message); }
+};
+
+// ── Init ──────────────────────────────────────────────────
+loadSyllabi();
+</script>
+</body>
+</html>

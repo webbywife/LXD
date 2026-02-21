@@ -330,6 +330,27 @@ body::before{
     position:relative;z-index:1;
 }
 
+/* ── Syllabi Showcase ── */
+.syl-showcase-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:14px;margin-top:48px;
+}
+.syl-show-card{
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border);border-radius:var(--rad);
+    padding:26px 24px;transition:border-color .3s,transform .3s;
+    display:flex;flex-direction:column;gap:0;
+}
+.syl-show-card:hover{border-color:var(--accent-border);transform:translateY(-3px);}
+.syl-show-type{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.syl-show-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px;}
+.syl-show-school{font-size:11px;color:var(--dimmer);margin-bottom:12px;min-height:14px;}
+.syl-show-meta{display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
+.syl-show-author{font-size:10px;color:var(--dimmer);}
+.syl-show-btn{padding:5px 13px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);border-radius:7px;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.18s;text-decoration:none;white-space:nowrap;}
+.syl-show-btn:hover{background:rgba(0,187,214,0.28);}
+.syl-empty-note{text-align:center;color:var(--dimmer);font-size:13px;padding:40px 0;}
+
 /* ── Scroll reveal ── */
 .rv{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease;}
 .rv.on{opacity:1;transform:translateY(0);}
@@ -342,12 +363,15 @@ body::before{
     .steps-grid{grid-template-columns:1fr 1fr;}
     .testi-grid{grid-template-columns:1fr 1fr;}
 }
+@media(max-width:900px){
+    .syl-showcase-grid{grid-template-columns:1fr 1fr;}
+}
 @media(max-width:640px){
     .hero-inner{grid-template-columns:1fr;}
     .hero-art{display:none;}
     .hero{padding:100px 20px 60px;}
     .sec{padding:80px 18px;}
-    .feat-grid,.steps-grid,.testi-grid{grid-template-columns:1fr;}
+    .feat-grid,.steps-grid,.testi-grid,.syl-showcase-grid{grid-template-columns:1fr;}
     .cta-box{padding:48px 24px;}
     .nav-pill{padding:10px 16px;}
     .nav-link{padding:6px 12px;}
@@ -366,6 +390,7 @@ body::before{
         <div class="nav-links">
             {% if session.get('user_id') %}
             <a href="{{ turl('generator') }}" class="nav-link">Generator</a>
+            <a href="{{ turl('syllabi_dashboard') }}" class="nav-link">My Syllabi</a>
             {% if session.get('user_role') == 'admin' %}
             <a href="{{ turl('auth.admin_panel') }}" class="nav-link">Admin</a>
             {% endif %}
@@ -397,9 +422,9 @@ body::before{
                 {% endif %}
             </div>
             <div class="hero-stats">
-                <span class="hero-stat"><strong>3,489</strong> Competencies</span>
-                <span class="hero-stat"><strong>13</strong> Subjects</span>
-                <span class="hero-stat">Grades <strong>K&#8209;10</strong></span>
+                <span class="hero-stat"><strong>3,567</strong> Competencies</span>
+                <span class="hero-stat"><strong>19</strong> Subjects</span>
+                <span class="hero-stat">K&#8209;12 incl. <strong>SHS</strong></span>
                 <span class="hero-stat"><strong>16</strong> Interactive Games</span>
                 <span class="hero-stat"><strong>SCORM 1.2</strong> Ready</span>
             </div>
@@ -453,7 +478,7 @@ body::before{
         <div class="rv">
             <span class="sec-label">Why SKOOLED&#8209;AI</span>
             <h2 class="sec-title">Built for Filipino<br>Classrooms.</h2>
-            <p class="sec-sub">3,489 learning competencies across 13 subjects — aligned to the official DepEd MATATAG curriculum, not just close to it.</p>
+            <p class="sec-sub">3,567 learning competencies across 19 subjects — MATATAG K&#8209;10 plus SHS Core subjects, aligned to the official DepEd curriculum.</p>
         </div>
         <div class="feat-grid">
             <div class="feat-card rv">
@@ -572,6 +597,45 @@ body::before{
                 <div class="testi-role">Grade 2 English &bull; Davao City</div>
             </div>
         </div>
+    </div>
+</section>
+
+<hr class="div">
+
+<!-- SYLLABI SHOWCASE -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv">
+            <span class="sec-label">Community</span>
+            <h2 class="sec-title">Recently Shared<br>Syllabi.</h2>
+            <p class="sec-sub">OBE-aligned course syllabi built by educators using SKOOLED&#8209;AI — view any, or build your own.</p>
+        </div>
+        {% if recent_syllabi %}
+        <div class="syl-showcase-grid">
+            {% for s in recent_syllabi %}
+            <div class="syl-show-card rv">
+                <div class="syl-show-type">{{ s.institution_type or 'Syllabus' }}</div>
+                <div class="syl-show-title">{{ s.course_title }}</div>
+                <div class="syl-show-school">{{ s.school_name or '&nbsp;' }}</div>
+                <div class="syl-show-meta">
+                    <span class="syl-show-author">{{ s.owner_name }} &nbsp;·&nbsp; {{ s.created_at }}</span>
+                    <a class="syl-show-btn" href="/syllabus/view/{{ s.token }}" target="_blank">View &rarr;</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% if session.get('user_id') %}
+        <p style="text-align:center;margin-top:28px;">
+            <a href="{{ turl('syllabi_dashboard') }}" style="color:var(--accent);font-size:13px;font-weight:600;">View all my syllabi &rarr;</a>
+        </p>
+        {% else %}
+        <p style="text-align:center;margin-top:28px;">
+            <a href="{{ url_for('auth.signup') }}" style="color:var(--accent);font-size:13px;font-weight:600;">Sign up to build your own &rarr;</a>
+        </p>
+        {% endif %}
+        {% else %}
+        <div class="syl-empty-note rv">No syllabi shared yet. <a href="{{ url_for('auth.signup') }}" style="color:var(--accent);font-weight:600;">Be the first →</a></div>
+        {% endif %}
     </div>
 </section>
 

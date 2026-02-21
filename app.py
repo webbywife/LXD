@@ -163,7 +163,30 @@ def _log_activity(action_type, detail="", subject="", grade=""):
 @app.route("/")
 def landing():
     """Public marketing landing page."""
-    return render_template("landing.html")
+    recent_syllabi = []
+    try:
+        from auth import get_db as _get_auth_db
+        conn = _get_auth_db()
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT token, course_title, owner_name, created_at, syllabus_json
+                   FROM syllabi ORDER BY created_at DESC LIMIT 6"""
+            )
+            rows = cur.fetchall()
+        conn.close()
+        for r in rows:
+            syl = json.loads(r["syllabus_json"]) if r["syllabus_json"] else {}
+            recent_syllabi.append({
+                "token": r["token"],
+                "course_title": r["course_title"] or "Untitled",
+                "owner_name": r["owner_name"] or "Anonymous",
+                "created_at": r["created_at"].strftime("%b %d, %Y") if r["created_at"] else "",
+                "institution_type": syl.get("institution_type", "College"),
+                "school_name": syl.get("school_name", ""),
+            })
+    except Exception:
+        pass
+    return render_template("landing.html", recent_syllabi=recent_syllabi)
 
 
 @app.route("/generator")
@@ -718,6 +741,14 @@ def syllabus():
     return render_template("syllabus.html")
 
 
+@app.route("/syllabi")
+@login_required
+def syllabi_dashboard():
+    """Dashboard: shows current user's syllabi (admin sees all)."""
+    is_admin = session.get("user_role") == "admin"
+    return render_template("syllabi_dashboard.html", is_admin=is_admin)
+
+
 @app.route("/api/generate-syllabus", methods=["POST"])
 @login_required
 def api_generate_syllabus():
@@ -815,24 +846,35 @@ def api_save_syllabus():
 @app.route("/api/my-syllabi")
 @login_required
 def api_my_syllabi():
-    """Return the current user's saved syllabi, newest first."""
+    """Return syllabi: current user's own, or all (admin)."""
     from auth import get_db
     conn = get_db()
+    is_admin = session.get("user_role") == "admin"
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                """SELECT token, course_title, revision, revision_comment,
-                          created_at, updated_at
-                   FROM syllabi
-                   WHERE owner_id = %s
-                   ORDER BY COALESCE(updated_at, created_at) DESC
-                   LIMIT 50""",
-                (session["user_id"],),
-            )
+            if is_admin:
+                cur.execute(
+                    """SELECT token, course_title, revision, revision_comment,
+                              created_at, updated_at, owner_name, owner_id
+                       FROM syllabi
+                       ORDER BY COALESCE(updated_at, created_at) DESC
+                       LIMIT 200"""
+                )
+            else:
+                cur.execute(
+                    """SELECT token, course_title, revision, revision_comment,
+                              created_at, updated_at, owner_name, owner_id
+                       FROM syllabi
+                       WHERE owner_id = %s
+                       ORDER BY COALESCE(updated_at, created_at) DESC
+                       LIMIT 50""",
+                    (session["user_id"],),
+                )
             rows = cur.fetchall()
     finally:
         conn.close()
 
+    current_uid = session["user_id"]
     result = []
     for r in rows:
         result.append({
@@ -840,6 +882,8 @@ def api_my_syllabi():
             "course_title": r["course_title"] or "Untitled",
             "revision": r["revision"] or 1,
             "revision_comment": r["revision_comment"] or "",
+            "owner_name": r["owner_name"] or "",
+            "is_owner": r["owner_id"] == current_uid,
             "created_at": r["created_at"].isoformat() if r["created_at"] else "",
             "updated_at": r["updated_at"].isoformat() if r["updated_at"] else "",
         })
@@ -849,22 +893,30 @@ def api_my_syllabi():
 @app.route("/api/load-syllabus/<token>")
 @login_required
 def api_load_syllabus(token):
-    """Load a syllabus for editing (owner only)."""
+    """Load a syllabus for editing (owner or admin)."""
     from auth import get_db
     conn = get_db()
+    is_admin = session.get("user_role") == "admin"
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                """SELECT token, syllabus_json, revision, revision_comment, updated_at
-                   FROM syllabi WHERE token = %s AND owner_id = %s""",
-                (token, session["user_id"]),
-            )
+            if is_admin:
+                cur.execute(
+                    """SELECT token, syllabus_json, revision, revision_comment, updated_at
+                       FROM syllabi WHERE token = %s""",
+                    (token,),
+                )
+            else:
+                cur.execute(
+                    """SELECT token, syllabus_json, revision, revision_comment, updated_at
+                       FROM syllabi WHERE token = %s AND owner_id = %s""",
+                    (token, session["user_id"]),
+                )
             row = cur.fetchone()
     finally:
         conn.close()
 
     if not row:
-        return jsonify({"error": "Not found or not owner"}), 404
+        return jsonify({"error": "Not found or not authorized"}), 404
 
     return jsonify({
         "token": row["token"],
@@ -892,14 +944,21 @@ def api_update_syllabus(token):
     conn = get_db()
     try:
         with conn.cursor() as cur:
-            # Verify ownership and get current state
-            cur.execute(
-                "SELECT id, syllabus_json, revision FROM syllabi WHERE token = %s AND owner_id = %s",
-                (token, session["user_id"]),
-            )
+            # Verify ownership (admin can edit any)
+            is_admin = session.get("user_role") == "admin"
+            if is_admin:
+                cur.execute(
+                    "SELECT id, syllabus_json, revision FROM syllabi WHERE token = %s",
+                    (token,),
+                )
+            else:
+                cur.execute(
+                    "SELECT id, syllabus_json, revision FROM syllabi WHERE token = %s AND owner_id = %s",
+                    (token, session["user_id"]),
+                )
             row = cur.fetchone()
             if not row:
-                return jsonify({"error": "Not found or not owner"}), 404
+                return jsonify({"error": "Not found or not authorized"}), 404
 
             old_revision = row["revision"] or 1
             old_json = row["syllabus_json"]
@@ -920,11 +979,11 @@ def api_update_syllabus(token):
                    SET syllabus_json = %s, course_title = %s,
                        revision = %s, revision_comment = %s,
                        updated_at = NOW()
-                   WHERE token = %s AND owner_id = %s""",
+                   WHERE token = %s""",
                 (
                     json.dumps(syllabus), course_title,
                     new_revision, comment,
-                    token, session["user_id"],
+                    token,
                 ),
             )
     finally:
@@ -936,15 +995,40 @@ def api_update_syllabus(token):
     return jsonify({"token": token, "url": share_url, "revision": new_revision})
 
 
+@app.route("/api/delete-syllabus/<token>", methods=["DELETE"])
+@login_required
+def api_delete_syllabus(token):
+    """Delete a syllabus (owner or admin only)."""
+    from auth import get_db
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            if is_admin:
+                cur.execute("DELETE FROM syllabi WHERE token = %s", (token,))
+            else:
+                cur.execute(
+                    "DELETE FROM syllabi WHERE token = %s AND owner_id = %s",
+                    (token, session["user_id"]),
+                )
+            deleted = cur.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+    if not deleted:
+        return jsonify({"error": "Not found or not authorized"}), 404
+    return jsonify({"ok": True})
+
+
 @app.route("/syllabus/view/<token>")
 def syllabus_view(token):
-    """Public (no login) view of a saved syllabus."""
+    """Public (no login) view of a saved syllabus. Edit button shown to owner/admin."""
     from auth import get_db
     conn = get_db()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT syllabus_json, course_title FROM syllabi WHERE token = %s",
+                "SELECT syllabus_json, course_title, owner_id FROM syllabi WHERE token = %s",
                 (token,),
             )
             row = cur.fetchone()
@@ -953,11 +1037,18 @@ def syllabus_view(token):
 
     if not row:
         return render_template("syllabus_view.html", syllabus=None,
-                               course_title=None, error="Syllabus not found or link has expired.")
+                               course_title=None, can_edit=False, syllabus_token=None,
+                               error="Syllabus not found or link has expired.")
+
+    can_edit = False
+    uid = session.get("user_id")
+    if uid:
+        can_edit = (uid == row["owner_id"]) or (session.get("user_role") == "admin")
 
     syllabus = json.loads(row["syllabus_json"])
     return render_template("syllabus_view.html", syllabus=syllabus,
-                           course_title=row["course_title"], error=None)
+                           course_title=row["course_title"], error=None,
+                           can_edit=can_edit, syllabus_token=token)
 
 
 if __name__ == "__main__":

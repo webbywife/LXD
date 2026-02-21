@@ -240,6 +240,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <span class="sep">|</span>
     <a href="{{ turl('syllabus') }}" class="active">Syllabus</a>
     <span class="sep">|</span>
+    <a href="{{ turl('syllabi_dashboard') }}">My Syllabi</a>
+    <span class="sep">|</span>
     {% if session.get('user_role') == 'admin' %}
     <a href="{{ turl('auth.admin_panel') }}">Admin</a>
     <span class="sep">|</span>
@@ -1216,8 +1218,10 @@ document.getElementById('btn-save-copy').addEventListener('click', function(){
 generateWeekRows(14);
 updateGradingTotal();
 
-// Restore draft on load
+// Restore draft on load (skip if ?load= param present — edit mode takes priority)
 (function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('load')) return; // will load syllabus for edit below
   const raw = localStorage.getItem(DRAFT_KEY);
   if(!raw) return;
   try{
@@ -1227,6 +1231,13 @@ updateGradingTotal();
     showDraftBar('Draft restored · saved at ' + dtFmt);
     document.getElementById('btn-clear-draft').style.display = 'inline';
   }catch(e){ localStorage.removeItem(DRAFT_KEY); }
+})();
+
+// Auto-load syllabus for editing when navigated with ?load=TOKEN
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const loadToken = params.get('load');
+  if(loadToken && AUTH_TOKEN){ loadSyllabusForEdit(loadToken); }
 })();
 </script>
 </body>
