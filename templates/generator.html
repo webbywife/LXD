@@ -1303,7 +1303,7 @@ async function openMyLPs(){
   }
 }
 
-async function loadLP(token){
+window.loadLP = async function loadLP(token){
   const body = $("#my-lps-body");
   body.innerHTML = '<div style="color:#6b8fa3;font-size:13px;text-align:center;padding:24px 0;">Loading lesson plan…</div>';
   try {
@@ -1344,7 +1344,7 @@ async function loadLP(token){
   }
 }
 
-async function deleteLP(token){
+window.deleteLP = async function deleteLP(token){
   if(!confirm("Delete this lesson plan? This cannot be undone.")) return;
   try {
     const resp = await fetch(aurl("/api/delete-lesson-plan/"+token), {method:"DELETE"});
