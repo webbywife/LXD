@@ -119,6 +119,17 @@ textarea{resize:vertical;min-height:60px;}
 .btn-s2{background:var(--c2);color:#fff;border-color:var(--c2);}
 .btn-s2:hover{background:var(--c2d);border-color:var(--c2d);color:#fff;}
 .btn-sm{padding:5px 12px;font-size:11px;}
+.btn-save-lp{background:linear-gradient(135deg,#0d6efd,#0b5ed7);color:#fff;border-color:#0d6efd;font-weight:700;}
+.btn-save-lp:hover{background:linear-gradient(135deg,#0b5ed7,#0a58ca);border-color:#0b5ed7;color:#fff;}
+.lp-list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,187,214,0.1);}
+.lp-list-item:last-child{border-bottom:none;}
+.lp-list-title{font-size:13px;font-weight:700;color:#e8f4f8;}
+.lp-list-sub{font-size:11px;color:#6b8fa3;margin-top:2px;}
+.lp-list-actions{display:flex;gap:6px;flex-shrink:0;}
+.btn-lp-load{padding:5px 14px;font-size:11px;font-weight:700;background:rgba(0,187,214,0.15);color:#00bbd6;border:1.5px solid rgba(0,187,214,0.35);border-radius:8px;cursor:pointer;}
+.btn-lp-load:hover{background:rgba(0,187,214,0.25);}
+.btn-lp-del{padding:5px 10px;font-size:11px;background:rgba(231,76,60,0.1);color:#e74c3c;border:1.5px solid rgba(231,76,60,0.3);border-radius:8px;cursor:pointer;}
+.btn-lp-del:hover{background:rgba(231,76,60,0.2);}
 .br{display:flex;justify-content:space-between;margin-top:22px;gap:10px;}
 
 /* Competencies */
@@ -282,6 +293,7 @@ textarea{resize:vertical;min-height:60px;}
         <a href="{{ url_for('landing') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Home</a>
         <a href="{{ turl('activities') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Activities</a>
         <a href="{{ turl('syllabus') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Syllabus</a>
+        <a href="#" id="nav-my-lps" style="color:#fff;opacity:0.8;text-decoration:none;">My Lesson Plans</a>
         {% if session.get('user_role') == 'admin' %}
         <a href="{{ turl('auth.admin_panel') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Admin</a>
         {% endif %}
@@ -496,6 +508,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <div class="ob" id="out-b"></div>
     <div class="oa">
+        <button class="btn btn-save-lp" id="b-save-lp">&#128190; Save Lesson Plan</button>
         <button class="btn" id="b-copy">&#128203; Copy</button>
         <button class="btn" id="b-dl">&#128229; Download .md</button>
         <button class="btn" id="b-gdoc">&#128196; Google Doc</button>
@@ -512,6 +525,7 @@ textarea{resize:vertical;min-height:60px;}
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
+    <div id="lp-save-msg" style="display:none;margin:8px 0 0;font-size:12px;color:var(--c1);font-weight:600;font-family:'Space Grotesk',sans-serif;"></div>
     <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip contains the lesson plan and assessment (if generated). Upload via Add Activity &gt; SCORM Package in Moodle, Canvas, or Brightspace. <strong>Note:</strong> The quiz is a separate LMS activity — use "Download Quiz (LMS)" to save it independently.</span></div>
 
     <!-- Section Regen Panel -->
@@ -1187,7 +1201,177 @@ $("#r-submit").addEventListener("click",function(){
   try{ restoreFormInputs(JSON.parse(raw)); }catch(e){ localStorage.removeItem(GEN_DRAFT_KEY); }
 })();
 
+// ── Save Lesson Plan ──────────────────────────────────────────
+$("#b-save-lp").addEventListener("click", async function(){
+  if(!rawLP){ alert("Generate a lesson plan first."); return; }
+  const btn = this;
+  const msg = $("#lp-save-msg");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  msg.style.display = "none";
+
+  // Build a readable title from the current form state
+  const subjectEl = $("#f-sub") || $("#f-topic-sub");
+  const gradeEl   = $("#f-grd") || $("#f-topic-grd");
+  const qtrEl     = $("#f-qtr");
+  const subject   = subjectEl?.options[subjectEl.selectedIndex]?.text || subjectEl?.value || "";
+  const grade     = gradeEl?.value || "";
+  const quarter   = qtrEl?.value || "";
+  const title     = [subject, grade ? "Grade "+grade : "", quarter ? "Q"+quarter : ""].filter(Boolean).join(" · ") || "Lesson Plan";
+
+  try {
+    const resp = await fetch(aurl("/api/save-lesson-plan"), {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        title,
+        subject,
+        grade,
+        quarter,
+        gen_mode: genMode,
+        lesson_md:     rawLP,
+        quiz_md:       rawQZ || "",
+        assessment_md: rawAS || "",
+      })
+    });
+    if(resp.status === 401){
+      msg.style.cssText = "display:block;color:#e74c3c;font-size:12px;margin-top:8px;";
+      msg.innerHTML = 'Session expired. <a href="/login" style="color:#00bbd6;">Log in again</a>.';
+      return;
+    }
+    const data = await resp.json();
+    if(data.token){
+      msg.style.cssText = "display:block;color:#00bbd6;font-size:12px;margin-top:8px;font-weight:600;";
+      msg.textContent = "✓ Saved! You can reload it anytime from \"My Lesson Plans\".";
+      btn.textContent = "✓ Saved";
+      setTimeout(()=>{ btn.textContent = "💾 Save Lesson Plan"; btn.disabled = false; }, 3000);
+    } else {
+      throw new Error(data.error || "Save failed");
+    }
+  } catch(e) {
+    msg.style.cssText = "display:block;color:#e74c3c;font-size:12px;margin-top:8px;";
+    msg.textContent = "Error: " + e.message;
+    btn.textContent = "💾 Save Lesson Plan";
+    btn.disabled = false;
+  }
+});
+
+// ── My Lesson Plans Modal ─────────────────────────────────────
+function esc(s){ const d=document.createElement("div");d.textContent=s;return d.innerHTML; }
+
+async function openMyLPs(){
+  const overlay = $("#my-lps-overlay");
+  const body    = $("#my-lps-body");
+  overlay.style.display = "flex";
+  body.innerHTML = '<div style="color:#6b8fa3;font-size:13px;text-align:center;padding:24px 0;">Loading…</div>';
+
+  try {
+    const resp = await fetch(aurl("/api/my-lesson-plans"));
+    if(resp.status === 401){
+      body.innerHTML = '<p style="color:#e74c3c;font-size:13px">Session expired. <a href="/login" style="color:#00bbd6;">Log in</a> and return.</p>';
+      return;
+    }
+    const list = await resp.json();
+    if(!list.length){
+      body.innerHTML = '<p style="color:#6b8fa3;font-size:13px;padding:8px 0;">No saved lesson plans yet. Generate one and click "Save Lesson Plan".</p>';
+      return;
+    }
+    body.innerHTML = list.map(lp => {
+      const dt   = lp.updated_at || lp.created_at || "";
+      const dtFmt = dt ? new Date(dt).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}) : "—";
+      const meta = [lp.subject, lp.grade?"Gr. "+lp.grade:"", lp.quarter?"Q"+lp.quarter:""].filter(Boolean).join(" · ");
+      return `<div class="lp-list-item" id="lp-row-${esc(lp.token)}">
+        <div>
+          <div class="lp-list-title">${esc(lp.title)}</div>
+          <div class="lp-list-sub">${meta ? esc(meta)+" &nbsp;·&nbsp; " : ""}${dtFmt}</div>
+        </div>
+        <div class="lp-list-actions">
+          <button class="btn-lp-load" onclick="loadLP('${esc(lp.token)}')">Load</button>
+          <button class="btn-lp-del"  onclick="deleteLP('${esc(lp.token)}')">✕</button>
+        </div>
+      </div>`;
+    }).join("");
+  } catch(e) {
+    body.innerHTML = '<p style="color:#e74c3c;font-size:13px">Error loading plans.</p>';
+  }
+}
+
+async function loadLP(token){
+  const body = $("#my-lps-body");
+  body.innerHTML = '<div style="color:#6b8fa3;font-size:13px;text-align:center;padding:24px 0;">Loading lesson plan…</div>';
+  try {
+    const resp = await fetch(aurl("/api/load-lesson-plan/"+token));
+    if(!resp.ok){ body.innerHTML='<p style="color:#e74c3c;font-size:13px">Could not load plan.</p>'; return; }
+    const data = await resp.json();
+    // Restore into JS globals and localStorage
+    rawLP = data.lesson_md || "";
+    rawQZ = data.quiz_md  || "";
+    rawAS = data.assessment_md || "";
+    localStorage.setItem("skooled_lesson_md", rawLP);
+    localStorage.setItem("skooled_quiz_md",   rawQZ);
+    localStorage.setItem(GEN_CONTENT_KEY, JSON.stringify({
+      rawLP, rawAS, rawQZ,
+      label: data.title || "Lesson Plan",
+      savedAt: new Date().toISOString()
+    }));
+    // Close modal and show step 4
+    $("#my-lps-overlay").style.display = "none";
+    // Update tabs
+    const hasAS = !!rawAS;
+    const hasQZ = !!rawQZ;
+    $("#t-as").style.display = hasAS ? "" : "none";
+    $("#t-qz").style.display = hasQZ ? "" : "none";
+    setTab("lp");
+    go(4);
+    $("#out-t").textContent = "📄 " + (data.title || "Lesson Plan");
+    // Enable activities button
+    localStorage.setItem("skooled_use_ai", "true");
+  } catch(e) {
+    body.innerHTML = '<p style="color:#e74c3c;font-size:13px">Error: '+e.message+'</p>';
+  }
+}
+
+async function deleteLP(token){
+  if(!confirm("Delete this lesson plan? This cannot be undone.")) return;
+  try {
+    const resp = await fetch(aurl("/api/delete-lesson-plan/"+token), {method:"DELETE"});
+    if(resp.ok){
+      const row = $("#lp-row-"+token);
+      if(row) row.remove();
+      if(!$("#my-lps-body").querySelector(".lp-list-item")){
+        $("#my-lps-body").innerHTML = '<p style="color:#6b8fa3;font-size:13px;padding:8px 0;">No saved lesson plans yet.</p>';
+      }
+    }
+  } catch(e) { alert("Delete failed: "+e.message); }
+}
+
+document.getElementById("nav-my-lps").addEventListener("click", function(e){
+  e.preventDefault();
+  openMyLPs();
+});
+document.getElementById("my-lps-close").addEventListener("click", function(){
+  $("#my-lps-overlay").style.display = "none";
+});
+document.getElementById("my-lps-overlay").addEventListener("click", function(e){
+  if(e.target === this) this.style.display = "none";
+});
+
 });
 </script>
+
+<!-- ═══════════════════════════════════════════════
+     MY LESSON PLANS MODAL
+═══════════════════════════════════════════════ -->
+<div id="my-lps-overlay" style="display:none;position:fixed;inset:0;background:rgba(5,14,22,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#0d1f2d;border:1.5px solid rgba(0,187,214,0.3);border-radius:18px;width:90%;max-width:580px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(0,187,214,0.15);">
+      <h3 style="margin:0;font-size:16px;font-weight:700;color:#e8f4f8;font-family:'Space Grotesk',sans-serif;">My Lesson Plans</h3>
+      <button id="my-lps-close" style="background:none;border:none;color:#6b8fa3;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div id="my-lps-body" style="overflow-y:auto;padding:16px 22px;flex:1;font-family:'Plus Jakarta Sans',sans-serif;">
+      <div style="color:#6b8fa3;font-size:13px;text-align:center;padding:24px 0;">Loading…</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

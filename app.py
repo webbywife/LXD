@@ -805,6 +805,150 @@ def api_generate_syllabus():
     return jsonify(response)
 
 
+@app.route("/api/save-lesson-plan", methods=["POST"])
+@login_required
+def api_save_lesson_plan():
+    """Save a lesson plan to the DB and return a token."""
+    from auth import get_db
+    data = request.get_json()
+    if not data or not data.get("lesson_md"):
+        return jsonify({"error": "No lesson plan content provided"}), 400
+
+    token = uuid.uuid4().hex
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO lesson_plans
+                   (token, owner_id, owner_name, title, subject, grade, quarter,
+                    gen_mode, lesson_md, quiz_md, assessment_md)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (
+                    token,
+                    session["user_id"],
+                    session.get("user_name", ""),
+                    data.get("title", "Untitled Lesson Plan"),
+                    data.get("subject", ""),
+                    data.get("grade", ""),
+                    data.get("quarter", ""),
+                    data.get("gen_mode", ""),
+                    data["lesson_md"],
+                    data.get("quiz_md", ""),
+                    data.get("assessment_md", ""),
+                ),
+            )
+    finally:
+        conn.close()
+
+    _log_activity("lesson_plan_save", data.get("title", ""), subject=data.get("subject", ""), grade=data.get("grade", ""))
+    return jsonify({"token": token})
+
+
+@app.route("/api/my-lesson-plans")
+@login_required
+def api_my_lesson_plans():
+    """Return the current user's saved lesson plans (admin sees all)."""
+    from auth import get_db
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            if is_admin:
+                cur.execute(
+                    """SELECT token, title, subject, grade, quarter, gen_mode,
+                              created_at, updated_at, owner_name, owner_id
+                       FROM lesson_plans
+                       ORDER BY COALESCE(updated_at, created_at) DESC
+                       LIMIT 200"""
+                )
+            else:
+                cur.execute(
+                    """SELECT token, title, subject, grade, quarter, gen_mode,
+                              created_at, updated_at, owner_name, owner_id
+                       FROM lesson_plans
+                       WHERE owner_id = %s
+                       ORDER BY COALESCE(updated_at, created_at) DESC
+                       LIMIT 50""",
+                    (session["user_id"],),
+                )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    current_uid = session["user_id"]
+    result = []
+    for r in rows:
+        result.append({
+            "token":      r["token"],
+            "title":      r["title"] or "Untitled",
+            "subject":    r["subject"] or "",
+            "grade":      r["grade"] or "",
+            "quarter":    r["quarter"] or "",
+            "gen_mode":   r["gen_mode"] or "",
+            "owner_name": r["owner_name"] or "",
+            "is_owner":   r["owner_id"] == current_uid,
+            "created_at": r["created_at"].isoformat() if r["created_at"] else "",
+            "updated_at": r["updated_at"].isoformat() if r["updated_at"] else "",
+        })
+    return jsonify(result)
+
+
+@app.route("/api/load-lesson-plan/<token>")
+@login_required
+def api_load_lesson_plan(token):
+    """Load a saved lesson plan. Owner or admin only."""
+    from auth import get_db
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM lesson_plans WHERE token = %s", (token,)
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    if not is_admin and row["owner_id"] != session["user_id"]:
+        return jsonify({"error": "Access denied"}), 403
+
+    return jsonify({
+        "token":          row["token"],
+        "title":          row["title"] or "",
+        "subject":        row["subject"] or "",
+        "grade":          row["grade"] or "",
+        "quarter":        row["quarter"] or "",
+        "gen_mode":       row["gen_mode"] or "",
+        "lesson_md":      row["lesson_md"] or "",
+        "quiz_md":        row["quiz_md"] or "",
+        "assessment_md":  row["assessment_md"] or "",
+        "created_at":     row["created_at"].isoformat() if row["created_at"] else "",
+    })
+
+
+@app.route("/api/delete-lesson-plan/<token>", methods=["DELETE"])
+@login_required
+def api_delete_lesson_plan(token):
+    """Delete a saved lesson plan. Owner or admin only."""
+    from auth import get_db
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT owner_id FROM lesson_plans WHERE token = %s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found"}), 404
+            if not is_admin and row["owner_id"] != session["user_id"]:
+                return jsonify({"error": "Access denied"}), 403
+            cur.execute("DELETE FROM lesson_plans WHERE token = %s", (token,))
+    finally:
+        conn.close()
+    return jsonify({"ok": True})
+
+
 @app.route("/api/save-syllabus", methods=["POST"])
 @login_required
 def api_save_syllabus():

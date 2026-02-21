@@ -100,6 +100,26 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS lesson_plans (
+                    id            INT AUTO_INCREMENT PRIMARY KEY,
+                    token         VARCHAR(64) NOT NULL UNIQUE,
+                    owner_id      INT NOT NULL,
+                    owner_name    VARCHAR(255),
+                    title         VARCHAR(500),
+                    subject       VARCHAR(255),
+                    grade         VARCHAR(50),
+                    quarter       VARCHAR(50),
+                    gen_mode      VARCHAR(50),
+                    lesson_md     LONGTEXT NOT NULL,
+                    quiz_md       LONGTEXT,
+                    assessment_md LONGTEXT,
+                    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_lp_token (token),
+                    INDEX idx_lp_owner (owner_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS activity_log (
                     id          INT AUTO_INCREMENT PRIMARY KEY,
                     user_id     INT NOT NULL,
