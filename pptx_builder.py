@@ -145,7 +145,7 @@ def _add_header(slide, title, subtitle="", title_color=NAVY):
                      font_size=13, color=RGBColor(0x0a, 0x3a, 0x4e))
 
 
-def _add_footer(slide, text="SKOOLED-AI  ·  Philippine DepEd MATATAG"):
+def _add_footer(slide, text="SKOOLED-AI  ·  AI-Generated Lesson Plan"):
     """Slim dark footer bar with slide label."""
     bar_top = SLIDE_H - Inches(0.36)
     _add_rect(slide, 0, bar_top, SLIDE_W, Inches(0.36), NAVY2)
@@ -203,8 +203,8 @@ def _slide_title(prs, parsed):
                      Inches(0.7), Inches(3.6), Inches(11.6), Inches(0.55),
                      font_size=17, color=GREY, align=PP_ALIGN.CENTER)
 
-    # DepEd label above bottom bar
-    _add_textbox(slide, "Philippine DepEd  ·  MATATAG Curriculum  ·  AI-Powered Lesson Plan",
+    # Brand label above bottom bar
+    _add_textbox(slide, "SKOOLED-AI  ·  AI-Generated Lesson Plan",
                  Inches(0.7), SLIDE_H - Inches(0.72), Inches(11.6), Inches(0.36),
                  font_size=10, color=DIMWHITE, align=PP_ALIGN.CENTER)
 
