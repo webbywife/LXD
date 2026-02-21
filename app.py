@@ -6,6 +6,7 @@ DepEd-aligned lesson plan content generator based on MATATAG Curriculum.
 import os
 import re
 import json
+import uuid
 import zipfile
 from io import BytesIO
 from dotenv import load_dotenv
@@ -760,6 +761,68 @@ def api_generate_syllabus():
     if warning:
         response["warning"] = warning
     return jsonify(response)
+
+
+@app.route("/api/save-syllabus", methods=["POST"])
+@login_required
+def api_save_syllabus():
+    """Save a syllabus to the DB and return a public shareable URL."""
+    from auth import get_db
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    syllabus = data.get("syllabus")
+    if not syllabus:
+        return jsonify({"error": "No syllabus content provided"}), 400
+
+    token = uuid.uuid4().hex
+    course_title = syllabus.get("course_title", "Untitled Syllabus")
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO syllabi (token, owner_id, owner_name, course_title, syllabus_json)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (
+                    token,
+                    session.get("user_id", 0),
+                    session.get("user_name", ""),
+                    course_title,
+                    json.dumps(syllabus),
+                ),
+            )
+    finally:
+        conn.close()
+
+    share_url = url_for("syllabus_view", token=token, _external=True)
+    _log_activity("syllabus_share", course_title, subject=syllabus.get("program", ""))
+    return jsonify({"token": token, "url": share_url})
+
+
+@app.route("/syllabus/view/<token>")
+def syllabus_view(token):
+    """Public (no login) view of a saved syllabus."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT syllabus_json, course_title FROM syllabi WHERE token = %s",
+                (token,),
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+
+    if not row:
+        return render_template("syllabus_view.html", syllabus=None,
+                               course_title=None, error="Syllabus not found or link has expired.")
+
+    syllabus = json.loads(row["syllabus_json"])
+    return render_template("syllabus_view.html", syllabus=syllabus,
+                           course_title=row["course_title"], error=None)
 
 
 if __name__ == "__main__":

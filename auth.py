@@ -65,6 +65,19 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS syllabi (
+                    id            INT AUTO_INCREMENT PRIMARY KEY,
+                    token         VARCHAR(64) NOT NULL UNIQUE,
+                    owner_id      INT NOT NULL,
+                    owner_name    VARCHAR(255),
+                    course_title  VARCHAR(500),
+                    syllabus_json LONGTEXT NOT NULL,
+                    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_syl_token (token),
+                    INDEX idx_syl_owner (owner_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS activity_log (
                     id          INT AUTO_INCREMENT PRIMARY KEY,
                     user_id     INT NOT NULL,

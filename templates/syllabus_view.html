@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<title>{% if course_title %}{{ course_title }} — {% endif %}Syllabus · SKOOLED-AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#dce6ec;min-height:100vh;display:flex;flex-direction:column;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
+
+.topbar{background:#0d1f2d;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.topbar-brand{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.03em;}
+.topbar-brand span{color:#00bbd6;}
+.topbar-actions{display:flex;gap:8px;}
+.btn{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,0.25);color:#fff;}
+.btn-outline:hover{border-color:#fff;}
+.btn-cyan{background:#00bbd6;color:#fff;}
+.btn-cyan:hover{background:#009bb3;}
+
+.page{padding:28px;display:flex;justify-content:center;}
+.error-box{background:#fff;border-radius:12px;padding:48px 36px;text-align:center;max-width:400px;margin:60px auto;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.error-box h2{color:#0d1f2d;margin-bottom:10px;}
+.error-box p{color:#6b8fa3;font-size:13px;}
+
+/* ── Syllabus Document ── */
+.syldoc{background:#fff;width:100%;max-width:960px;box-shadow:0 4px 40px rgba(0,0,0,.12);border-radius:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a1a2e;line-height:1.6;}
+.syl-hdr{background:#0d1f2d;color:#fff;padding:22px 28px;display:flex;align-items:center;gap:20px;}
+.syl-hdr-badge{width:52px;height:52px;background:rgba(0,187,214,.15);border:2px solid rgba(0,187,214,.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.syl-school{font-size:16px;font-weight:800;font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em;}
+.syl-dept{font-size:12px;color:rgba(255,255,255,.7);margin-top:1px;}
+.syl-program{font-size:11px;color:rgba(0,187,214,.9);font-weight:600;margin-top:2px;}
+.syl-tag{background:rgba(0,187,214,.2);border:1px solid rgba(0,187,214,.35);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:rgba(255,255,255,.9);align-self:flex-start;white-space:nowrap;}
+.syl-banner{background:linear-gradient(135deg,#00bbd6 0%,#0d4a6e 100%);padding:16px 28px;display:flex;align-items:center;gap:16px;}
+.syl-banner-code{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-.03em;white-space:nowrap;}
+.syl-banner-sep{width:2px;height:36px;background:rgba(255,255,255,.3);flex-shrink:0;}
+.syl-banner-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;opacity:.95;}
+.syl-banner-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.65);font-weight:600;}
+.syl-info{padding:18px 28px;border-bottom:1px solid #e8eef2;}
+.syl-info-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #d5e3ea;border-radius:8px;overflow:hidden;}
+.syl-info-cell{padding:10px 14px;border-right:1px solid #d5e3ea;border-bottom:1px solid #d5e3ea;}
+.syl-info-cell:nth-child(3n){border-right:none;}
+.syl-info-cell:nth-last-child(-n+3){border-bottom:none;}
+.sic-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b8fa3;margin-bottom:2px;}
+.sic-val{font-size:12px;font-weight:600;color:#0d1f2d;}
+.sic-val.empty{color:#aab8c2;font-style:italic;font-weight:400;}
+.syl-section{padding:16px 28px;border-bottom:1px solid #e8eef2;}
+.syl-section:last-child{border-bottom:none;}
+.syl-sec-hdr{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#00bbd6;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid rgba(0,187,214,.15);display:flex;align-items:center;gap:8px;}
+.syl-sec-hdr::before{content:'';width:3px;height:14px;background:#00bbd6;border-radius:2px;flex-shrink:0;}
+.syl-sec-body{font-size:12px;line-height:1.75;color:#2a3a4a;}
+.syl-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
+.syl-table th{background:#0d1f2d;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;}
+.syl-table td{padding:8px 10px;border-bottom:1px solid #e8eef2;vertical-align:top;color:#2a3a4a;}
+.syl-table tr:nth-child(even) td{background:#f7fafc;}
+.syl-table tr:last-child td{border-bottom:none;}
+.co-code{font-weight:700;color:#0d1f2d;white-space:nowrap;font-family:'Space Grotesk',sans-serif;}
+.syl-plan-wrap{overflow-x:auto;margin-top:6px;}
+.syl-plan-table{width:100%;border-collapse:collapse;font-size:11px;min-width:860px;}
+.syl-plan-table th{background:#0d1f2d;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.syl-plan-table td{padding:8px 10px;border-bottom:1px solid #e8eef2;border-right:1px solid #f0f5f7;vertical-align:top;color:#2a3a4a;line-height:1.55;}
+.syl-plan-table tr:nth-child(even) td{background:#f7fafc;}
+.syl-plan-table tr:last-child td{border-bottom:none;}
+.wk-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#00bbd6;text-align:center;white-space:nowrap;}
+.topic-cell{font-weight:600;color:#0d1f2d;}
+.syl-grade-table{width:100%;border-collapse:collapse;font-size:12px;max-width:420px;}
+.syl-grade-table th{background:#0d1f2d;color:#fff;padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;}
+.syl-grade-table td{padding:8px 12px;border-bottom:1px solid #e8eef2;}
+.wt{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:#00bbd6;}
+.syl-grade-total td{background:#0d1f2d;color:#fff;font-weight:700;border-bottom:none;}
+.syl-grade-total .wt{color:#faa32b;}
+.syl-note{background:#fff8ed;border-left:3px solid #faa32b;padding:10px 14px;border-radius:0 8px 8px 0;font-size:11.5px;color:#5a4310;line-height:1.55;margin:8px 0;}
+.syl-refs{padding:0;list-style:none;}
+.syl-refs li{padding:4px 0 4px 16px;position:relative;font-size:12px;line-height:1.6;border-bottom:1px solid #f5f5f5;color:#2a3a4a;}
+.syl-refs li::before{content:'›';position:absolute;left:0;color:#00bbd6;font-weight:700;}
+.syl-refs li:last-child{border-bottom:none;}
+.syl-refs-sub{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b8fa3;margin:10px 0 4px;}
+.syl-sig{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:24px 28px;background:#f9fbfc;border-top:2px solid #e8eef2;}
+.syl-sig-box{text-align:center;}
+.syl-sig-line{border-bottom:2px solid #0d1f2d;margin:0 20px 6px;height:40px;}
+.syl-sig-name{font-size:11px;font-weight:700;color:#0d1f2d;margin-bottom:2px;}
+.syl-sig-role{font-size:10px;color:#6b8fa3;text-transform:uppercase;letter-spacing:.04em;}
+
+@media print{
+  .topbar{display:none!important;}
+  body{background:#fff;}
+  .page{padding:0;}
+  .syldoc{box-shadow:none;border-radius:0;max-width:100%;}
+  @page{margin:10mm;size:A4;}
+  .syl-plan-wrap{overflow-x:visible;}
+  .syl-plan-table{min-width:unset;font-size:9px;}
+  .syl-plan-table th,.syl-plan-table td{padding:5px 6px;}
+  .syl-hdr,.syl-banner{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">SKOOLED<span>-AI</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</div>
+
+{% if error %}
+<div class="error-box">
+  <h2>Syllabus Not Found</h2>
+  <p>{{ error }}</p>
+</div>
+{% else %}
+<div class="page">
+  <div class="syldoc" id="syldoc"></div>
+</div>
+
+<script>
+const S = {{ syllabus | tojson | safe }};
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function nl2p(s){return s?s.split(/\n+/).filter(l=>l.trim()).map(l=>`<p style="margin:0 0 6px">${esc(l.trim())}</p>`).join(''):'<p style="color:#aab8c2;font-style:italic">Not provided</p>';}
+
+function render(){
+  const s=S;
+  let h='';
+  // Header
+  const typeLabel=s.institution_type==='shs'?'Senior High School':'Higher Education Institution';
+  h+=`<div class="syl-hdr"><div class="syl-hdr-badge">&#127891;</div><div class="syl-hdr-info"><div class="syl-school">${esc(s.school_name||'[School]')}</div><div class="syl-dept">${esc(s.college_dept||'')}</div><div class="syl-program">${esc(s.program||'')}</div></div><div class="syl-tag">${esc(typeLabel)}</div></div>`;
+  // Banner
+  h+=`<div class="syl-banner"><div><div class="syl-banner-label">Course Code</div><div class="syl-banner-code">${esc(s.course_code||'—')}</div></div><div class="syl-banner-sep"></div><div><div class="syl-banner-label">Course Title</div><div class="syl-banner-title">${esc(s.course_title||'—')}</div></div></div>`;
+  // Info grid
+  const cells=[['Credit Units',s.credits||'—'],['Prerequisites',s.prerequisites||'None'],['Course Type',s.course_type||'—'],['Academic Period',s.semester||'—'],['Faculty','___________________________'],['Schedule','___________________________']];
+  h+=`<div class="syl-info"><div class="syl-info-grid">${cells.map(([l,v])=>`<div class="syl-info-cell"><div class="sic-lbl">${l}</div><div class="sic-val${v.includes('___')||!v||v==='—'?' empty':''}">${esc(v)}</div></div>`).join('')}</div></div>`;
+  // Description
+  h+=`<div class="syl-section"><div class="syl-sec-hdr">Course Description</div><div class="syl-sec-body">${nl2p(s.course_description)}</div></div>`;
+  // POs
+  if(s.program_outcomes&&s.program_outcomes.length){
+    h+=`<div class="syl-section"><div class="syl-sec-hdr">Program Outcomes</div><table class="syl-table"><thead><tr><th style="width:65px">Code</th><th>Outcome Statement</th></tr></thead><tbody>${s.program_outcomes.map(po=>`<tr><td class="co-code">${esc(po.code)}</td><td>${esc(po.description)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  // COs
+  if(s.course_outcomes&&s.course_outcomes.length){
+    h+=`<div class="syl-section"><div class="syl-sec-hdr">Course Outcomes</div><table class="syl-table"><thead><tr><th style="width:55px">Code</th><th>Course Outcome Statement</th><th style="width:120px">PO Mapping</th></tr></thead><tbody>${s.course_outcomes.map(co=>`<tr><td class="co-code">${esc(co.code)}</td><td>${esc(co.description)}</td><td><span style="color:#aab8c2;font-style:italic;font-size:10px">—</span></td></tr>`).join('')}</tbody></table></div>`;
+  }
+  // Course Plan
+  if(s.course_plan&&s.course_plan.length){
+    const rows=s.course_plan.map(w=>`<tr><td class="wk-num">${esc(String(w.week||''))}</td><td class="topic-cell">${esc(w.topics||'')}</td><td>${esc(w.ilos||'')}</td><td>${esc(w.tlas||'')}</td><td>${esc(w.assessment_tasks||'')}</td><td>${esc(w.evaluation_strategies||'')}</td><td>${esc(w.resources||'')}</td><td style="white-space:nowrap">${esc(w.due_date||'')}</td></tr>`).join('');
+    h+=`<div class="syl-section"><div class="syl-sec-hdr">Course Plan</div><div class="syl-plan-wrap"><table class="syl-plan-table"><thead><tr><th style="width:42px;text-align:center">Wk</th><th style="min-width:130px">Topics</th><th style="min-width:160px">ILOs</th><th style="min-width:130px">TLAs</th><th style="min-width:120px">Assessment Tasks</th><th style="min-width:110px">Evaluation</th><th style="min-width:120px">Resources</th><th style="min-width:70px">Due Date</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+  // Grading
+  if(s.grading_system&&s.grading_system.length){
+    let total=0;
+    const gRows=s.grading_system.map(g=>{total+=parseInt(g.weight||0);return`<tr><td>${esc(g.component)}</td><td class="wt">${esc(String(g.weight))}%</td></tr>`;}).join('');
+    h+=`<div class="syl-section"><div class="syl-sec-hdr">Grading System</div><table class="syl-grade-table"><thead><tr><th>Component</th><th>Weight</th></tr></thead><tbody>${gRows}<tr class="syl-grade-total"><td><strong>TOTAL</strong></td><td class="wt">${total}%</td></tr></tbody></table><div class="syl-note" style="margin-top:10px">Passing grade: <strong>70%</strong>. Grading is cumulative and zero-based.</div></div>`;
+  }
+  // Policies
+  h+=`<div class="syl-section"><div class="syl-sec-hdr">Academic Policies</div><div class="syl-sec-body"><p style="margin-bottom:8px"><strong>Attendance:</strong> Minimum 80% required. Exceeding 20% absences may result in INC or DRP.</p><p style="margin-bottom:8px"><strong>Academic Integrity:</strong> All outputs must be original work. Plagiarism results in a failing grade.</p><p style="margin-bottom:8px"><strong>Netiquette:</strong> Respectful behavior required in all class interactions.</p><p><strong>Intellectual Property:</strong> Course materials may not be reproduced without consent.</p></div></div>`;
+  // References
+  if(s.references){
+    const books=s.references.books||[];
+    const sites=s.references.websites||[];
+    if(books.length||sites.length){
+      let rh='<div class="syl-section"><div class="syl-sec-hdr">References</div>';
+      if(books.length) rh+='<div class="syl-refs-sub">Books &amp; Journals</div><ul class="syl-refs">'+books.map(b=>`<li>${esc(b)}</li>`).join('')+'</ul>';
+      if(sites.length) rh+='<div class="syl-refs-sub" style="margin-top:12px">Online Resources</div><ul class="syl-refs">'+sites.map(b=>`<li>${esc(b)}</li>`).join('')+'</ul>';
+      h+=rh+'</div>';
+    }
+  }
+  // Signatures
+  h+=`<div class="syl-sig"><div class="syl-sig-box"><div class="syl-sig-line"></div><div class="syl-sig-name">[Faculty Name]</div><div class="syl-sig-role">Prepared by — Course Instructor</div></div><div class="syl-sig-box"><div class="syl-sig-line"></div><div class="syl-sig-name">[Department Head / Dean]</div><div class="syl-sig-role">Approved by — Academic Head</div></div></div>`;
+  document.getElementById('syldoc').innerHTML=h;
+}
+render();
+</script>
+{% endif %}
+</body>
+</html>

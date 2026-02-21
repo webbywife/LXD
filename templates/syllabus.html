@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="auth-token" content="{{ auth_token }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<title>SKOOLED-AI · Syllabus Generator</title>
+<title>SKOOLED-AI · Syllabus Builder</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a1929;--nav:#0d1f2d;--card:rgba(255,255,255,0.05);
   --cyan:#00bbd6;--cyan-d:#009bb3;--orange:#faa32b;--green:#00b894;
   --red:#e74c3c;--white:#ffffff;--grey:rgba(255,255,255,0.6);
-  --border:rgba(0,187,214,0.2);--rad:14px;--form-w:400px;
+  --border:rgba(0,187,214,0.2);--rad:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
 h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
 /* ── Nav ── */
@@ -29,131 +29,161 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .nav-links .sep{color:rgba(255,255,255,0.15);font-size:16px;margin:0 2px;}
 .nav-user{font-size:12px;color:var(--grey);padding:5px 12px;border-left:1px solid var(--border);margin-left:6px;}
 
-/* ── Layout ── */
-.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 52px);}
+/* ── Page ── */
+.page{max-width:900px;margin:0 auto;padding:28px 20px 60px;width:100%;}
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-0.04em;color:var(--white);}
+.page-sub{font-size:13px;color:var(--grey);margin-top:3px;font-weight:400;}
+.btn-preview{padding:11px 28px;border-radius:11px;border:none;background:var(--cyan);color:#000;font-size:13px;font-weight:800;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.2s;letter-spacing:-0.02em;white-space:nowrap;}
+.btn-preview:hover{background:#00d4f0;box-shadow:0 6px 24px rgba(0,187,214,.35);}
 
-/* ── Form Panel ── */
-.form-panel{width:var(--form-w);min-width:320px;background:rgba(0,0,0,0.3);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
-.form-inner{padding:20px;flex:1;}
-.form-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:2px;letter-spacing:-0.02em;}
-.form-sub{font-size:11px;color:var(--grey);margin-bottom:18px;}
+/* ── Form Cards ── */
+.card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--rad);padding:22px 24px;margin-bottom:16px;}
+.card-hdr{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-hdr::before{content:'';width:3px;height:13px;background:var(--cyan);border-radius:2px;flex-shrink:0;}
 
-/* Form Sections */
-.fs{margin-bottom:18px;}
-.fs-hdr{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.fs-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
+/* ── Grid Layouts ── */
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:600px){.fr2,.fr3{grid-template-columns:1fr;}}
 
-/* Type Tabs */
-.type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
-.type-tab{padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:'Space Grotesk',sans-serif;}
-.type-tab:hover{border-color:var(--cyan);color:var(--white);}
-.type-tab.on{border-color:var(--cyan);background:rgba(0,187,214,0.12);color:var(--white);}
-
-/* Form Fields */
-.fg{margin-bottom:10px;}
-.fg label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:4px;}
+/* ── Fields ── */
+.fg{margin-bottom:12px;}
+.fg:last-child{margin-bottom:0;}
+.fg label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);margin-bottom:4px;letter-spacing:.01em;}
 .fg input,.fg select,.fg textarea{
-  width:100%;padding:8px 12px;font-size:12px;font-family:inherit;
-  border:1.5px solid rgba(0,187,214,0.25);border-radius:9px;
+  width:100%;padding:9px 12px;font-size:13px;font-family:inherit;
+  border:1.5px solid rgba(0,187,214,0.22);border-radius:9px;
   background:rgba(255,255,255,0.06);color:var(--white);transition:.2s;
 }
-.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,0.3);}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--cyan);background:rgba(0,187,214,0.06);}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,0.28);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--cyan);background:rgba(0,187,214,0.07);}
 .fg select option{background:#0d1f2d;color:#fff;}
-.fg textarea{resize:vertical;min-height:70px;line-height:1.6;}
+.fg textarea{resize:vertical;min-height:80px;line-height:1.65;}
 .fg .hint{font-size:10px;color:var(--grey);margin-top:3px;line-height:1.4;}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
-/* Grading rows */
-.grading-row{display:grid;grid-template-columns:1fr 60px;gap:6px;margin-bottom:6px;align-items:center;}
-.grading-row input{padding:7px 10px;font-size:12px;}
-.grading-total{font-size:12px;font-weight:700;color:var(--grey);text-align:right;padding-top:4px;}
+/* ── Type Tabs ── */
+.type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.type-tab{padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:'Space Grotesk',sans-serif;}
+.type-tab:hover{border-color:var(--cyan);color:var(--white);}
+.type-tab.on{border-color:var(--cyan);background:rgba(0,187,214,0.1);color:var(--white);}
+
+/* ── Grading ── */
+.grading-row{display:grid;grid-template-columns:1fr 70px 28px;gap:8px;align-items:center;margin-bottom:8px;}
+.grading-row input{padding:8px 10px;font-size:12px;}
+.gr-del{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:16px;padding:4px;transition:.2s;border-radius:4px;}
+.gr-del:hover{color:var(--red);background:rgba(231,76,60,0.1);}
+.grading-total{font-size:12px;font-weight:700;color:var(--grey);text-align:right;margin-top:4px;}
 .grading-total.ok{color:var(--green);}
 .grading-total.err{color:var(--red);}
+.btn-add-row{background:none;border:1.5px dashed var(--border);color:var(--grey);font-size:12px;padding:7px 14px;border-radius:8px;cursor:pointer;transition:.2s;width:100%;margin-top:6px;font-family:inherit;}
+.btn-add-row:hover{border-color:var(--cyan);color:var(--white);}
 
-/* AI Settings */
-.ai-toggle{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;}
-.ai-toggle:hover{border-color:rgba(0,187,214,0.5);}
-.ai-toggle.on{border-color:var(--cyan);background:rgba(0,187,214,0.07);}
-.ai-toggle-ico{font-size:18px;flex-shrink:0;}
-.ai-toggle-lbl{flex:1;font-size:12px;font-weight:600;}
-.sw{position:relative;width:38px;height:20px;flex-shrink:0;}
-.sw input{opacity:0;width:0;height:0;}
-.sl{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:20px;cursor:pointer;transition:.3s;}
-.sl:before{content:"";position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
-.sw input:checked+.sl{background:var(--cyan);}
-.sw input:checked+.sl:before{transform:translateX(18px);}
-.ai-fields{display:none;margin-top:8px;}
-.ai-fields.on{display:block;}
+/* ── Week Accordion ── */
+.week-row{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:.2s;}
+.week-row:hover{border-color:rgba(0,187,214,0.35);}
+.week-hdr{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;background:rgba(255,255,255,0.03);user-select:none;}
+.week-hdr:hover{background:rgba(0,187,214,0.06);}
+.week-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:var(--cyan);white-space:nowrap;min-width:56px;}
+.week-preview{flex:1;font-size:12px;color:var(--grey);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.week-chevron{font-size:11px;color:var(--grey);transition:transform .2s;flex-shrink:0;}
+.week-row.open .week-chevron{transform:rotate(180deg);}
+.week-body{display:none;padding:14px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,0.15);}
+.week-row.open .week-body{display:block;}
+.week-body .fg label{font-size:10.5px;}
+.week-body .fg input,.week-body .fg textarea{font-size:12px;}
+.week-body .fg textarea{min-height:56px;}
 
-/* Generate Button */
-.form-foot{padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0;}
-.btn-gen{width:100%;padding:13px;border-radius:12px;border:none;background:var(--cyan);color:#000;font-size:14px;font-weight:800;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.2s;letter-spacing:-0.02em;}
-.btn-gen:hover{background:#00d4f0;box-shadow:0 6px 24px rgba(0,187,214,.35);}
-.btn-gen:disabled{opacity:.5;cursor:not-allowed;}
+.weeks-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.weeks-toolbar span{font-size:12px;color:var(--grey);}
+.btn-expand-all{background:none;border:1px solid var(--border);color:var(--grey);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-expand-all:hover{border-color:var(--cyan);color:var(--white);}
 
-/* ── Output Panel ── */
-.output-panel{flex:1;overflow-y:auto;background:#e8eef2;display:flex;flex-direction:column;}
-.output-toolbar{background:#fff;border-bottom:1px solid #dde5ea;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;}
-.output-toolbar h3{font-size:13px;font-weight:700;color:#0d1f2d;margin:0;}
-.ot-btns{display:flex;gap:8px;}
-.btn-sm{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid #c8e8ee;background:#fff;color:#0d1f2d;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;}
-.btn-sm:hover{border-color:var(--cyan);color:var(--cyan);}
-.btn-sm.primary{background:var(--cyan);color:#fff;border-color:var(--cyan);}
-.btn-sm.primary:hover{background:var(--cyan-d);}
-.output-body{flex:1;padding:30px;display:flex;justify-content:center;}
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#e74c3c;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transition:transform .3s;box-shadow:0 6px 24px rgba(0,0,0,.25);}
+.toast.show{transform:translateX(-50%) translateY(0);}
 
-/* Empty state */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:400px;gap:14px;color:#6b8fa3;max-width:360px;margin:auto;}
-.empty-icon{font-size:52px;opacity:.35;}
-.empty-title{font-size:16px;font-weight:700;color:#3a5a72;}
-.empty-desc{font-size:13px;line-height:1.6;}
+/* ════════════════════════════════════════════
+   PREVIEW OVERLAY
+════════════════════════════════════════════ */
+.preview-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:#dce6ec;z-index:500;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.preview-overlay.show{transform:translateY(0);}
+.preview-toolbar{
+  background:#fff;border-bottom:1px solid #d0dee6;
+  padding:10px 24px;display:flex;align-items:center;
+  gap:10px;flex-shrink:0;flex-wrap:wrap;
+}
+.preview-toolbar h3{font-size:13px;font-weight:700;color:#0d1f2d;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-back{padding:7px 16px;border-radius:8px;border:1.5px solid #c8d8e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#0d1f2d;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.btn-back:hover{border-color:#00bbd6;color:#00bbd6;}
+.btn-print-doc{padding:7px 16px;border-radius:8px;border:1.5px solid #c8d8e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#0d1f2d;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.btn-print-doc:hover{border-color:#00bbd6;color:#00bbd6;}
+.btn-share{padding:7px 16px;border-radius:8px;border:none;background:#00bbd6;font-size:12px;font-weight:700;cursor:pointer;color:#fff;font-family:'Space Grotesk',sans-serif;transition:.2s;}
+.btn-share:hover{background:#009bb3;}
+.preview-body{flex:1;overflow-y:auto;padding:30px;display:flex;justify-content:center;}
 
-/* Loading */
-.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:14px;margin:auto;}
-.spin{width:46px;height:46px;border:4px solid rgba(0,187,214,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loader-t{font-size:15px;font-weight:600;color:#0d1f2d;}
-.loader-s{font-size:12px;color:#6b8fa3;}
+/* ════════════════════════════════════════════
+   SHARE MODAL
+════════════════════════════════════════════ */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-hdr h3{font-size:16px;font-weight:800;color:#0d1f2d;font-family:'Space Grotesk',sans-serif;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#6b8fa3;padding:2px 6px;border-radius:4px;transition:.2s;}
+.modal-close:hover{color:#0d1f2d;background:#f0f5f7;}
+.modal-section{margin-bottom:16px;}
+.modal-section label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b8fa3;margin-bottom:6px;}
+.modal-url-row{display:flex;gap:8px;align-items:center;}
+.modal-url-row input{flex:1;padding:9px 12px;font-size:12px;border:1.5px solid #c8d8e0;border-radius:8px;color:#0d1f2d;font-family:'Space Grotesk',sans-serif;}
+.modal-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;white-space:nowrap;}
+.modal-btn.cyan{background:#00bbd6;color:#fff;}
+.modal-btn.cyan:hover{background:#009bb3;}
+.modal-btn.dark{background:#0d1f2d;color:#fff;}
+.modal-btn.dark:hover{background:#081520;}
+.modal-divider{text-align:center;color:#aab8c2;font-size:12px;margin:14px 0;position:relative;}
+.modal-divider::before,.modal-divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:#e0eaef;}
+.modal-divider::before{left:0;}
+.modal-divider::after{right:0;}
+.modal-email-row{display:flex;gap:8px;}
+.modal-email-row input{flex:1;padding:9px 12px;font-size:12px;border:1.5px solid #c8d8e0;border-radius:8px;color:#0d1f2d;}
+.modal-note{font-size:11px;color:#6b8fa3;margin-top:10px;line-height:1.5;}
+.saving-indicator{text-align:center;color:#6b8fa3;font-size:13px;padding:12px 0;}
 
-/* ── Syllabus Document ── */
+/* ════════════════════════════════════════════
+   SYLLABUS DOCUMENT (shared with view page)
+════════════════════════════════════════════ */
 .syldoc{background:#fff;width:100%;max-width:960px;box-shadow:0 4px 40px rgba(0,0,0,0.12);border-radius:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a1a2e;line-height:1.6;}
-
-/* Doc Header */
 .syl-hdr{background:#0d1f2d;color:#fff;padding:22px 28px;display:flex;align-items:center;gap:20px;}
 .syl-hdr-badge{width:52px;height:52px;background:rgba(0,187,214,0.15);border:2px solid rgba(0,187,214,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
 .syl-hdr-info{flex:1;}
 .syl-school{font-size:16px;font-weight:800;font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em;}
 .syl-dept{font-size:12px;color:rgba(255,255,255,0.7);margin-top:1px;}
 .syl-program{font-size:11px;color:rgba(0,187,214,0.9);font-weight:600;margin-top:2px;}
-.syl-tag{background:rgba(0,187,214,0.2);border:1px solid rgba(0,187,214,0.35);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);align-self:flex-start;}
-
-/* Title Banner */
+.syl-tag{background:rgba(0,187,214,0.2);border:1px solid rgba(0,187,214,0.35);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);align-self:flex-start;white-space:nowrap;}
 .syl-banner{background:linear-gradient(135deg,#00bbd6 0%,#0d4a6e 100%);padding:16px 28px;display:flex;align-items:center;gap:16px;}
 .syl-banner-code{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.03em;white-space:nowrap;}
 .syl-banner-sep{width:2px;height:36px;background:rgba(255,255,255,0.3);flex-shrink:0;}
 .syl-banner-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;opacity:.95;}
 .syl-banner-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.65);font-weight:600;}
-
-/* Info Grid */
 .syl-info{padding:18px 28px;border-bottom:1px solid #e8eef2;}
 .syl-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid #d5e3ea;border-radius:8px;overflow:hidden;}
 .syl-info-cell{padding:10px 14px;border-right:1px solid #d5e3ea;border-bottom:1px solid #d5e3ea;}
 .syl-info-cell:nth-child(3n){border-right:none;}
 .syl-info-cell:nth-last-child(-n+3){border-bottom:none;}
-.syl-info-cell:nth-last-child(-n+3):not(:nth-last-child(-n+3):nth-child(3n+1)):not(:nth-last-child(-n+3):nth-child(3n)){border-bottom:none;}
 .sic-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b8fa3;margin-bottom:2px;}
 .sic-val{font-size:12px;font-weight:600;color:#0d1f2d;}
 .sic-val.empty{color:#aab8c2;font-style:italic;font-weight:400;}
-
-/* Sections */
 .syl-section{padding:16px 28px;border-bottom:1px solid #e8eef2;}
 .syl-section:last-child{border-bottom:none;}
 .syl-sec-hdr{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#00bbd6;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid rgba(0,187,214,0.15);display:flex;align-items:center;gap:8px;}
-.syl-sec-hdr::before{content:'';width:3px;height:14px;background:var(--cyan);border-radius:2px;flex-shrink:0;}
+.syl-sec-hdr::before{content:'';width:3px;height:14px;background:#00bbd6;border-radius:2px;flex-shrink:0;}
 .syl-sec-body{font-size:12px;line-height:1.75;color:#2a3a4a;}
-
-/* Tables */
 .syl-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
 .syl-table th{background:#0d1f2d;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;}
 .syl-table td{padding:8px 10px;border-bottom:1px solid #e8eef2;vertical-align:top;color:#2a3a4a;}
@@ -162,89 +192,46 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .syl-table .co-code{font-weight:700;color:#0d1f2d;white-space:nowrap;font-family:'Space Grotesk',sans-serif;}
 .syl-table .po-map{display:flex;flex-wrap:wrap;gap:3px;}
 .syl-table .po-chip{background:rgba(0,187,214,0.1);border:1px solid rgba(0,187,214,0.3);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;color:#0d7a8a;white-space:nowrap;}
-
-/* Course Plan table wrapper */
 .syl-plan-wrap{overflow-x:auto;margin-top:6px;}
-.syl-plan-table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px;}
+.syl-plan-table{width:100%;border-collapse:collapse;font-size:11px;min-width:860px;}
 .syl-plan-table th{background:#0d1f2d;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
 .syl-plan-table td{padding:8px 10px;border-bottom:1px solid #e8eef2;border-right:1px solid #f0f5f7;vertical-align:top;color:#2a3a4a;line-height:1.55;}
 .syl-plan-table tr:nth-child(even) td{background:#f7fafc;}
 .syl-plan-table tr:last-child td{border-bottom:none;}
 .syl-plan-table .wk-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#00bbd6;text-align:center;white-space:nowrap;}
 .syl-plan-table .topic-cell{font-weight:600;color:#0d1f2d;}
-
-/* Grading table */
-.syl-grade-table{width:100%;border-collapse:collapse;font-size:12px;max-width:480px;}
+.syl-grade-table{width:100%;border-collapse:collapse;font-size:12px;max-width:420px;}
 .syl-grade-table th{background:#0d1f2d;color:#fff;padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;}
 .syl-grade-table td{padding:8px 12px;border-bottom:1px solid #e8eef2;}
 .syl-grade-table .wt{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:#00bbd6;}
 .syl-grade-total td{background:#0d1f2d;color:#fff;font-weight:700;border-bottom:none;}
-.syl-grade-total .wt{color:#faa32b;font-size:16px;}
-
-/* Rubric */
-.syl-rubric-table{width:100%;border-collapse:collapse;font-size:11px;}
-.syl-rubric-table th{padding:8px 10px;text-align:center;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;background:#0d1f2d;color:#fff;}
-.syl-rubric-table th:first-child{text-align:left;background:#0d2a3d;}
-.syl-rubric-table td{padding:8px 10px;border-bottom:1px solid #e8eef2;border-right:1px solid #f0f5f7;vertical-align:top;font-size:11px;line-height:1.5;}
-.syl-rubric-table .crit-cell{font-weight:700;color:#0d1f2d;min-width:100px;}
-.syl-rubric-table .exc{background:rgba(0,184,148,.05);}
-.syl-rubric-table .sat{background:rgba(0,187,214,.04);}
-.syl-rubric-table .dev{background:rgba(250,163,43,.04);}
-.syl-rubric-table .beg{background:rgba(231,76,60,.04);}
-.score-badge{display:inline-block;background:#0d1f2d;color:#fff;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;margin-right:4px;}
-.score-badge.s4{background:#00b894;}
-.score-badge.s3{background:#00bbd6;}
-.score-badge.s2{background:#faa32b;}
-.score-badge.s1{background:#e74c3c;}
-
-/* References */
+.syl-grade-total .wt{color:#faa32b;}
+.syl-reqs-list{padding-left:16px;margin:0;}
+.syl-reqs-list li{padding:3px 0;font-size:12px;color:#2a3a4a;line-height:1.6;}
 .syl-refs{padding:0;list-style:none;}
 .syl-refs li{padding:4px 0 4px 16px;position:relative;font-size:12px;line-height:1.6;border-bottom:1px solid #f5f5f5;color:#2a3a4a;}
 .syl-refs li::before{content:'›';position:absolute;left:0;color:#00bbd6;font-weight:700;}
 .syl-refs li:last-child{border-bottom:none;}
 .syl-refs-sub{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b8fa3;margin:10px 0 4px;}
-
-/* Signature */
+.syl-note{background:#fff8ed;border-left:3px solid #faa32b;padding:10px 14px;border-radius:0 8px 8px 0;font-size:11.5px;color:#5a4310;line-height:1.55;margin:8px 0;}
 .syl-sig{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:24px 28px;background:#f9fbfc;border-top:2px solid #e8eef2;}
 .syl-sig-box{text-align:center;}
 .syl-sig-line{border-bottom:2px solid #0d1f2d;margin:0 20px 6px;height:40px;}
 .syl-sig-name{font-size:11px;font-weight:700;color:#0d1f2d;margin-bottom:2px;}
 .syl-sig-role{font-size:10px;color:#6b8fa3;text-transform:uppercase;letter-spacing:.04em;}
 
-/* Misc */
-.syl-note{background:#fff8ed;border-left:3px solid #faa32b;padding:10px 14px;border-radius:0 8px 8px 0;font-size:11.5px;color:#5a4310;line-height:1.55;margin:8px 0;}
-.syl-reqs-list{padding-left:16px;margin:0;}
-.syl-reqs-list li{padding:3px 0;font-size:12px;color:#2a3a4a;line-height:1.6;}
-
-/* Error toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#e74c3c;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s;box-shadow:0 6px 24px rgba(0,0,0,.2);}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.warn-note{background:rgba(250,163,43,0.1);border:1px solid rgba(250,163,43,0.3);border-radius:8px;padding:8px 12px;font-size:11px;color:#c97d00;margin-top:8px;}
-
 /* ── Print ── */
 @media print{
-  body{overflow:visible;}
-  .nav,.form-panel,.output-toolbar{display:none!important;}
-  .layout{display:block;height:auto;}
-  .output-panel{overflow:visible;background:#fff;}
-  .output-body{padding:0;display:block;}
+  .nav,.preview-toolbar,.modal-overlay{display:none!important;}
+  .preview-overlay{position:static;transform:none;background:#fff;}
+  .preview-body{padding:0;display:block;}
   .syldoc{box-shadow:none;border-radius:0;max-width:100%;}
-  .empty-state,.loader{display:none;}
-  @page{margin:10mm; size:A4;}
-  @page :first{margin-top:0;}
+  @page{margin:10mm;size:A4;}
   .syl-plan-wrap{overflow-x:visible;}
   .syl-plan-table{min-width:unset;font-size:9px;}
   .syl-plan-table th,.syl-plan-table td{padding:5px 6px;}
   .syl-section{padding:10px 16px;}
   .syl-hdr,.syl-banner{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-}
-
-@media(max-width:768px){
-  body{overflow:auto;}
-  .layout{flex-direction:column;height:auto;overflow:visible;}
-  .form-panel{width:100%;min-width:unset;height:auto;overflow:visible;}
-  .output-panel{min-height:600px;}
-  .output-body{padding:12px;}
 }
 </style>
 </head>
@@ -269,36 +256,36 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   </div>
 </div>
 
-<div class="layout">
-
 <!-- ════════════════════════════════════════════
-     FORM PANEL
+     MAIN FORM
 ════════════════════════════════════════════ -->
-<div class="form-panel">
-<div class="form-inner">
-  <div class="form-title">Syllabus Generator</div>
-  <div class="form-sub">OBE-aligned syllabi for SHS &amp; College</div>
+<div class="page" id="main-form">
 
-  <!-- Institution Type -->
-  <div class="fs">
-    <div class="fs-hdr">Institution Type</div>
-    <div class="type-tabs">
-      <div class="type-tab on" data-type="college" id="tab-college">College / University</div>
-      <div class="type-tab" data-type="shs" id="tab-shs">Senior High School</div>
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">Syllabus Builder</div>
+      <div class="page-sub">Fill in all sections below, then preview and share your syllabus.</div>
     </div>
-    <input type="hidden" id="institution-type" value="college">
+    <button class="btn-preview" id="btn-preview">Preview Syllabus &rarr;</button>
   </div>
 
-  <!-- School & Program -->
-  <div class="fs">
-    <div class="fs-hdr">School &amp; Program</div>
-    <div class="fg">
-      <label>School / University Name</label>
-      <input type="text" id="school-name" placeholder="e.g. De La Salle-College of Saint Benilde">
+  <!-- Institution Type -->
+  <div class="card">
+    <div class="card-hdr">Institution Type</div>
+    <div class="type-tabs">
+      <div class="type-tab on" data-type="college">College / University</div>
+      <div class="type-tab" data-type="shs">Senior High School</div>
     </div>
-    <div class="fg">
-      <label>College / Department</label>
-      <input type="text" id="college-dept" placeholder="e.g. School of New Media Arts">
+    <input type="hidden" id="institution-type" value="college">
+    <div class="fr2">
+      <div class="fg">
+        <label>School / University Name</label>
+        <input type="text" id="school-name" placeholder="e.g. De La Salle-College of Saint Benilde">
+      </div>
+      <div class="fg">
+        <label>College / Department</label>
+        <input type="text" id="college-dept" placeholder="e.g. School of New Media Arts">
+      </div>
     </div>
     <div class="fg">
       <label>Program</label>
@@ -307,9 +294,9 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   </div>
 
   <!-- Course Details -->
-  <div class="fs">
-    <div class="fs-hdr">Course Details</div>
-    <div class="fr2">
+  <div class="card">
+    <div class="card-hdr">Course Details</div>
+    <div class="fr3">
       <div class="fg">
         <label>Course Code</label>
         <input type="text" id="course-code" placeholder="e.g. MELPRIN">
@@ -318,16 +305,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
         <label>Credit Units</label>
         <input type="text" id="credits" placeholder="e.g. 3 units">
       </div>
+      <div class="fg">
+        <label>Prerequisites</label>
+        <input type="text" id="prerequisites" placeholder="None">
+      </div>
     </div>
     <div class="fg">
       <label>Course Title *</label>
       <input type="text" id="course-title" placeholder="e.g. Elements and Principles of Design">
     </div>
-    <div class="fg">
-      <label>Prerequisites</label>
-      <input type="text" id="prerequisites" placeholder="e.g. None / Course Code">
-    </div>
-    <div class="fr2">
+    <div class="fr3">
       <div class="fg">
         <label>Course Type</label>
         <select id="course-type">
@@ -341,7 +328,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
         </select>
       </div>
       <div class="fg">
-        <label>No. of Weeks</label>
+        <label>Number of Weeks</label>
         <select id="num-weeks">
           <option value="12">12 weeks</option>
           <option value="13">13 weeks</option>
@@ -351,511 +338,485 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
           <option value="18">18 weeks</option>
         </select>
       </div>
-    </div>
-    <div class="fg">
-      <label>Semester / Term</label>
-      <input type="text" id="semester" placeholder="e.g. 2nd Semester, AY 2025-2026">
+      <div class="fg">
+        <label>Semester / Term</label>
+        <input type="text" id="semester" placeholder="e.g. 2nd Semester, AY 2025-2026">
+      </div>
     </div>
   </div>
 
   <!-- Course Description -->
-  <div class="fs">
-    <div class="fs-hdr">Course Description</div>
+  <div class="card">
+    <div class="card-hdr">Course Description</div>
     <div class="fg">
-      <textarea id="course-description" rows="4" placeholder="Enter the course description (2–4 sentences describing what the course covers, its approach, and who it is for)..."></textarea>
+      <textarea id="course-description" rows="4" placeholder="Describe the course — what it covers, the approach used, and who it is for (2–4 sentences)."></textarea>
     </div>
   </div>
 
   <!-- Program Outcomes -->
-  <div class="fs">
-    <div class="fs-hdr">Program Outcomes</div>
+  <div class="card">
+    <div class="card-hdr">Program Outcomes</div>
     <div class="fg">
-      <textarea id="program-outcomes" rows="5" placeholder="Enter one Program Outcome per line&#10;e.g.&#10;Apply knowledge of design principles in professional contexts&#10;Communicate design concepts effectively across media&#10;Demonstrate ethical and socially responsible practice"></textarea>
-      <div class="hint">One outcome per line. Will be numbered PO1, PO2, PO3…</div>
+      <textarea id="program-outcomes" rows="5" placeholder="Enter one Program Outcome per line, e.g.:&#10;Apply knowledge of design principles in professional contexts&#10;Communicate design concepts effectively across different media&#10;Demonstrate ethical and socially responsible creative practice"></textarea>
+      <div class="hint">One outcome per line &nbsp;•&nbsp; Will be numbered PO1, PO2, PO3…</div>
     </div>
   </div>
 
   <!-- Course Outcomes -->
-  <div class="fs">
-    <div class="fs-hdr">Course Outcomes</div>
+  <div class="card">
+    <div class="card-hdr">Course Outcomes</div>
     <div class="fg">
-      <textarea id="course-outcomes" rows="5" placeholder="Enter one Course Outcome per line&#10;e.g.&#10;Identify the fundamental elements and principles of design&#10;Analyze design compositions using formal critique frameworks&#10;Create original design outputs applying learned principles&#10;Evaluate peer work constructively using design criteria"></textarea>
-      <div class="hint">One outcome per line (4–8 recommended). Will be numbered CO1, CO2, CO3…</div>
+      <textarea id="course-outcomes" rows="5" placeholder="Enter one Course Outcome per line, e.g.:&#10;Identify the fundamental elements and principles of design&#10;Analyze design compositions using formal critique frameworks&#10;Create original design outputs applying learned principles&#10;Evaluate peer work constructively using design rubric criteria"></textarea>
+      <div class="hint">One outcome per line (4–8 recommended) &nbsp;•&nbsp; Will be numbered CO1, CO2…</div>
     </div>
   </div>
 
+  <!-- Course Plan -->
+  <div class="card">
+    <div class="card-hdr">Weekly Course Plan</div>
+    <div class="weeks-toolbar">
+      <span id="week-count-label">14 weeks</span>
+      <button class="btn-expand-all" id="btn-expand-all">Expand All</button>
+    </div>
+    <div id="week-rows"></div>
+  </div>
+
   <!-- Grading -->
-  <div class="fs">
-    <div class="fs-hdr">Grading Breakdown</div>
+  <div class="card">
+    <div class="card-hdr">Grading Breakdown</div>
     <div id="grading-rows">
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Activities">
         <input type="number" class="g-wt" min="0" max="100" value="30" placeholder="%">
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
       </div>
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Projects">
         <input type="number" class="g-wt" min="0" max="100" value="30" placeholder="%">
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
       </div>
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Final Project">
         <input type="number" class="g-wt" min="0" max="100" value="40" placeholder="%">
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
       </div>
     </div>
     <div class="grading-total ok" id="grading-total">Total: 100% ✓</div>
-    <div class="hint" style="margin-top:6px;">Weights must add up to 100%</div>
+    <button class="btn-add-row" onclick="addGradingRow()">+ Add Component</button>
   </div>
 
-  <!-- AI Settings -->
-  <div class="fs">
-    <div class="fs-hdr">AI Settings</div>
-    <label class="ai-toggle" id="ai-toggle">
-      <span class="ai-toggle-ico">✨</span>
-      <span class="ai-toggle-lbl">Use AI to Generate Content</span>
-      <label class="sw"><input type="checkbox" id="use-ai"><span class="sl"></span></label>
-    </label>
-    <div class="ai-fields" id="ai-fields">
-      <div class="fg">
-        <label>AI Provider</label>
-        <select id="ai-provider">
-          <option value="anthropic">Anthropic (Claude)</option>
-          <option value="openai">OpenAI (GPT-4o)</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>API Key</label>
-        <input type="password" id="api-key" placeholder="sk-ant-... or sk-...">
-        <div class="hint">Stored locally in your browser only.</div>
-      </div>
+  <!-- References -->
+  <div class="card">
+    <div class="card-hdr">References</div>
+    <div class="fg">
+      <label>Books &amp; Journals (one per line, APA format)</label>
+      <textarea id="ref-books" rows="4" placeholder="Author, A. A. (Year). Title of book. Publisher.&#10;Author, B. B. (Year). Title of journal article. Journal Name, vol(no), pp–pp."></textarea>
     </div>
-    <div class="warn-note" id="no-ai-note">Without AI, a structured template with placeholder content will be generated. Enable AI for a fully written syllabus.</div>
+    <div class="fg">
+      <label>Online Resources (one per line)</label>
+      <textarea id="ref-websites" rows="3" placeholder="https://example.com — Description of resource"></textarea>
+    </div>
   </div>
-</div><!-- /form-inner -->
 
-<div class="form-foot">
-  <button class="btn-gen" id="btn-generate">Generate Syllabus</button>
-</div>
-</div><!-- /form-panel -->
+  <div style="text-align:center;padding:10px 0;">
+    <button class="btn-preview" id="btn-preview2">Preview Syllabus &rarr;</button>
+  </div>
+
+</div><!-- /page -->
 
 
 <!-- ════════════════════════════════════════════
-     OUTPUT PANEL
+     PREVIEW OVERLAY
 ════════════════════════════════════════════ -->
-<div class="output-panel" id="output-panel">
-  <div class="output-toolbar">
-    <h3 id="out-title">Generated Syllabus</h3>
-    <div class="ot-btns">
-      <button class="btn-sm primary" id="btn-print" style="display:none" onclick="window.print()">Print / Save PDF</button>
-    </div>
+<div class="preview-overlay" id="preview-overlay">
+  <div class="preview-toolbar">
+    <button class="btn-back" id="btn-back">&larr; Back to Edit</button>
+    <h3 id="preview-title">Syllabus Preview</h3>
+    <button class="btn-print-doc" onclick="window.print()">Print / Save PDF</button>
+    <button class="btn-share" id="btn-share">Save &amp; Share</button>
   </div>
-  <div class="output-body" id="output-body">
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">Your syllabus will appear here</div>
-      <div class="empty-desc">Fill in the form on the left and click <strong>Generate Syllabus</strong> to create a complete OBE-aligned course syllabus ready to print.</div>
+  <div class="preview-body" id="preview-body"></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SHARE MODAL
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Share Syllabus</h3>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div id="modal-content">
+      <div class="saving-indicator">Saving syllabus…</div>
     </div>
   </div>
 </div>
 
-</div><!-- /layout -->
-
 <div class="toast" id="toast"></div>
+
 
 <!-- ════════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════════ -->
 <script>
 const AUTH_TOKEN = document.querySelector('meta[name="auth-token"]').content;
+function apiUrl(p){ return AUTH_TOKEN ? p+'?_t='+encodeURIComponent(AUTH_TOKEN) : p; }
 
-function apiUrl(path){
-  return AUTH_TOKEN ? path+'?_t='+encodeURIComponent(AUTH_TOKEN) : path;
+// ── Week Rows ─────────────────────────────────────────────────────────────
+function generateWeekRows(n){
+  const container = document.getElementById('week-rows');
+  container.innerHTML = '';
+  document.getElementById('week-count-label').textContent = n + ' week' + (n>1?'s':'');
+  for(let w=1; w<=n; w++){
+    const open = w<=2 ? ' open' : '';
+    container.innerHTML += `
+    <div class="week-row${open}" data-week="${w}">
+      <div class="week-hdr" onclick="toggleWeek(this)">
+        <span class="week-num">Week ${w}</span>
+        <span class="week-preview" id="wp-${w}">click to expand</span>
+        <span class="week-chevron">▼</span>
+      </div>
+      <div class="week-body">
+        <div class="fg"><label>Topics</label>
+          <input type="text" id="w${w}-topics" placeholder="Main topic and subtopics for this week" oninput="updatePreview(${w})">
+        </div>
+        <div class="fg"><label>Intended Learning Outcomes (ILOs)</label>
+          <textarea id="w${w}-ilos" rows="2" placeholder="By the end of this week, students will be able to: (1)… (2)…"></textarea>
+        </div>
+        <div class="fr2">
+          <div class="fg"><label>Teaching &amp; Learning Activities (TLAs)</label>
+            <input type="text" id="w${w}-tlas" placeholder="e.g. Lecture-Discussion, Workshop">
+          </div>
+          <div class="fg"><label>Assessment Tasks</label>
+            <input type="text" id="w${w}-ats" placeholder="e.g. Quiz 1, Activity Sheet">
+          </div>
+        </div>
+        <div class="fr2">
+          <div class="fg"><label>Evaluation Strategies</label>
+            <input type="text" id="w${w}-eval" placeholder="e.g. Rubric, Checklist, Peer Evaluation">
+          </div>
+          <div class="fg"><label>Resources</label>
+            <input type="text" id="w${w}-res" placeholder="e.g. Textbook Ch. 1, URL">
+          </div>
+        </div>
+        <div class="fg"><label>Due Date (optional)</label>
+          <input type="text" id="w${w}-due" placeholder="">
+        </div>
+      </div>
+    </div>`;
+  }
 }
 
-// ── Settings Persistence ──────────────────────────────────────────────────
-function saveSettings(){
-  const useAI = document.getElementById('use-ai').checked;
-  const provider = document.getElementById('ai-provider').value;
-  const apiKey = document.getElementById('api-key').value;
-  localStorage.setItem('sa_use_ai', useAI ? '1' : '0');
-  localStorage.setItem('sa_ai_provider', provider);
-  if(apiKey) localStorage.setItem('sa_api_key', apiKey);
+function toggleWeek(hdr){
+  hdr.closest('.week-row').classList.toggle('open');
 }
 
-function loadSettings(){
-  const useAI = localStorage.getItem('sa_use_ai') === '1';
-  document.getElementById('use-ai').checked = useAI;
-  toggleAIFields(useAI);
-  const p = localStorage.getItem('sa_ai_provider');
-  if(p) document.getElementById('ai-provider').value = p;
-  const k = localStorage.getItem('sa_api_key');
-  if(k) document.getElementById('api-key').value = k;
+function updatePreview(w){
+  const topics = document.getElementById('w'+w+'-topics').value.trim();
+  const prev = document.getElementById('wp-'+w);
+  if(prev) prev.textContent = topics || 'click to expand';
 }
 
-function toggleAIFields(on){
-  document.getElementById('ai-fields').classList.toggle('on', on);
-  document.getElementById('ai-toggle').classList.toggle('on', on);
-  document.getElementById('no-ai-note').style.display = on ? 'none' : 'block';
-}
-
-document.getElementById('use-ai').addEventListener('change', function(){
-  toggleAIFields(this.checked);
-});
-
-// ── Institution Type Toggle ───────────────────────────────────────────────
-document.querySelectorAll('.type-tab').forEach(tab => {
-  tab.addEventListener('click', function(){
-    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('on'));
-    this.classList.add('on');
-    document.getElementById('institution-type').value = this.dataset.type;
+let allExpanded = false;
+document.getElementById('btn-expand-all').addEventListener('click', function(){
+  allExpanded = !allExpanded;
+  document.querySelectorAll('.week-row').forEach(r=>{
+    r.classList.toggle('open', allExpanded);
   });
+  this.textContent = allExpanded ? 'Collapse All' : 'Expand All';
 });
 
-// ── Grading Total ─────────────────────────────────────────────────────────
+document.getElementById('num-weeks').addEventListener('change', function(){
+  generateWeekRows(parseInt(this.value));
+});
+
+// ── Grading ───────────────────────────────────────────────────────────────
 function updateGradingTotal(){
-  let total = 0;
-  document.querySelectorAll('.g-wt').forEach(el => total += parseInt(el.value||0));
-  const el = document.getElementById('grading-total');
-  el.textContent = 'Total: ' + total + '%' + (total===100 ? ' ✓' : ' ✗ (must be 100%)');
-  el.className = 'grading-total ' + (total===100 ? 'ok' : 'err');
+  let t=0;
+  document.querySelectorAll('.g-wt').forEach(el=>t+=parseInt(el.value||0));
+  const el=document.getElementById('grading-total');
+  el.textContent='Total: '+t+'%'+(t===100?' ✓':' ✗ (must equal 100%)');
+  el.className='grading-total '+(t===100?'ok':'err');
 }
-document.addEventListener('input', e => { if(e.target.classList.contains('g-wt')) updateGradingTotal(); });
+document.addEventListener('input',e=>{
+  if(e.target.classList.contains('g-wt')) updateGradingTotal();
+});
+function removeGradingRow(btn){
+  btn.closest('.grading-row').remove();
+  updateGradingTotal();
+}
+function addGradingRow(){
+  const d=document.createElement('div');
+  d.className='grading-row';
+  d.innerHTML=`<input type="text" class="g-comp" placeholder="Component name"><input type="number" class="g-wt" min="0" max="100" value="0" placeholder="%"><button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>`;
+  document.getElementById('grading-rows').appendChild(d);
+  updateGradingTotal();
+}
 
-// ── Generate ──────────────────────────────────────────────────────────────
-document.getElementById('btn-generate').addEventListener('click', async function(){
-  // Validate
-  const courseTitle = document.getElementById('course-title').value.trim();
-  if(!courseTitle){ showToast('Course Title is required'); return; }
-
-  let total = 0;
-  document.querySelectorAll('.g-wt').forEach(el => total += parseInt(el.value||0));
-  if(total !== 100){ showToast('Grading weights must add up to 100%'); return; }
-
-  // Build grading object
-  const grading = {};
-  const rows = document.querySelectorAll('#grading-rows .grading-row');
-  rows.forEach(row => {
-    const comp = row.querySelector('.g-comp').value.trim();
-    const wt = parseInt(row.querySelector('.g-wt').value||0);
-    if(comp && wt > 0) grading[comp] = wt;
+// ── Type Tabs ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.type-tab').forEach(tab=>{
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('on'));
+    this.classList.add('on');
+    document.getElementById('institution-type').value=this.dataset.type;
   });
+});
 
-  // Save AI settings
-  saveSettings();
+// ── Build Syllabus Object from Form ──────────────────────────────────────
+function parseOutcomes(text, prefix){
+  return text.split('\n').map(l=>l.trim()).filter(Boolean).map((line,i)=>{
+    const clean=line.replace(/^(?:\d+[\.\):\s]+|[-•*]\s+|(?:PO|CO|LO)\s*\d+[\.\):\s]+)/,'').trim();
+    return {code: prefix+(i+1), description: clean||line, po_mapping:[]};
+  });
+}
 
-  // Build payload
-  const payload = {
+function collectWeekData(){
+  const n=parseInt(document.getElementById('num-weeks').value);
+  const plan=[];
+  for(let w=1;w<=n;w++){
+    plan.push({
+      week: w,
+      topics: (document.getElementById('w'+w+'-topics')||{value:''}).value.trim(),
+      ilos: (document.getElementById('w'+w+'-ilos')||{value:''}).value.trim(),
+      tlas: (document.getElementById('w'+w+'-tlas')||{value:''}).value.trim(),
+      assessment_tasks: (document.getElementById('w'+w+'-ats')||{value:''}).value.trim(),
+      evaluation_strategies: (document.getElementById('w'+w+'-eval')||{value:''}).value.trim(),
+      resources: (document.getElementById('w'+w+'-res')||{value:''}).value.trim(),
+      due_date: (document.getElementById('w'+w+'-due')||{value:''}).value.trim(),
+    });
+  }
+  return plan;
+}
+
+function buildSyllabusFromForm(){
+  const poText=document.getElementById('program-outcomes').value.trim();
+  const coText=document.getElementById('course-outcomes').value.trim();
+  const grading=[];
+  document.querySelectorAll('#grading-rows .grading-row').forEach(row=>{
+    const comp=row.querySelector('.g-comp').value.trim();
+    const wt=parseInt(row.querySelector('.g-wt').value||0);
+    if(comp&&wt>0) grading.push({component:comp,weight:wt});
+  });
+  const booksText=document.getElementById('ref-books').value.trim();
+  const sitesText=document.getElementById('ref-websites').value.trim();
+  return {
     institution_type: document.getElementById('institution-type').value,
     school_name: document.getElementById('school-name').value.trim(),
     college_dept: document.getElementById('college-dept').value.trim(),
     program: document.getElementById('program').value.trim(),
     course_code: document.getElementById('course-code').value.trim(),
-    course_title: courseTitle,
+    course_title: document.getElementById('course-title').value.trim(),
     credits: document.getElementById('credits').value.trim(),
-    prerequisites: document.getElementById('prerequisites').value.trim() || 'None',
+    prerequisites: document.getElementById('prerequisites').value.trim()||'None',
     course_type: document.getElementById('course-type').value,
     semester: document.getElementById('semester').value.trim(),
-    num_weeks: parseInt(document.getElementById('num-weeks').value),
+    faculty:'', schedule:'',
     course_description: document.getElementById('course-description').value.trim(),
-    program_outcomes: document.getElementById('program-outcomes').value.trim(),
-    course_outcomes: document.getElementById('course-outcomes').value.trim(),
-    grading: grading,
-    use_ai: document.getElementById('use-ai').checked,
-    api_key: document.getElementById('api-key').value.trim(),
-    ai_provider: document.getElementById('ai-provider').value,
+    program_outcomes: parseOutcomes(poText,'PO'),
+    course_outcomes: parseOutcomes(coText,'CO'),
+    course_plan: collectWeekData(),
+    grading_system: grading,
+    references:{
+      books: booksText.split('\n').map(l=>l.trim()).filter(Boolean),
+      websites: sitesText.split('\n').map(l=>l.trim()).filter(Boolean),
+    },
   };
+}
 
-  // Show loader
-  const body = document.getElementById('output-body');
-  const title = document.getElementById('out-title');
-  const printBtn = document.getElementById('btn-print');
-  body.innerHTML = `<div class="loader"><div class="spin"></div><div class="loader-t">Generating syllabus...</div><div class="loader-s">This may take up to 30 seconds with AI enabled</div></div>`;
-  printBtn.style.display = 'none';
-  this.disabled = true;
-  title.textContent = 'Generating...';
+// ── Preview ───────────────────────────────────────────────────────────────
+function showPreview(){
+  const courseTitle=document.getElementById('course-title').value.trim();
+  if(!courseTitle){ showToast('Please enter a Course Title first'); return; }
+  const s=buildSyllabusFromForm();
+  document.getElementById('preview-body').innerHTML=`<div class="syldoc">${renderSyllabusDoc(s)}</div>`;
+  document.getElementById('preview-title').textContent=
+    (s.course_code?s.course_code+' — ':'')+s.course_title;
+  document.getElementById('preview-overlay').classList.add('show');
+}
 
-  try {
-    const resp = await fetch(apiUrl('/api/generate-syllabus'), {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
+document.getElementById('btn-preview').addEventListener('click', showPreview);
+document.getElementById('btn-preview2').addEventListener('click', showPreview);
+document.getElementById('btn-back').addEventListener('click', ()=>{
+  document.getElementById('preview-overlay').classList.remove('show');
+});
+
+// ── Save & Share ──────────────────────────────────────────────────────────
+document.getElementById('btn-share').addEventListener('click', async function(){
+  const overlay=document.getElementById('modal-overlay');
+  const content=document.getElementById('modal-content');
+  content.innerHTML='<div class="saving-indicator">Saving syllabus…</div>';
+  overlay.classList.add('show');
+
+  const s=buildSyllabusFromForm();
+  try{
+    const resp=await fetch(apiUrl('/api/save-syllabus'),{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({syllabus:s})
     });
-    const data = await resp.json();
-    if(data.error){ showToast(data.error); body.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Generation Failed</div><div class="empty-desc">${esc(data.error)}</div></div>`; return; }
-
-    if(data.warning){
-      showToast('Note: ' + data.warning, 5000);
-    }
-
-    // Save to localStorage for later
-    localStorage.setItem('skooled_syllabus', JSON.stringify(data.syllabus));
-
-    // Render
-    body.innerHTML = renderSyllabus(data.syllabus);
-    title.textContent = (data.syllabus.course_code||'') + ' — ' + (data.syllabus.course_title||'Syllabus');
-    printBtn.style.display = '';
-  } catch(e){
-    showToast('Network error: ' + e.message);
-    body.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Error</div><div class="empty-desc">${esc(e.message)}</div></div>`;
-  } finally {
-    this.disabled = false;
+    const data=await resp.json();
+    if(data.error){ content.innerHTML=`<p style="color:#e74c3c">${esc(data.error)}</p>`; return; }
+    const url=data.url;
+    const title=s.course_code?(s.course_code+' — '+s.course_title):s.course_title;
+    content.innerHTML=`
+      <div class="modal-section">
+        <label>Shareable Link</label>
+        <div class="modal-url-row">
+          <input type="text" id="share-url-input" value="${esc(url)}" readonly>
+          <button class="modal-btn cyan" id="copy-btn">Copy</button>
+        </div>
+      </div>
+      <div class="modal-divider">or share via email</div>
+      <div class="modal-section">
+        <label>Recipient Email Address</label>
+        <div class="modal-email-row">
+          <input type="email" id="share-email" placeholder="colleague@school.edu.ph">
+          <button class="modal-btn dark" id="send-email-btn">Open Email</button>
+        </div>
+      </div>
+      <div class="modal-note">The recipient can view and print the syllabus without needing to log in to SKOOLED-AI.</div>`;
+    document.getElementById('copy-btn').onclick=()=>{
+      navigator.clipboard.writeText(url).then(()=>showToast('Link copied!'));
+      document.getElementById('copy-btn').textContent='Copied!';
+      setTimeout(()=>document.getElementById('copy-btn').textContent='Copy',2000);
+    };
+    document.getElementById('send-email-btn').onclick=()=>{
+      const email=document.getElementById('share-email').value.trim();
+      if(!email){showToast('Enter an email address');return;}
+      const subject=encodeURIComponent('Syllabus: '+title);
+      const body=encodeURIComponent('Hello,\n\nPlease find the course syllabus for '+title+' at the link below:\n\n'+url+'\n\nYou can view and download it without needing an account.\n\nBest regards');
+      window.open('mailto:'+email+'?subject='+subject+'&body='+body);
+    };
+  }catch(e){
+    content.innerHTML=`<p style="color:#e74c3c">Error: ${esc(e.message)}</p>`;
   }
 });
 
-// ── Rendering ─────────────────────────────────────────────────────────────
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function nl2p(s){ return s ? s.split(/\n+/).filter(l=>l.trim()).map(l=>`<p style="margin:0 0 6px">${esc(l.trim())}</p>`).join('') : ''; }
-function nl2li(s){ return s ? s.split(/\n+/).filter(l=>l.trim()).map(l=>`<li>${esc(l.trim())}</li>`).join('') : ''; }
+document.getElementById('modal-close').addEventListener('click',()=>{
+  document.getElementById('modal-overlay').classList.remove('show');
+});
+document.getElementById('modal-overlay').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('show');
+});
 
-function renderSyllabus(s){
-  return `<div class="syldoc">
-    ${renderHeader(s)}
-    ${renderBanner(s)}
-    ${renderInfoGrid(s)}
-    ${renderDescription(s)}
-    ${renderPOs(s)}
-    ${renderCOs(s)}
-    ${renderCourseStructure(s)}
-    ${renderCoursePlan(s)}
-    ${renderRequirements(s)}
-    ${renderGrading(s)}
-    ${renderPolicies(s)}
-    ${renderRubric(s)}
-    ${renderReferences(s)}
-    ${renderSignatures(s)}
-  </div>`;
+// ── Rendering ─────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function nl2p(s){return s?s.split(/\n+/).filter(l=>l.trim()).map(l=>`<p style="margin:0 0 6px">${esc(l.trim())}</p>`).join(''):'<p style="color:#aab8c2;font-style:italic">Not provided</p>';}
+
+function renderSyllabusDoc(s){
+  return renderHeader(s)+renderBanner(s)+renderInfoGrid(s)+renderDescription(s)
+    +renderPOs(s)+renderCOs(s)+renderCoursePlan(s)
+    +renderGrading(s)+renderPolicies()+renderReferences(s)+renderSignatures();
 }
 
 function renderHeader(s){
-  const typeLabel = s.institution_type === 'shs' ? 'Senior High School' : 'Higher Education Institution';
+  const typeLabel=s.institution_type==='shs'?'Senior High School':'Higher Education Institution';
   return `<div class="syl-hdr">
-    <div class="syl-hdr-badge">🎓</div>
+    <div class="syl-hdr-badge">&#127891;</div>
     <div class="syl-hdr-info">
       <div class="syl-school">${esc(s.school_name||'[School / University Name]')}</div>
       <div class="syl-dept">${esc(s.college_dept||'[College / Department]')}</div>
       <div class="syl-program">${esc(s.program||'[Program]')}</div>
     </div>
     <div class="syl-tag">${esc(typeLabel)}</div>
-  </div>`;
-}
+  </div>`;}
 
 function renderBanner(s){
   return `<div class="syl-banner">
-    <div>
-      <div class="syl-banner-label">Course Code</div>
-      <div class="syl-banner-code">${esc(s.course_code||'—')}</div>
-    </div>
+    <div><div class="syl-banner-label">Course Code</div><div class="syl-banner-code">${esc(s.course_code||'—')}</div></div>
     <div class="syl-banner-sep"></div>
-    <div>
-      <div class="syl-banner-label">Course Title</div>
-      <div class="syl-banner-title">${esc(s.course_title||'—')}</div>
-    </div>
-  </div>`;
-}
+    <div><div class="syl-banner-label">Course Title</div><div class="syl-banner-title">${esc(s.course_title||'—')}</div></div>
+  </div>`;}
 
 function renderInfoGrid(s){
-  const cells = [
-    ['Credit Units', s.credits||'—'],
-    ['Prerequisites', s.prerequisites||'None'],
-    ['Course Type', s.course_type||'—'],
-    ['Academic Period', s.semester||'—'],
-    ['Faculty', s.faculty||'___________________________'],
-    ['Schedule', s.schedule||'___________________________'],
-  ];
-  const cellsHtml = cells.map(([l,v])=>`<div class="syl-info-cell"><div class="sic-lbl">${l}</div><div class="sic-val${v.includes('___')||!v||v==='—'?' empty':''}">${esc(v)}</div></div>`).join('');
-  return `<div class="syl-info"><div class="syl-info-grid">${cellsHtml}</div></div>`;
-}
+  const cells=[['Credit Units',s.credits||'—'],['Prerequisites',s.prerequisites||'None'],['Course Type',s.course_type||'—'],['Academic Period',s.semester||'—'],['Faculty','___________________________'],['Schedule','___________________________']];
+  return `<div class="syl-info"><div class="syl-info-grid">${cells.map(([l,v])=>`<div class="syl-info-cell"><div class="sic-lbl">${l}</div><div class="sic-val${v.includes('___')||!v||v==='—'?' empty':''}">${esc(v)}</div></div>`).join('')}</div></div>`;}
 
 function renderDescription(s){
-  if(!s.course_description) return '';
-  return `<div class="syl-section"><div class="syl-sec-hdr">Course Description</div><div class="syl-sec-body">${nl2p(s.course_description)}</div></div>`;
-}
+  return `<div class="syl-section"><div class="syl-sec-hdr">Course Description</div><div class="syl-sec-body">${nl2p(s.course_description)}</div></div>`;}
 
 function renderPOs(s){
   if(!s.program_outcomes||!s.program_outcomes.length) return '';
-  const rows = s.program_outcomes.map(po=>`<tr><td class="co-code">${esc(po.code)}</td><td>${esc(po.description)}</td></tr>`).join('');
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Program Outcomes</div>
-    <table class="syl-table">
-      <thead><tr><th style="width:70px">Code</th><th>Outcome Statement</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>`;
-}
+  return `<div class="syl-section"><div class="syl-sec-hdr">Program Outcomes</div>
+    <table class="syl-table"><thead><tr><th style="width:65px">Code</th><th>Outcome Statement</th></tr></thead>
+    <tbody>${s.program_outcomes.map(po=>`<tr><td class="co-code">${esc(po.code)}</td><td>${esc(po.description)}</td></tr>`).join('')}</tbody></table></div>`;}
 
 function renderCOs(s){
   if(!s.course_outcomes||!s.course_outcomes.length) return '';
-  const rows = s.course_outcomes.map(co=>{
-    const poChips = (co.po_mapping||[]).map(p=>`<span class="po-chip">${esc(p)}</span>`).join('');
-    return `<tr><td class="co-code">${esc(co.code)}</td><td>${esc(co.description)}</td><td><div class="po-map">${poChips||'<span style="color:#aab8c2;font-style:italic;font-size:10px">—</span>'}</div></td></tr>`;
-  }).join('');
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Course Outcomes</div>
-    <table class="syl-table">
-      <thead><tr><th style="width:55px">Code</th><th>Course Outcome Statement</th><th style="width:120px">Program Outcome Mapping</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>`;
-}
-
-function renderCourseStructure(s){
-  let html = '<div class="syl-section"><div class="syl-sec-hdr">Course Structure &amp; Requirements</div>';
-  if(s.technology_requirements){
-    html += `<div class="syl-sec-body" style="margin-bottom:12px"><strong>Technology Requirements</strong><br>${nl2p(s.technology_requirements)}</div>`;
-  }
-  if(s.communication_guidelines){
-    html += `<div class="syl-sec-body" style="margin-bottom:12px"><strong>Communication Guidelines</strong><br>${nl2p(s.communication_guidelines)}</div>`;
-  }
-  if(s.submission_protocol){
-    html += `<div class="syl-sec-body"><strong>Submission Protocol</strong><br>${nl2p(s.submission_protocol)}</div>`;
-  }
-  html += '</div>';
-  return html;
-}
+  return `<div class="syl-section"><div class="syl-sec-hdr">Course Outcomes</div>
+    <table class="syl-table"><thead><tr><th style="width:55px">Code</th><th>Course Outcome Statement</th><th style="width:120px">PO Mapping</th></tr></thead>
+    <tbody>${s.course_outcomes.map(co=>`<tr><td class="co-code">${esc(co.code)}</td><td>${esc(co.description)}</td><td><div class="po-map"><span style="color:#aab8c2;font-style:italic;font-size:10px">—</span></div></td></tr>`).join('')}</tbody></table></div>`;}
 
 function renderCoursePlan(s){
   if(!s.course_plan||!s.course_plan.length) return '';
-  const rows = s.course_plan.map(w=>`
-    <tr>
-      <td class="wk-num">${esc(String(w.week||''))}</td>
-      <td class="topic-cell">${esc(w.topics||'')}</td>
-      <td>${esc(w.ilos||'')}</td>
-      <td>${esc(w.tlas||'')}</td>
-      <td>${esc(w.assessment_tasks||'')}</td>
-      <td>${esc(w.evaluation_strategies||'')}</td>
-      <td>${esc(w.resources||'')}</td>
-      <td style="white-space:nowrap">${esc(w.due_date||'')}</td>
-    </tr>`).join('');
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Course Plan</div>
-    <div class="syl-plan-wrap">
-      <table class="syl-plan-table">
-        <thead><tr>
-          <th style="width:42px;text-align:center">Week</th>
-          <th style="min-width:140px">Topics</th>
-          <th style="min-width:170px">Intended Learning Outcomes (ILOs)</th>
-          <th style="min-width:140px">Teaching &amp; Learning Activities (TLAs)</th>
-          <th style="min-width:130px">Assessment Tasks (ATs)</th>
-          <th style="min-width:110px">Evaluation Strategies</th>
-          <th style="min-width:130px">Resources</th>
-          <th style="min-width:70px">Due Date</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function renderRequirements(s){
-  if(!s.course_requirements||!s.course_requirements.length) return '';
-  const items = s.course_requirements.map(r=>`<li>${esc(r)}</li>`).join('');
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Course Requirements &amp; Policies</div>
-    <ul class="syl-reqs-list">${items}</ul>
-  </div>`;
-}
+  const rows=s.course_plan.map(w=>`<tr>
+    <td class="wk-num">${esc(String(w.week||''))}</td>
+    <td class="topic-cell">${esc(w.topics||'')}</td>
+    <td>${esc(w.ilos||'')}</td>
+    <td>${esc(w.tlas||'')}</td>
+    <td>${esc(w.assessment_tasks||'')}</td>
+    <td>${esc(w.evaluation_strategies||'')}</td>
+    <td>${esc(w.resources||'')}</td>
+    <td style="white-space:nowrap">${esc(w.due_date||'')}</td>
+  </tr>`).join('');
+  return `<div class="syl-section"><div class="syl-sec-hdr">Course Plan</div>
+    <div class="syl-plan-wrap"><table class="syl-plan-table">
+      <thead><tr>
+        <th style="width:42px;text-align:center">Wk</th>
+        <th style="min-width:130px">Topics</th>
+        <th style="min-width:160px">ILOs</th>
+        <th style="min-width:130px">TLAs</th>
+        <th style="min-width:120px">Assessment Tasks</th>
+        <th style="min-width:110px">Evaluation</th>
+        <th style="min-width:120px">Resources</th>
+        <th style="min-width:70px">Due Date</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div></div>`;}
 
 function renderGrading(s){
   if(!s.grading_system||!s.grading_system.length) return '';
-  let total = 0;
-  const rows = s.grading_system.map(g=>{
-    total += parseInt(g.weight||0);
-    return `<tr><td>${esc(g.component)}</td><td class="wt">${esc(String(g.weight))}%</td></tr>`;
-  }).join('');
-  const note = `<div class="syl-note" style="margin-top:10px">The passing grade for this course is <strong>70%</strong>. Grading is cumulative and zero-based. All components must be submitted to receive a final grade.</div>`;
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Grading System</div>
-    <table class="syl-grade-table">
-      <thead><tr><th>Component</th><th>Weight</th></tr></thead>
-      <tbody>${rows}<tr class="syl-grade-total"><td><strong>TOTAL</strong></td><td class="wt">${total}%</td></tr></tbody>
-    </table>
-    ${note}
-  </div>`;
-}
+  let total=0;
+  const rows=s.grading_system.map(g=>{total+=parseInt(g.weight||0);return`<tr><td>${esc(g.component)}</td><td class="wt">${esc(String(g.weight))}%</td></tr>`;}).join('');
+  return `<div class="syl-section"><div class="syl-sec-hdr">Grading System</div>
+    <table class="syl-grade-table"><thead><tr><th>Component</th><th>Weight</th></tr></thead>
+    <tbody>${rows}<tr class="syl-grade-total"><td><strong>TOTAL</strong></td><td class="wt">${total}%</td></tr></tbody></table>
+    <div class="syl-note" style="margin-top:10px">The passing grade for this course is <strong>70%</strong>. Grading is cumulative and zero-based.</div></div>`;}
 
-function renderPolicies(s){
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Academic Policies</div>
+function renderPolicies(){
+  return `<div class="syl-section"><div class="syl-sec-hdr">Academic Policies</div>
     <div class="syl-sec-body">
-      <p style="margin-bottom:8px"><strong>Attendance &amp; Participation:</strong> Students are expected to attend all class sessions. Regular attendance and active participation are integral to learning outcomes. Chronic absences may result in a grade of INC or DRP per institutional policy.</p>
-      <p style="margin-bottom:8px"><strong>Academic Honesty:</strong> All outputs submitted must be the original work of the student. Any form of academic dishonesty — including plagiarism, fabrication, and unauthorized collaboration — will result in a failing grade for the concerned output and may be subject to further disciplinary action in accordance with the school's academic integrity policy.</p>
-      <p style="margin-bottom:8px"><strong>Netiquette:</strong> Students must observe proper online etiquette in all digital communications and virtual learning environments. Use of appropriate language and respectful behavior is required in synchronous and asynchronous sessions.</p>
-      <p><strong>Intellectual Property:</strong> All course materials provided by the instructor are protected by copyright. Students may not reproduce, distribute, or publish any course materials without prior written consent.</p>
-    </div>
-  </div>`;
-}
-
-function renderRubric(s){
-  if(!s.rubric||!s.rubric.criteria||!s.rubric.criteria.length) return '';
-  const headers = `<tr>
-    <th style="width:120px">Criterion</th>
-    <th style="width:60px;text-align:center">Weight</th>
-    <th><span class="score-badge s4">4</span> Excellent</th>
-    <th><span class="score-badge s3">3</span> Satisfactory</th>
-    <th><span class="score-badge s2">2</span> Developing</th>
-    <th><span class="score-badge s1">1</span> Beginning</th>
-  </tr>`;
-  const rows = s.rubric.criteria.map(c=>`<tr>
-    <td class="crit-cell">${esc(c.criterion||'')}<br><span style="font-size:10px;color:#6b8fa3;font-weight:400">${esc(c.weight||'')}</span></td>
-    <td style="text-align:center;font-weight:700;font-family:'Space Grotesk',sans-serif;color:#0d1f2d">${esc(c.weight||'')}</td>
-    <td class="exc">${esc(c.excellent_4||c.excellent||'')}</td>
-    <td class="sat">${esc(c.satisfactory_3||c.satisfactory||'')}</td>
-    <td class="dev">${esc(c.developing_2||c.developing||'')}</td>
-    <td class="beg">${esc(c.beginning_1||c.beginning||'')}</td>
-  </tr>`).join('');
-  return `<div class="syl-section">
-    <div class="syl-sec-hdr">Assessment Rubric — ${esc(s.rubric.title||'Course Output Rubric')}</div>
-    <div style="overflow-x:auto"><table class="syl-rubric-table"><thead>${headers}</thead><tbody>${rows}</tbody></table></div>
-  </div>`;
-}
+      <p style="margin-bottom:8px"><strong>Attendance:</strong> Students must maintain at least 80% attendance. Exceeding 20% absences may result in a grade of INC or DRP per institutional policy.</p>
+      <p style="margin-bottom:8px"><strong>Academic Integrity:</strong> All outputs must be the student's original work. Plagiarism will result in a failing grade for the output and may lead to further disciplinary action.</p>
+      <p style="margin-bottom:8px"><strong>Netiquette:</strong> Respectful behavior and appropriate language are required in all class interactions, online or face-to-face.</p>
+      <p><strong>Intellectual Property:</strong> Course materials are protected by copyright and may not be reproduced or distributed without prior written consent.</p>
+    </div></div>`;}
 
 function renderReferences(s){
   if(!s.references) return '';
-  const books = (s.references.books||[]).filter(b=>b&&!b.startsWith('['));
-  const sites = (s.references.websites||[]).filter(b=>b&&!b.startsWith('['));
-  if(!books.length && !sites.length){
-    const allBooks = s.references.books||[];
-    const allSites = s.references.websites||[];
-    if(!allBooks.length && !allSites.length) return '';
-  }
-  let html = '<div class="syl-section"><div class="syl-sec-hdr">References</div>';
-  if((s.references.books||[]).length){
-    html += '<div class="syl-refs-sub">Books &amp; Journals</div><ul class="syl-refs">';
-    s.references.books.forEach(b=>{ html+=`<li>${esc(b)}</li>`; });
-    html += '</ul>';
-  }
-  if((s.references.websites||[]).length){
-    html += '<div class="syl-refs-sub" style="margin-top:12px">Online Resources</div><ul class="syl-refs">';
-    s.references.websites.forEach(b=>{ html+=`<li>${esc(b)}</li>`; });
-    html += '</ul>';
-  }
-  html += '</div>';
-  return html;
-}
+  const books=(s.references.books||[]);
+  const sites=(s.references.websites||[]);
+  if(!books.length&&!sites.length) return '';
+  let html='<div class="syl-section"><div class="syl-sec-hdr">References</div>';
+  if(books.length){html+='<div class="syl-refs-sub">Books &amp; Journals</div><ul class="syl-refs">'+books.map(b=>`<li>${esc(b)}</li>`).join('')+'</ul>';}
+  if(sites.length){html+='<div class="syl-refs-sub" style="margin-top:12px">Online Resources</div><ul class="syl-refs">'+sites.map(b=>`<li>${esc(b)}</li>`).join('')+'</ul>';}
+  return html+'</div>';}
 
-function renderSignatures(s){
+function renderSignatures(){
   return `<div class="syl-sig">
-    <div class="syl-sig-box">
-      <div class="syl-sig-line"></div>
-      <div class="syl-sig-name">[Faculty Name]</div>
-      <div class="syl-sig-role">Prepared by — Course Instructor</div>
-    </div>
-    <div class="syl-sig-box">
-      <div class="syl-sig-line"></div>
-      <div class="syl-sig-name">[Department Head / Dean]</div>
-      <div class="syl-sig-role">Approved by — Department / Academic Head</div>
-    </div>
-  </div>`;
-}
+    <div class="syl-sig-box"><div class="syl-sig-line"></div><div class="syl-sig-name">[Faculty Name]</div><div class="syl-sig-role">Prepared by — Course Instructor</div></div>
+    <div class="syl-sig-box"><div class="syl-sig-line"></div><div class="syl-sig-name">[Department Head / Dean]</div><div class="syl-sig-role">Approved by — Academic Head</div></div>
+  </div>`;}
 
 // ── Toast ─────────────────────────────────────────────────────────────────
-function showToast(msg, dur=3500){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), dur);
-}
+function showToast(msg,dur=3500){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);}
 
 // ── Init ──────────────────────────────────────────────────────────────────
-loadSettings();
+generateWeekRows(14);
 updateGradingTotal();
 </script>
 </body>
