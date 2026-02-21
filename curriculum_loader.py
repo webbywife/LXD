@@ -7,6 +7,7 @@ import os
 import re
 import sqlite3
 import json
+from collections import defaultdict
 from openpyxl import load_workbook
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,6 +45,28 @@ SUBJECT_DISPLAY = {
     "EPP_TLE": "EPP / TLE (Technology & Livelihood)",
     "Makabansa": "Makabansa (Civics/History/Geography)",
     "Araling_Panlipunan": "Araling Panlipunan (Social Studies)",
+}
+
+
+SHS_FILE = "SSHS_Core_Curriculum_AI_Reference.xlsx"
+
+# Maps Subject_Code in the Excel to a unique subject_id in the DB
+SHS_SUBJECT_CODES = {
+    "EC":  "SHS_Effective_Communication",
+    "MK":  "SHS_Mabisang_Komunikasyon",
+    "GM":  "SHS_General_Mathematics",
+    "GS":  "SHS_General_Science",
+    "LCS": "SHS_Life_and_Career_Skills",
+    "KLP": "SHS_Kasaysayan_at_Lipunan",
+}
+
+SHS_DISPLAY = {
+    "SHS_Effective_Communication": "SHS \u2013 Effective Communication (English)",
+    "SHS_Mabisang_Komunikasyon":   "SHS \u2013 Mabisang Komunikasyon (Filipino)",
+    "SHS_General_Mathematics":     "SHS \u2013 General Mathematics",
+    "SHS_General_Science":         "SHS \u2013 General Science",
+    "SHS_Life_and_Career_Skills":  "SHS \u2013 Life and Career Skills",
+    "SHS_Kasaysayan_at_Lipunan":   "SHS \u2013 Kasaysayan at Lipunan ng Pilipinas",
 }
 
 
@@ -512,14 +535,143 @@ def load_single_subject(subject_id, filename):
     wb.close()
 
 
+def load_shs_curriculum():
+    """Load all 6 SHS Core Subject competencies from the single multi-subject Excel file.
+
+    The file has title/subtitle rows at index 0-1, real headers at index 2,
+    and data starting at index 3. All subjects share one sheet, identified
+    by the Subject_Code column (EC, MK, GM, GS, LCS, KLP).
+    """
+    filepath = os.path.join(DATA_DIR, SHS_FILE)
+    if not os.path.exists(filepath):
+        print(f"  WARNING: SHS file not found: {filepath}")
+        return
+
+    print(f"  Loading SHS Core Subjects from {SHS_FILE}...")
+    wb = load_workbook(filepath, read_only=True, data_only=True)
+
+    # Find the learning competencies sheet (S1_Learning_Competencies or similar)
+    ws = None
+    for name in wb.sheetnames:
+        lower = name.lower()
+        if "competenc" in lower or "learning" in lower or lower.startswith("s1"):
+            ws = wb[name]
+            break
+    if ws is None:
+        print("  WARNING: Could not find competencies sheet in SHS file.")
+        wb.close()
+        return
+
+    # rows[0] = title, rows[1] = subtitle, rows[2] = header, rows[3+] = data
+    rows = _read_sheet_rows(ws)
+    if len(rows) < 4:
+        print("  WARNING: SHS sheet has insufficient rows.")
+        wb.close()
+        return
+
+    headers = rows[2]
+
+    col_code    = _find_column(headers, "subject_code", "subject code")
+    col_grade   = _find_column(headers, "grade_level", "grade level", "grade")
+    col_quarter = _find_column(headers, "quarter")
+    col_lc_id   = _find_column(headers, "lc_id", "lc_code")
+    col_domain  = _find_column(headers, "domain", "strand", "component")
+    col_lc      = _find_column(headers, "competency_statement", "learning_competency", "competency")
+    col_bloom   = _find_column(headers, "bloom", "blooms")
+    col_tags    = _find_column(headers, "ai_tag", "ai_searchable", "tags")
+
+    if col_code is None:
+        print("  WARNING: Could not find Subject_Code column in SHS sheet.")
+        wb.close()
+        return
+
+    def normalize_grade(g):
+        m = re.search(r'\d+', str(g).strip())
+        return m.group() if m else str(g).strip()
+
+    def normalize_quarter(q):
+        m = re.search(r'\d+', str(q).strip())
+        return m.group() if m else str(q).strip()
+
+    # Group data rows by Subject_Code
+    subject_rows = defaultdict(list)
+    for row in rows[3:]:
+        if not any(row):
+            continue
+        code = row[col_code] if col_code < len(row) else ""
+        if code and code in SHS_SUBJECT_CODES:
+            subject_rows[code].append(row)
+
+    conn = sqlite3.connect(DB_PATH)
+    mapped_cols = {col_code, col_grade, col_quarter, col_lc_id,
+                   col_domain, col_lc, col_bloom, col_tags}
+
+    for code, s_rows in subject_rows.items():
+        subject_id   = SHS_SUBJECT_CODES[code]
+        display_name = SHS_DISPLAY[subject_id]
+
+        conn.execute(
+            "INSERT OR REPLACE INTO subjects (id, display_name, filename) VALUES (?, ?, ?)",
+            (subject_id, display_name, SHS_FILE)
+        )
+
+        c = conn.cursor()
+        count = 0
+        for row in s_rows:
+            def get(idx):
+                if idx is not None and idx < len(row):
+                    return row[idx]
+                return ""
+
+            lc_text = get(col_lc)
+            if not lc_text:
+                continue
+
+            grade   = normalize_grade(get(col_grade))   if col_grade   is not None else ""
+            quarter = normalize_quarter(get(col_quarter)) if col_quarter is not None else ""
+
+            extra = {}
+            for i, val in enumerate(row):
+                if i not in mapped_cols and val and i < len(headers):
+                    extra[headers[i]] = val
+
+            c.execute("""
+                INSERT INTO learning_competencies
+                (subject_id, lc_id, grade, quarter, key_stage, domain, subdomain,
+                 content_topic, learning_competency, content_standard, performance_standard,
+                 blooms_level, competency_type, ai_tags, extra_data)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                subject_id, get(col_lc_id),
+                grade, quarter,
+                "SHS",
+                get(col_domain), "",
+                "", lc_text,
+                "", "",
+                get(col_bloom), "",
+                get(col_tags),
+                json.dumps(extra, ensure_ascii=False) if extra else None
+            ))
+            count += 1
+
+        print(f"    {display_name} ({code}): {count} competencies")
+
+    conn.commit()
+    conn.close()
+    wb.close()
+
+
 def load_all_curriculum_data():
     """Load all curriculum data from all Excel files into the database."""
     print("Initializing database...")
     init_database()
 
-    print(f"Loading {len(SUBJECT_FILES)} subject files...")
+    print(f"Loading {len(SUBJECT_FILES)} MATATAG subject files...")
     for subject_id, filename in SUBJECT_FILES.items():
         load_single_subject(subject_id, filename)
+
+    print("Loading SHS Core Subjects...")
+    load_shs_curriculum()
 
     # Print summary
     conn = sqlite3.connect(DB_PATH)
