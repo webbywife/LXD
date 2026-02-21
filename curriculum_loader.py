@@ -4,6 +4,7 @@ Parses all 13 MATATAG Excel spreadsheets into a SQLite database.
 """
 
 import os
+import re
 import sqlite3
 import json
 from openpyxl import load_workbook
@@ -624,14 +625,113 @@ def get_pedagogical_approaches(subject_id):
     return [dict(r) for r in rows]
 
 
+# Fallback used when a subject's spreadsheet has no recoverable skill names (e.g. English, Filipino)
+_UNIVERSAL_21C_SKILLS = [
+    {"skill_name": "Critical Thinking", "category": "Learning & Innovation",
+     "description": "Analyze, evaluate and synthesize information to solve complex problems."},
+    {"skill_name": "Creativity", "category": "Learning & Innovation",
+     "description": "Generate new ideas and approaches to learning challenges."},
+    {"skill_name": "Communication", "category": "Life & Career",
+     "description": "Express ideas clearly and effectively in written, oral, and multimodal forms."},
+    {"skill_name": "Collaboration", "category": "Life & Career",
+     "description": "Work effectively with others toward shared learning goals."},
+    {"skill_name": "Information Literacy", "category": "Information, Media & Technology",
+     "description": "Access, evaluate, and use information effectively and ethically."},
+    {"skill_name": "Technology Literacy", "category": "Information, Media & Technology",
+     "description": "Use digital tools and technology responsibly for learning and communication."},
+]
+
+# Regex for ID codes like CS01, 21C-01, 21C01, 21C1
+_CODE_RE = re.compile(r'^[A-Z]{2,4}[\-_]?\d{1,3}$|^\d{2}[A-Z]{1,2}[\-_]?\d{1,3}$', re.IGNORECASE)
+
+# Column header strings that are meta-labels, not skill names
+_HEADER_LABELS = {
+    'skill code', 'skill category', 'skill domain', 'skill_id',
+    'skill name', 'skill sub-category', 'category', 'specific skill',
+    'skill_name', 'skill_category',
+}
+
+
 def get_21st_century_skills(subject_id):
-    """Get 21st century skills for a subject."""
+    """Get 21st century skills for a subject, with smart name extraction and deduplication.
+
+    Different spreadsheets store skills differently:
+    - Some use codes (CS01, 21C-01) as skill_name → real name is in extra_data
+    - Some store the category as skill_name and repeat it for each sub-skill
+    - Some have a 'Specific Skill' or 'Skill Sub-Category' field in extra_data
+    """
     conn = get_db()
     rows = conn.execute(
         "SELECT * FROM twenty_first_century_skills WHERE subject_id = ?", (subject_id,)
     ).fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+
+    skills = []
+    seen_names = set()
+
+    for row in rows:
+        r = dict(row)
+        raw_name = (r.get('skill_name') or '').strip()
+        extra = json.loads(r.get('extra_data') or '{}')
+
+        # Skip header rows that leaked into the data
+        if raw_name.lower() in _HEADER_LABELS:
+            continue
+
+        name = raw_name
+
+        # Priority 1: Specific Skill (AP, Reading_Literacy, Mathematics, PE_Health)
+        specific = extra.get('Specific Skill', '').strip()
+        if specific and not _CODE_RE.match(specific) and specific.lower() not in _HEADER_LABELS:
+            name = specific
+
+        # Priority 2: Skill Sub-Category (Makabansa)
+        elif not specific:
+            sub = extra.get('Skill Sub-Category', '').strip()
+            if sub and not _CODE_RE.match(sub) and sub.lower() not in _HEADER_LABELS:
+                name = sub
+
+        # Priority 3: Skill Name / Skill_Name (Kindergarten, Music_Arts — code stored in skill_name)
+        if _CODE_RE.match(name):
+            for key in ('Skill Name', 'Skill_Name'):
+                val = extra.get(key, '').strip()
+                if val and not _CODE_RE.match(val) and val.lower() not in _HEADER_LABELS:
+                    name = val
+                    break
+
+        # Still a code or empty → skip (e.g. English CS01, Filipino 21C-01 with no recovery)
+        if not name or _CODE_RE.match(name):
+            continue
+
+        # Deduplicate case-insensitively
+        name_key = name.lower()
+        if name_key in seen_names:
+            continue
+        seen_names.add(name_key)
+
+        # Get description — prefer stored description, fall back to extra_data
+        desc = (r.get('description') or '').strip()
+        if not desc:
+            desc = extra.get('Description', extra.get('description', '')).strip()
+
+        # Get category
+        cat = (r.get('category') or '').strip()
+        if not cat:
+            cat = extra.get('Skill Category', extra.get('Skill_Category', raw_name)).strip()
+
+        skills.append({
+            'id': r['id'],
+            'subject_id': r['subject_id'],
+            'skill_name': name,
+            'category': cat,
+            'description': desc,
+        })
+
+    # Fallback for subjects whose spreadsheet has no recoverable skill names (e.g. English, Filipino)
+    if not skills:
+        return [dict(s, id=0, subject_id=subject_id) for s in _UNIVERSAL_21C_SKILLS]
+
+    return skills
 
 
 def get_crosscutting_concepts(subject_id):

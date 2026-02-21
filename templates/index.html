@@ -4,27 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MATATAG AI Lesson Plan Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-    --bg: #f1f1f2;
+    --bg: #f0f9fb;
     --c1: #00bbd6;
     --c1d: #009bb3;
-    --c2: #237194;
-    --c2d: #1a5670;
+    --c2: #0d1f2d;
+    --c2d: #081520;
     --accent: #faa32b;
     --accent-lt: #fff8ed;
-    --white: #ffffff;
-    --text: #2d3436;
-    --text-s: #636e72;
-    --border: #dfe6e9;
+    --glass: rgba(255,255,255,0.72);
+    --glass-b: rgba(0,187,214,0.2);
+    --text: #0d1f2d;
+    --text-s: rgba(13,31,45,0.56);
+    --border: #c8e8ee;
     --success: #00b894;
     --danger: #e74c3c;
-    --rad: 12px;
+    --rad: 18px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Open Sans','Roboto',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
-h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(0,187,214,0.11) 0%,transparent 65%);}
+h1,h2,h3,h4,.grotesk{font-family:'Space Grotesk',sans-serif;}
 
 /* Header */
 .hdr{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;position:relative;overflow:hidden;}
@@ -38,13 +39,13 @@ h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
 /* Steps */
 .steps{display:flex;justify-content:center;gap:0;padding:18px 20px 0;max-width:800px;margin:0 auto;}
 .stp{flex:1;text-align:center;position:relative;padding-bottom:10px;}
-.stp-n{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:#dfe6e9;color:var(--text-s);margin-bottom:4px;transition:.3s;}
+.stp-n{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:rgba(13,31,45,0.12);color:var(--text-s);margin-bottom:4px;transition:.3s;}
 .stp.a .stp-n{background:var(--c1);color:#fff;}
 .stp.d .stp-n{background:var(--success);color:#fff;}
 .stp-l{font-size:11px;font-weight:600;color:var(--text-s);}
 .stp.a .stp-l{color:var(--c2);}
 .stp.d .stp-l{color:var(--success);}
-.stp-ln{position:absolute;top:17px;left:50%;width:100%;height:3px;background:#dfe6e9;z-index:0;}
+.stp-ln{position:absolute;top:17px;left:50%;width:100%;height:3px;background:rgba(13,31,45,0.12);z-index:0;}
 .stp:last-child .stp-ln{display:none;}
 .stp.d .stp-ln{background:var(--success);}
 
@@ -68,15 +69,15 @@ h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:600px){.fr{grid-template-columns:1fr;}}
 .fg{margin-bottom:14px;}
-.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif;color:var(--c2);}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Space Grotesk',sans-serif;color:var(--c2);}
 .fg .hn{font-size:11px;color:var(--text-s);margin-top:2px;}
-select,input[type="text"],input[type="password"],textarea{width:100%;padding:10px 14px;font-size:13px;font-family:inherit;border:2px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;}
+select,input[type="text"],input[type="password"],textarea{width:100%;padding:10px 14px;font-size:13px;font-family:inherit;border:1.5px solid var(--glass-b);border-radius:8px;background:#fff;transition:border-color .2s;}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--c1);}
 select:disabled{background:#f5f6fa;opacity:.6;}
 textarea{resize:vertical;min-height:60px;}
 
 /* Buttons */
-.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;transition:.2s;font-family:'Poppins',sans-serif;}
+.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;border:1.5px solid var(--glass-b);background:#fff;cursor:pointer;transition:.2s;font-family:'Space Grotesk',sans-serif;}
 .btn:hover{border-color:var(--c1);}
 .btn-p{background:var(--c1);color:#fff;border-color:var(--c1);}
 .btn-p:hover{background:var(--c1d);}
@@ -102,7 +103,7 @@ textarea{resize:vertical;min-height:60px;}
 .sc{font-size:13px;font-weight:700;color:var(--c2);}
 
 /* Toggles */
-.tc{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.2s;}
+.tc{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--glass-b);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.2s;}
 .tc:hover{border-color:var(--c1);}
 .tc.on{border-color:var(--c1);background:#f0fcfe;}
 .tc-i{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
@@ -111,22 +112,22 @@ textarea{resize:vertical;min-height:60px;}
 .tc.on .tc-ck{background:var(--c1);border-color:var(--c1);}
 .tc-x{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-s);padding:2px 6px;transition:transform .2s;flex-shrink:0;}
 .tc-x.op{transform:rotate(180deg);}
-.to{display:none;padding:14px 16px;margin:-8px 0 8px;border:2px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:#fafbfc;}
+.to{display:none;padding:14px 16px;margin:-8px 0 8px;border:1.5px solid var(--glass-b);border-top:none;border-radius:0 0 10px 10px;background:#fafbfc;}
 .to.op{display:block;}
 
 /* Model Cards */
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media(max-width:600px){.mg{grid-template-columns:1fr;}}
-.mc{padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:center;}
+.mc{padding:12px;border:1.5px solid var(--glass-b);border-radius:10px;cursor:pointer;transition:.2s;text-align:center;}
 .mc:hover{border-color:var(--c1);}
 .mc.sel{border-color:var(--c1);background:#e0f7fa;}
-.mc-n{font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;}
+.mc-n{font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
 .mc-d{font-size:10px;color:var(--text-s);margin-top:2px;}
 
 /* Assessment Types */
 .at-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media(max-width:600px){.at-grid{grid-template-columns:1fr;}}
-.at{padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
+.at{padding:10px 14px;border:1.5px solid var(--glass-b);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
 .at:hover{border-color:var(--accent);}
 .at.on{border-color:var(--accent);background:var(--accent-lt);}
 .at-i{font-size:20px;flex-shrink:0;}
@@ -145,20 +146,20 @@ textarea{resize:vertical;min-height:60px;}
 .po{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(29,78,120,0.85);z-index:1000;justify-content:center;align-items:center;}
 .po.a{display:flex;}
 .pb{background:#fff;border-radius:20px;padding:40px 44px;text-align:center;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-.pb-t{font-size:18px;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:6px;}
+.pb-t{font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-bottom:6px;}
 .pb-s{font-size:12px;color:var(--text-s);margin-bottom:22px;}
-.pb-p{font-size:36px;font-weight:800;color:var(--c1);margin-bottom:4px;font-family:'Poppins',sans-serif;}
+.pb-p{font-size:36px;font-weight:800;color:var(--c1);margin-bottom:4px;font-family:'Space Grotesk',sans-serif;}
 .pb-bg{width:100%;height:10px;background:#ecf0f1;border-radius:5px;overflow:hidden;margin-bottom:10px;}
 .pb-fl{height:100%;background:linear-gradient(90deg,var(--c1),var(--accent));border-radius:5px;transition:width .4s;width:0%;}
 .pb-st{font-size:11px;color:var(--text-s);min-height:16px;}
 
 /* Output */
 .ob{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;max-height:70vh;overflow-y:auto;line-height:1.8;font-size:14px;}
-.ob h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:var(--c2);margin:24px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--c1);}
-.ob h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--c1);}
-.ob h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:14px 0 6px;}
+.ob h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--c2);margin:24px 0 12px;padding-bottom:6px;border-bottom:3px solid var(--c1);}
+.ob h2{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--c1);}
+.ob h3{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:14px 0 6px;}
 .ob table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
-.ob th{background:var(--c2);color:#fff;padding:8px 12px;font-family:'Poppins',sans-serif;font-weight:600;text-align:left;}
+.ob th{background:var(--c2);color:#fff;padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-weight:600;text-align:left;}
 .ob td{padding:7px 12px;border:1px solid var(--border);}
 .ob tr:nth-child(even) td{background:#f9fafb;}
 .ob td:first-child{font-weight:600;color:var(--c2);}
@@ -172,7 +173,7 @@ textarea{resize:vertical;min-height:60px;}
 .oa{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
 .tabs{display:none;margin-bottom:14px;gap:4px;}
 .tabs.on{display:flex;}
-.tab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;}
+.tab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--glass-b);background:#fff;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;}
 .tab.a{background:var(--c2);color:#fff;border-color:var(--c2);}
 
 .ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:20px;}
@@ -290,9 +291,9 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- AI Toggle -->
     <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;" id="ai-box">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--glass-b);border-radius:10px;" id="ai-box">
             <label class="sw"><input type="checkbox" id="f-ai"><span class="sl"></span></label>
-            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">&#129302; Use AI (Claude) for Enhanced Generation</div><div style="font-size:11px;color:var(--text-s);">AI writes detailed, classroom-ready content. Without AI, you get a structured template.</div></div>
+            <div><div style="font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;">&#129302; Use AI (Claude) for Enhanced Generation</div><div style="font-size:11px;color:var(--text-s);">AI writes detailed, classroom-ready content. Without AI, you get a structured template.</div></div>
         </div>
         <div id="ai-opts" style="display:none;padding:10px 4px 0;">
             <div class="fr"><div class="fg"><label>AI Provider</label><select id="f-aip"><option value="anthropic">Anthropic (Claude)</option><option value="openai">OpenAI (GPT-4)</option></select></div><div class="fg"><label>API Key</label><input type="password" id="f-aik" placeholder="Leave blank for server key"><div class="hn" style="color:var(--success);">&#9989; Server key pre-configured</div></div></div>

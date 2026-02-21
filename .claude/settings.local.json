@@ -5,7 +5,18 @@
       "Bash(python3:*)",
       "Bash(node --version:*)",
       "Bash(npm:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl -L \"https://demo.skooled.online/pluginfile.php/1/theme_skools/favicon/1752895062/favicon%20%287%29.ico\" -o /Users/leaabarentos/LXD/static/favicon.ico)",
+      "Bash(ssh:*)",
+      "Bash(sshpass -p '73X#$74#2ewqRrS' ssh -o StrictHostKeyChecking=no skooled-ai@skooled-ai.webprvw.xyz \"cd /home/405568.cloudwaysapps.com/muwrnbjezq/public_html/lxd_app && bash stop.sh 2>/dev/null; sleep 2; bash start.sh && sleep 4 && curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9090/\")",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(python deploy.py:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)"
     ]
   }
 }

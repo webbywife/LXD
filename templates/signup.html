@@ -4,53 +4,117 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<title>Sign Up - SKOOLED-AI Lesson Plan Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Sign Up — SKOOLED-AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--c1:#00bbd6;--c1d:#009bb3;--c2:#237194;--c2d:#1a5670;--accent:#faa32b;--white:#ffffff;--text:#2d3436;--text-s:#636e72;--border:#dfe6e9;--bg:#f1f1f2;--success:#00b894;--danger:#e74c3c;--warning:#fdcb6e;}
+:root{
+    --accent:#00bbd6;--accent-d:#009bb3;
+    --accent-dim:rgba(0,187,214,0.14);--accent-border:rgba(0,187,214,0.35);
+    --navy:#0d1f2d;--navy-d:#081520;
+    --bg:#f0f9fb;--text:#0d1f2d;--text-s:rgba(13,31,45,0.56);
+    --glass:rgba(255,255,255,0.78);--glass-b:rgba(0,187,214,0.2);
+    --border:#c8e8ee;--success:#00b894;--danger:#e74c3c;--warning:#fdcb6e;
+    --rad:20px;
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-h1,h2,.poppins{font-family:'Poppins',sans-serif;}
+body{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;display:flex;flex-direction:column;
+    background-image:radial-gradient(ellipse 90% 55% at 50% -5%,rgba(0,187,214,0.12) 0%,transparent 65%);
+    background-attachment:fixed;
+}
+h1,h2,h3,.grotesk{font-family:'Space Grotesk',sans-serif;}
+a{text-decoration:none;color:inherit;}
 
-.hdr{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;}
-.hdr h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
-.hdr p{font-size:12px;opacity:0.85;margin-top:3px;}
+.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;
+    background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--glass-b);
+}
+.topbar-logo{
+    display:flex;align-items:center;gap:9px;
+    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
+    letter-spacing:-0.03em;color:var(--navy);
+}
+.topbar-logo-icon{
+    width:30px;height:30px;border-radius:9px;background:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.topbar-logo .ac{color:var(--accent);}
+.topbar-back{
+    font-size:12px;font-weight:600;color:var(--text-s);
+    padding:7px 16px;border-radius:30px;
+    border:1px solid var(--glass-b);background:var(--glass);transition:.2s;
+}
+.topbar-back:hover{border-color:var(--accent-border);color:var(--accent);}
 
 .wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;}
-.card{background:var(--white);border-radius:16px;padding:40px 36px;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid var(--border);width:100%;max-width:420px;}
-.card-t{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--c2);}
-.card-s{font-size:13px;color:var(--text-s);text-align:center;margin-bottom:24px;}
 
-.flash{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;}
-.flash-error{background:#ffeaea;color:var(--danger);border:1px solid #f5c6c6;}
-.flash-success{background:#e8f8f5;color:var(--success);border:1px solid #b8e6d8;}
-.flash-warning{background:#fef9e7;color:#856404;border:1px solid #fce8a6;}
+.card{
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-b);border-radius:var(--rad);
+    padding:44px 40px;width:100%;max-width:420px;
+    box-shadow:0 4px 40px rgba(0,187,214,0.09),0 1px 6px rgba(0,0,0,0.04);
+}
+.card-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;}
+.card-logo-icon{
+    width:44px;height:44px;border-radius:14px;background:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    box-shadow:0 4px 18px rgba(0,187,214,0.3);
+}
+.card-logo-name{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.04em;color:var(--navy);}
+.card-logo-name em{font-style:normal;color:var(--accent);}
+.card-t{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--navy);letter-spacing:-0.03em;}
+.card-s{font-size:13px;color:var(--text-s);text-align:center;margin-bottom:28px;font-weight:400;}
+
+.flash{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;}
+.flash-error{background:rgba(231,76,60,0.09);color:var(--danger);border:1px solid rgba(231,76,60,0.25);}
+.flash-success{background:rgba(0,184,148,0.09);color:var(--success);border:1px solid rgba(0,184,148,0.25);}
+.flash-warning{background:rgba(253,203,110,0.15);color:#7a5a00;border:1px solid rgba(253,203,110,0.4);}
 
 .fg{margin-bottom:16px;}
-.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif;color:var(--c2);}
-.fg input{width:100%;padding:11px 14px;font-size:14px;font-family:inherit;border:2px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;}
-.fg input:focus{outline:none;border-color:var(--c1);}
-.fg .hn{font-size:11px;color:var(--text-s);margin-top:3px;}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;font-family:'Space Grotesk',sans-serif;color:var(--navy);}
+.fg input{
+    width:100%;padding:11px 14px;font-size:14px;font-family:inherit;
+    border:1.5px solid var(--border);border-radius:10px;
+    background:rgba(255,255,255,0.8);color:var(--text);transition:border-color .2s;
+}
+.fg input:focus{outline:none;border-color:var(--accent);background:#fff;}
+.fg .hn{font-size:11px;color:var(--text-s);margin-top:4px;}
 
-.btn{width:100%;padding:12px;border-radius:8px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;background:var(--c1);color:#fff;}
-.btn:hover{background:var(--c1d);}
+.btn{
+    width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:800;
+    border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+    background:var(--accent);color:var(--navy);letter-spacing:-0.02em;
+    box-shadow:0 6px 22px rgba(0,187,214,0.28);transition:.22s;
+}
+.btn:hover{background:#00d4f0;box-shadow:0 10px 30px rgba(0,187,214,.36);transform:translateY(-1px);}
 
 .links{text-align:center;margin-top:20px;font-size:13px;color:var(--text-s);}
-.links a{color:var(--c1);text-decoration:none;font-weight:600;}
+.links a{color:var(--accent);font-weight:600;}
 .links a:hover{text-decoration:underline;}
 
-.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);}
+.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--glass-b);letter-spacing:.04em;font-weight:500;}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-    <h1>SKOOLED-AI Lesson Plan Generator</h1>
-    <p>DepEd-Aligned Curriculum Content Development System</p>
+<div class="topbar">
+    <a href="{{ url_for('landing') }}" class="topbar-logo">
+        <div class="topbar-logo-icon">&#127891;</div>
+        <span>SKOOLED<span class="ac">-AI</span></span>
+    </a>
+    <a href="{{ url_for('landing') }}" class="topbar-back">&#8592; Back to Home</a>
 </div>
 
 <div class="wrap">
 <div class="card">
+    <div class="card-logo">
+        <div class="card-logo-icon">&#127891;</div>
+        <div class="card-logo-name">SKOOLED<em>-AI</em></div>
+    </div>
     <div class="card-t">Create Account</div>
     <div class="card-s">Sign up to start generating AI-powered lesson plans</div>
 
@@ -80,7 +144,7 @@ h1,h2,.poppins{font-family:'Poppins',sans-serif;}
             <label>Confirm Password</label>
             <input type="password" name="confirm_password" required placeholder="Re-enter your password" minlength="8">
         </div>
-        <button type="submit" class="btn">Create Account</button>
+        <button type="submit" class="btn">Create Account &#8594;</button>
     </form>
 
     <div class="links">
@@ -89,6 +153,6 @@ h1,h2,.poppins{font-family:'Poppins',sans-serif;}
 </div>
 </div>
 
-<div class="ft">SKOOLED-AI Lesson Plan Generator &bull; Philippine DepEd Curriculum</div>
+<div class="ft">SKOOLED-AI &bull; DepEd MATATAG Curriculum &bull; Philippine Teachers</div>
 </body>
 </html>

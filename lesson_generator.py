@@ -296,12 +296,15 @@ Generate a COMPLETE lesson plan with the following sections (generate ONLY the s
         title_note = f' Use this title: "{custom_title}"' if custom_title else " Create an engaging, descriptive title."
         section_instructions.append(
             f"## 1. LESSON PLAN HEADER\n"
-            f"- Title:{title_note}\n"
-            f"- Subject: {subject}\n"
-            f"- Grade Level: Grade {grade}\n"
-            f"- Quarter: {quarter}\n"
-            f"- Time Allotment: {time}\n"
-            f"- Content Topic: {topic}"
+            f"Format this section exactly as follows:\n"
+            f"1. Output the lesson title as a `# H1` markdown heading.{title_note}\n"
+            f"2. Add a `---` horizontal rule on its own line after the title.\n"
+            f"3. Then output a 2-column markdown table (no header row, just |---|---| separator then data rows):\n"
+            f"   | **Subject** | {subject} |\n"
+            f"   | **Grade Level** | Grade {grade} |\n"
+            f"   | **Quarter** | {quarter} |\n"
+            f"   | **Time Allotment** | {time} |\n"
+            f"   | **Content Topic** | {topic} |"
         )
 
     if "twenty_first_century_skills" in enabled_sections:
@@ -474,9 +477,12 @@ def generate_lesson_plan_local(context, template_config):
         title = custom_title if custom_title else " - ".join(title_parts) if title_parts else subject
         sections.append(f"""## Lesson Plan
 
+# {title}
+
+---
+
 | | |
 |---|---|
-| **Title** | {title} |
 | **Subject** | {subject} |
 | **Grade Level** | Grade {grade} |
 | **Quarter** | {quarter} |
@@ -1387,11 +1393,14 @@ Generate a COMPLETE lesson plan with the following sections (generate ONLY the s
         title_note = f' Use this title: "{custom_title}"' if custom_title else f" Create an engaging, descriptive title about {topic}."
         section_instructions.append(
             f"## 1. LESSON PLAN HEADER\n"
-            f"- Title:{title_note}\n"
-            f"- Subject: {subject}\n"
-            f"- Grade Level: {grade}\n"
-            f"- Time Allotment: {time}\n"
-            f"- Topic: {topic}"
+            f"Format this section exactly as follows:\n"
+            f"1. Output the lesson title as a `# H1` markdown heading.{title_note}\n"
+            f"2. Add a `---` horizontal rule on its own line after the title.\n"
+            f"3. Then output a 2-column markdown table (no header row, just |---|---| separator then data rows):\n"
+            f"   | **Subject** | {subject} |\n"
+            f"   | **Grade Level** | {grade} |\n"
+            f"   | **Time Allotment** | {time} |\n"
+            f"   | **Topic** | {topic} |"
         )
 
     if "twenty_first_century_skills" in enabled_sections:
@@ -1535,9 +1544,12 @@ def _generate_topic_local(topic_context, template_config):
         title = custom_title if custom_title else topic
         sections.append(f"""## Lesson Plan
 
+# {title}
+
+---
+
 | | |
 |---|---|
-| **Title** | {title} |
 | **Subject** | {subject} |
 | **Grade Level** | {grade} |
 | **Topic** | {topic} |
@@ -2207,3 +2219,238 @@ def generate_lesson_plan(subject_id, competency_ids, template_config, use_ai=Fal
         content = generate_lesson_plan_local(context, template_config)
 
     return content, None
+
+
+## ============================================================
+## RPMS-PPST ALIGNMENT GENERATOR
+## ============================================================
+
+PPST_DOMAINS = [
+    {
+        "domain": 1,
+        "title": "Content Knowledge and Pedagogy",
+        "strands": [
+            ("1.1", "Content knowledge and its application within and across curriculum areas"),
+            ("1.2", "Research-based knowledge and principles of teaching and learning"),
+            ("1.3", "Positive use of ICT"),
+            ("1.4", "Strategies for promoting literacy and numeracy"),
+            ("1.5", "Strategies for developing critical and creative thinking, as well as other higher-order thinking skills"),
+            ("1.6", "Mother Tongue, Filipino and English in teaching and learning"),
+            ("1.7", "Classroom communication strategies"),
+        ],
+    },
+    {
+        "domain": 2,
+        "title": "Learning Environment",
+        "strands": [
+            ("2.1", "Learner safety and security"),
+            ("2.2", "Fair learning environment"),
+            ("2.3", "Management of classroom structure and activities"),
+            ("2.4", "Support for learner participation"),
+            ("2.5", "Promotion of purposive learning"),
+            ("2.6", "Management of learner behavior"),
+        ],
+    },
+    {
+        "domain": 3,
+        "title": "Diversity of Learners",
+        "strands": [
+            ("3.1", "Learners' gender, needs, strengths, interests and experiences"),
+            ("3.2", "Learners' linguistic, cultural, socio-economic and religious backgrounds"),
+            ("3.3", "Learners with disabilities, giftedness and talents"),
+            ("3.4", "Learners in difficult circumstances"),
+            ("3.5", "Learners from indigenous groups"),
+        ],
+    },
+    {
+        "domain": 4,
+        "title": "Curriculum and Planning",
+        "strands": [
+            ("4.1", "Planning and management of teaching and learning process"),
+            ("4.2", "Learning outcomes aligned with learning competencies"),
+            ("4.3", "Relevance and responsiveness of learning programs"),
+            ("4.4", "Professional collaboration to enrich teaching practice"),
+            ("4.5", "Teaching and learning resources including ICT"),
+        ],
+    },
+    {
+        "domain": 5,
+        "title": "Assessment and Reporting",
+        "strands": [
+            ("5.1", "Design, selection, organization and utilization of assessment strategies"),
+            ("5.2", "Monitoring and evaluation of learner progress and achievement"),
+            ("5.3", "Feedback to improve learning"),
+            ("5.4", "Communication of learner needs, progress and achievement to key stakeholders"),
+            ("5.5", "Use of assessment data to enhance teaching and learning practices"),
+        ],
+    },
+]
+
+
+def _ppst_domain_list_text():
+    """Return a compact text listing all PPST strands for inclusion in the AI prompt."""
+    lines = []
+    for d in PPST_DOMAINS:
+        lines.append(f"\nDomain {d['domain']}: {d['title']}")
+        for code, label in d["strands"]:
+            lines.append(f"  Strand {code}: {label}")
+    return "\n".join(lines)
+
+
+def generate_rpms_ppst(lesson_content, lesson_context, api_key, ai_provider="anthropic"):
+    """Generate RPMS-PPST alignment evidence from a lesson plan.
+
+    Args:
+        lesson_content: Full markdown text of the lesson plan.
+        lesson_context: Dict with keys subject, grade, competencies_summary.
+        api_key: AI provider API key.
+        ai_provider: "anthropic" or "openai".
+
+    Returns:
+        (content, error) tuple.
+    """
+    subject = lesson_context.get("subject", "")
+    grade = lesson_context.get("grade", "")
+    comps = lesson_context.get("competencies_summary", "")
+
+    strand_list = _ppst_domain_list_text()
+
+    prompt = f"""You are a DepEd RPMS-PPST compliance specialist.
+
+Below is a completed DepEd MATATAG lesson plan for {subject}, Grade {grade}.
+
+LESSON PLAN:
+{lesson_content}
+
+LEARNING COMPETENCIES:
+{comps}
+
+PPST DOMAINS AND STRANDS:
+{strand_list}
+
+TASK:
+Analyze the lesson plan and map it to the PPST framework. For each applicable strand, cite specific evidence from the lesson plan (quote or paraphrase actual content). Skip strands that are clearly not addressed.
+
+FORMAT your response exactly as:
+## Domain N — [Title]
+
+### Strand X.X: [Label]
+- **Evidence:** [Specific quote or paraphrase from the lesson plan]
+
+Repeat for each applicable strand. Do not add introductory or concluding paragraphs."""
+
+    if api_key and ai_provider == "anthropic":
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=3000,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return message.content[0].text, None
+        except ImportError:
+            pass
+        except Exception as e:
+            pass  # fall through to local fallback
+
+    if api_key and ai_provider == "openai":
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a DepEd RPMS-PPST compliance specialist."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=3000
+            )
+            return response.choices[0].message.content, None
+        except ImportError:
+            pass
+        except Exception as e:
+            pass  # fall through to local fallback
+
+    # Local fallback: structured placeholder
+    lines = [f"# RPMS-PPST Alignment\n\n**Subject:** {subject} | **Grade:** {grade}\n"]
+    for d in PPST_DOMAINS:
+        lines.append(f"\n## Domain {d['domain']} — {d['title']}\n")
+        for code, label in d["strands"]:
+            lines.append(f"### Strand {code}: {label}\n- **Evidence:** See lesson plan\n")
+    return "\n".join(lines), None
+
+
+## ============================================================
+## SECTION-LEVEL REGENERATION
+## ============================================================
+
+def regenerate_section(section_title, section_content, lesson_context, instruction,
+                        api_key=None, ai_provider="anthropic"):
+    """Regenerate a single lesson plan section following a user instruction.
+
+    Args:
+        section_title: The ## heading title of the section.
+        section_content: Full markdown of the section (including the ## heading).
+        lesson_context: Dict with keys subject, grade, competencies_summary.
+        instruction: Free-text instruction (e.g. "Make it shorter").
+        api_key: AI provider API key.
+        ai_provider: "anthropic" or "openai".
+
+    Returns:
+        (content, error) tuple.
+    """
+    subject = lesson_context.get("subject", "")
+    grade = lesson_context.get("grade", "")
+    comps = lesson_context.get("competencies_summary", "")
+
+    prompt = f"""You are an expert DepEd MATATAG curriculum specialist rewriting a single lesson plan section.
+
+Context:
+- Subject: {subject}
+- Grade: {grade}
+- Learning Competencies: {comps}
+
+ORIGINAL SECTION:
+{section_content}
+
+INSTRUCTION: {instruction}
+
+Rewrite the section following the instruction. Keep it aligned with DepEd MATATAG standards.
+Return ONLY the rewritten markdown starting with the ## heading. Do not add any explanation."""
+
+    if api_key and ai_provider == "anthropic":
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=1500,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return message.content[0].text, None
+        except ImportError:
+            pass
+        except Exception as e:
+            pass
+
+    if api_key and ai_provider == "openai":
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are an expert DepEd MATATAG curriculum specialist."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=1500
+            )
+            return response.choices[0].message.content, None
+        except ImportError:
+            pass
+        except Exception as e:
+            pass
+
+    # Fallback: return original unchanged
+    return section_content, None

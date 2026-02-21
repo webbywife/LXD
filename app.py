@@ -24,10 +24,13 @@ from lesson_generator import (
     generate_quiz, generate_quiz_topic,
     convert_quiz_to_gift, convert_quiz_to_qti,
     get_template_sections, get_procedure_models,
+    generate_rpms_ppst, regenerate_section,
     TEMPLATE_SECTIONS, PROCEDURE_MODELS, ASSESSMENT_TYPES, QUIZ_TYPES
 )
 from scorm_builder import build_scorm_package
 from auth import auth_bp, login_required, init_db, verify_auth_token, generate_auth_token
+from activities_generator import generate_activity_content as _gen_activity_content
+from pptx_builder import build_pptx
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -547,6 +550,114 @@ def api_reload_data():
         return jsonify({"message": f"Reloaded {count} learning competencies."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/generate-rpms-ppst", methods=["POST"])
+@login_required
+def api_generate_rpms_ppst():
+    """Generate RPMS-PPST alignment evidence for a lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    lesson_plan = data.get("lesson_plan", "").strip()
+    if not lesson_plan:
+        return jsonify({"error": "Lesson plan content is required"}), 400
+
+    lesson_context = {
+        "subject": data.get("subject", ""),
+        "grade": data.get("grade", ""),
+        "competencies_summary": data.get("competencies_summary", ""),
+    }
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = generate_rpms_ppst(lesson_plan, lesson_context, api_key, ai_provider)
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({"content": content})
+
+
+@app.route("/api/regenerate-section", methods=["POST"])
+@login_required
+def api_regenerate_section():
+    """Regenerate a single section of a lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    section_title = data.get("section_title", "").strip()
+    section_content = data.get("section_content", "").strip()
+    if not section_title or not section_content:
+        return jsonify({"error": "section_title and section_content are required"}), 400
+
+    lesson_context = data.get("lesson_context", {})
+    instruction = data.get("instruction", "").strip() or "Improve this section"
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = regenerate_section(
+        section_title, section_content, lesson_context, instruction, api_key, ai_provider
+    )
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({"content": content})
+
+
+@app.route("/activities")
+@login_required
+def activities():
+    """Interactive activities page."""
+    return render_template("activities.html")
+
+
+@app.route("/api/generate-activity-content", methods=["POST"])
+@login_required
+def api_generate_activity_content():
+    """Extract structured game content from lesson/quiz markdown."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    lesson_md = data.get("lesson_md", "").strip()
+    quiz_md = data.get("quiz_md", "").strip()
+    if not lesson_md:
+        return jsonify({"error": "lesson_md is required"}), 400
+
+    api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    ai_provider = data.get("ai_provider", "anthropic")
+
+    content, error = _gen_activity_content(lesson_md, quiz_md, api_key, ai_provider)
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify(content)
+
+
+@app.route("/api/download-pptx", methods=["POST"])
+@login_required
+def api_download_pptx():
+    """Generate and download a SKOOLED-AI branded .pptx lesson plan."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    lesson_md = data.get("lesson_md", "").strip()
+    if not lesson_md:
+        return jsonify({"error": "lesson_md is required"}), 400
+
+    title = data.get("title", "Lesson Plan")
+    safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:50]
+
+    buf = build_pptx(lesson_md)
+    return send_file(
+        buf,
+        mimetype="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        as_attachment=True,
+        download_name=f"LessonPlan_{safe_title}.pptx",
+    )
 
 
 if __name__ == "__main__":

@@ -6,47 +6,56 @@
 <meta name="auth-token" content="{{ auth_token }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>SKOOLED-AI Lesson Plan Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ── Variables (Landing page light-mode palette) ── */
 :root {
-    --bg: #f1f1f2;
+    --bg: #f0f9fb;
     --c1: #00bbd6;
     --c1d: #009bb3;
-    --c2: #237194;
-    --c2d: #1a5670;
+    --c2: #0d1f2d;
+    --c2d: #081520;
     --accent: #faa32b;
     --accent-lt: #fff8ed;
-    --white: #ffffff;
-    --text: #2d3436;
-    --text-s: #636e72;
-    --border: #dfe6e9;
+    --glass: rgba(255,255,255,0.72);
+    --glass-b: rgba(0,187,214,0.2);
+    --text: #0d1f2d;
+    --text-s: rgba(13,31,45,0.56);
+    --border: #c8e8ee;
     --success: #00b894;
     --danger: #e74c3c;
-    --rad: 12px;
+    --rad: 18px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Open Sans','Roboto',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
-h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
+body{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+    background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(0,187,214,0.11) 0%,transparent 65%);
+    background-attachment:fixed;
+}
+h1,h2,h3,h4,.grotesk{font-family:'Space Grotesk',sans-serif;}
 
 /* Header */
-.hdr{background:linear-gradient(135deg,var(--c2) 0%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;position:relative;overflow:hidden;}
-.hdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;}
-.hdr::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;background:rgba(255,255,255,0.04);border-radius:50%;}
-.hdr h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
-.hdr p{font-size:12px;opacity:0.85;margin-top:3px;}
-.hdr .stats{display:flex;justify-content:center;gap:12px;margin-top:10px;font-size:11px;flex-wrap:wrap;}
-.hdr .st{background:rgba(255,255,255,0.15);padding:3px 12px;border-radius:16px;}
+.hdr{background:linear-gradient(135deg,var(--c2) 0%,#1b4a6e 55%,var(--c1) 100%);color:#fff;padding:22px 30px;text-align:center;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(0,187,214,0.14);border-radius:50%;}
+.hdr::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;background:rgba(255,255,255,0.05);border-radius:50%;}
+.hdr h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.04em;}
+.hdr p{font-size:12px;opacity:0.72;margin-top:3px;font-weight:300;}
+.hdr .stats{display:flex;justify-content:center;gap:10px;margin-top:10px;font-size:11px;flex-wrap:wrap;}
+.hdr .st{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.16);padding:3px 12px;border-radius:20px;font-weight:500;}
 
 /* Steps */
 .steps{display:flex;justify-content:center;gap:0;padding:18px 20px 0;max-width:800px;margin:0 auto;}
 .stp{flex:1;text-align:center;position:relative;padding-bottom:10px;}
-.stp-n{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:#dfe6e9;color:var(--text-s);margin-bottom:4px;transition:.3s;}
-.stp.a .stp-n{background:var(--c1);color:#fff;}
+.stp-n{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:rgba(13,31,45,0.1);color:var(--text-s);margin-bottom:4px;transition:.3s;}
+.stp.a .stp-n{background:var(--c1);color:#fff;box-shadow:0 4px 14px rgba(0,187,214,.3);}
 .stp.d .stp-n{background:var(--success);color:#fff;}
 .stp-l{font-size:11px;font-weight:600;color:var(--text-s);}
 .stp.a .stp-l{color:var(--c2);}
 .stp.d .stp-l{color:var(--success);}
-.stp-ln{position:absolute;top:17px;left:50%;width:100%;height:3px;background:#dfe6e9;z-index:0;}
+.stp-ln{position:absolute;top:17px;left:50%;width:100%;height:2px;background:rgba(13,31,45,0.1);z-index:0;}
 .stp:last-child .stp-ln{display:none;}
 .stp.d .stp-ln{background:var(--success);}
 
@@ -54,12 +63,19 @@ h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
 .cnt{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
 
 /* Card */
-.crd{background:var(--white);border-radius:var(--rad);padding:26px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border:1px solid var(--border);margin-bottom:16px;}
-.crd-t{font-size:18px;font-weight:700;margin-bottom:3px;}
-.crd-s{font-size:12px;color:var(--text-s);margin-bottom:18px;}
+.crd{
+    background:var(--glass);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-radius:var(--rad);padding:26px;
+    box-shadow:0 2px 20px rgba(0,187,214,0.07),0 1px 4px rgba(0,0,0,0.04);
+    border:1px solid var(--glass-b);
+    margin-bottom:16px;
+}
+.crd-t{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:3px;letter-spacing:-0.025em;color:var(--c2);}
+.crd-s{font-size:12px;color:var(--text-s);margin-bottom:18px;font-weight:400;}
 
 /* Tip */
-.tip{display:flex;gap:10px;background:var(--accent-lt);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin:12px 0;font-size:12px;align-items:flex-start;line-height:1.5;}
+.tip{display:flex;gap:10px;background:var(--accent-lt);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0;font-size:12px;align-items:flex-start;line-height:1.5;}
 .tip .ti{font-size:18px;flex-shrink:0;}
 .tip .tt{color:#5a4310;}
 
@@ -70,65 +86,80 @@ h1,h2,h3,h4,.poppins{font-family:'Poppins',sans-serif;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:600px){.fr{grid-template-columns:1fr;}}
 .fg{margin-bottom:14px;}
-.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif;color:var(--c2);}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;font-family:'Space Grotesk',sans-serif;color:var(--c2);}
 .fg .hn{font-size:11px;color:var(--text-s);margin-top:2px;}
-select,input[type="text"],input[type="password"],textarea{width:100%;padding:10px 14px;font-size:13px;font-family:inherit;border:2px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;}
+select,input[type="text"],input[type="password"],textarea{
+    width:100%;padding:10px 14px;font-size:13px;font-family:inherit;
+    border:1.5px solid var(--border);border-radius:10px;
+    background:rgba(255,255,255,0.8);color:var(--text);
+    transition:border-color .2s;
+}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--c1);}
-select:disabled{background:#f5f6fa;opacity:.6;}
+select:disabled{background:rgba(240,245,247,0.6);opacity:.6;}
 textarea{resize:vertical;min-height:60px;}
 
 /* Buttons */
-.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;transition:.2s;font-family:'Poppins',sans-serif;}
-.btn:hover{border-color:var(--c1);}
+.btn{
+    padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;
+    border:1.5px solid var(--glass-b);background:var(--glass);
+    backdrop-filter:blur(10px);cursor:pointer;transition:.2s;
+    font-family:'Space Grotesk',sans-serif;color:var(--c2);
+}
+.btn:hover{border-color:var(--c1);color:var(--c1);}
 .btn-p{background:var(--c1);color:#fff;border-color:var(--c1);}
-.btn-p:hover{background:var(--c1d);}
+.btn-p:hover{background:var(--c1d);border-color:var(--c1d);color:#fff;}
 .btn-p:disabled{opacity:.5;cursor:not-allowed;}
-.btn-g{background:var(--accent);color:#fff;border-color:var(--accent);padding:14px 32px;font-size:15px;font-weight:700;}
-.btn-g:hover{background:#e8922a;}
-.btn-g:disabled{opacity:.5;cursor:not-allowed;}
+.btn-g{
+    background:var(--c1);color:var(--c2);border-color:var(--c1);
+    padding:14px 32px;font-size:15px;font-weight:800;
+    box-shadow:0 8px 28px rgba(0,187,214,0.28);letter-spacing:-0.02em;
+}
+.btn-g:hover{background:#00d4f0;border-color:#00d4f0;color:var(--c2);box-shadow:0 12px 36px rgba(0,187,214,.36);transform:translateY(-1px);}
+.btn-g:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .btn-s2{background:var(--c2);color:#fff;border-color:var(--c2);}
-.btn-s2:hover{background:var(--c2d);}
+.btn-s2:hover{background:var(--c2d);border-color:var(--c2d);color:#fff;}
 .btn-sm{padding:5px 12px;font-size:11px;}
 .br{display:flex;justify-content:space-between;margin-top:22px;gap:10px;}
 
 /* Competencies */
-.cg{max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
-.cc{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #f5f6fa;cursor:pointer;transition:background .15s;align-items:flex-start;}
-.cc:hover{background:#f0fcfe;}.cc.sel{background:#e0f7fa;}
+.cg{max-height:380px;overflow-y:auto;border:1px solid var(--glass-b);border-radius:12px;background:rgba(255,255,255,0.45);}
+.cc{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(0,187,214,0.08);cursor:pointer;transition:background .15s;align-items:flex-start;}
+.cc:hover{background:rgba(0,187,214,0.07);}
+.cc.sel{background:rgba(0,187,214,0.12);}
 .cc:last-child{border-bottom:none;}
 .cc input{margin-top:3px;transform:scale(1.15);accent-color:var(--c1);}
 .cc-c{font-size:10px;font-weight:700;color:var(--c1);}
 .cc-d{font-size:12px;line-height:1.5;}
 .cc-m{font-size:10px;color:var(--text-s);margin-top:2px;}
 .sb{display:flex;justify-content:space-between;align-items:center;padding:6px 0;margin-bottom:6px;}
-.sc{font-size:13px;font-weight:700;color:var(--c2);}
+.sc{font-size:13px;font-weight:700;color:var(--c2);font-family:'Space Grotesk',sans-serif;}
 
 /* Toggles */
-.tc{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.2s;}
-.tc:hover{border-color:var(--c1);}
-.tc.on{border-color:var(--c1);background:#f0fcfe;}
+.tc{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--glass-b);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.2s;background:rgba(255,255,255,0.5);}
+.tc:hover{border-color:rgba(0,187,214,0.4);}
+.tc.on{border-color:rgba(0,187,214,0.4);background:rgba(0,187,214,0.07);}
 .tc-i{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
 .tc-n{font-size:13px;font-weight:600;flex:1;}
-.tc-ck{width:20px;height:20px;border-radius:5px;border:2px solid #b2bec3;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;transition:.2s;flex-shrink:0;}
+.tc-ck{width:20px;height:20px;border-radius:5px;border:1.5px solid rgba(13,31,45,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;transition:.2s;flex-shrink:0;}
 .tc.on .tc-ck{background:var(--c1);border-color:var(--c1);}
 .tc-x{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-s);padding:2px 6px;transition:transform .2s;flex-shrink:0;}
 .tc-x.op{transform:rotate(180deg);}
-.to{display:none;padding:14px 16px;margin:-8px 0 8px;border:2px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:#fafbfc;}
+.to{display:none;padding:14px 16px;margin:-8px 0 8px;border:1.5px solid var(--glass-b);border-top:none;border-radius:0 0 12px 12px;background:rgba(255,255,255,0.4);}
 .to.op{display:block;}
 
 /* Model Cards */
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media(max-width:600px){.mg{grid-template-columns:1fr;}}
-.mc{padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:center;}
-.mc:hover{border-color:var(--c1);}
-.mc.sel{border-color:var(--c1);background:#e0f7fa;}
-.mc-n{font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;}
+.mc{padding:12px;border:1.5px solid var(--glass-b);border-radius:12px;cursor:pointer;transition:.2s;text-align:center;background:rgba(255,255,255,0.5);}
+.mc:hover{border-color:rgba(0,187,214,0.45);}
+.mc.sel{border-color:var(--c1);background:rgba(0,187,214,0.1);}
+.mc-n{font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
 .mc-d{font-size:10px;color:var(--text-s);margin-top:2px;}
 
 /* Assessment Types */
 .at-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media(max-width:600px){.at-grid{grid-template-columns:1fr;}}
-.at{padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
+.at{padding:10px 14px;border:1.5px solid var(--glass-b);border-radius:12px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.5);}
 .at:hover{border-color:var(--accent);}
 .at.on{border-color:var(--accent);background:var(--accent-lt);}
 .at-i{font-size:20px;flex-shrink:0;}
@@ -138,44 +169,44 @@ textarea{resize:vertical;min-height:60px;}
 /* Switch */
 .sw{position:relative;width:42px;height:22px;flex-shrink:0;}
 .sw input{opacity:0;width:0;height:0;}
-.sl{position:absolute;top:0;left:0;right:0;bottom:0;background:#b2bec3;border-radius:22px;cursor:pointer;transition:.3s;}
+.sl{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(13,31,45,0.15);border-radius:22px;cursor:pointer;transition:.3s;}
 .sl:before{content:"";position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
 .sw input:checked+.sl{background:var(--c1);}
 .sw input:checked+.sl:before{transform:translateX(20px);}
 
 /* Progress */
-.po{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(29,78,120,0.85);z-index:1000;justify-content:center;align-items:center;}
+.po{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(13,31,45,0.82);backdrop-filter:blur(10px);z-index:1000;justify-content:center;align-items:center;}
 .po.a{display:flex;}
-.pb{background:#fff;border-radius:20px;padding:40px 44px;text-align:center;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-.pb-t{font-size:18px;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:6px;}
+.pb{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-b);border-radius:24px;padding:40px 44px;text-align:center;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.12);}
+.pb-t{font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-bottom:6px;color:var(--c2);letter-spacing:-0.02em;}
 .pb-s{font-size:12px;color:var(--text-s);margin-bottom:22px;}
-.pb-p{font-size:36px;font-weight:800;color:var(--c1);margin-bottom:4px;font-family:'Poppins',sans-serif;}
-.pb-bg{width:100%;height:10px;background:#ecf0f1;border-radius:5px;overflow:hidden;margin-bottom:10px;}
+.pb-p{font-size:36px;font-weight:800;color:var(--c1);margin-bottom:4px;font-family:'Space Grotesk',sans-serif;}
+.pb-bg{width:100%;height:8px;background:rgba(0,187,214,0.12);border-radius:5px;overflow:hidden;margin-bottom:10px;}
 .pb-fl{height:100%;background:linear-gradient(90deg,var(--c1),var(--accent));border-radius:5px;transition:width .4s;width:0%;}
 .pb-st{font-size:11px;color:var(--text-s);min-height:16px;}
 
 /* Output */
-.ob{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;max-height:70vh;overflow-y:auto;line-height:1.8;font-size:14px;}
-.ob h1{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:var(--c2);margin:24px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--c1);text-align:center;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.ob h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:22px 0 10px;padding:10px 16px;border-left:4px solid var(--c1);background:#f0fcfe;border-radius:0 8px 8px 0;}
-.ob h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--c2d);margin:16px 0 8px;padding-left:8px;border-left:3px solid var(--accent);}
-.ob h4{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--c2);margin:12px 0 6px;}
-.ob table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px;border-radius:8px;overflow:hidden;}
-.ob th{background:var(--c2);color:#fff;padding:10px 14px;font-family:'Poppins',sans-serif;font-weight:600;text-align:left;}
-.ob td{padding:8px 14px;border:1px solid var(--border);}
-.ob tr:nth-child(even) td{background:#f8fffe;}
+.ob{background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border:1px solid var(--glass-b);border-radius:14px;padding:28px;max-height:70vh;overflow-y:auto;line-height:1.8;font-size:14px;}
+.ob h1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--c2);margin:24px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--c1);text-align:center;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.ob h2{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--c2);margin:22px 0 10px;padding:10px 16px;border-left:4px solid var(--c1);background:rgba(0,187,214,0.07);border-radius:0 10px 10px 0;}
+.ob h3{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--c2);margin:16px 0 8px;padding-left:8px;border-left:3px solid var(--accent);}
+.ob h4{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:var(--c2);margin:12px 0 6px;}
+.ob table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px;border-radius:10px;overflow:hidden;}
+.ob th{background:var(--c2);color:#fff;padding:10px 14px;font-family:'Space Grotesk',sans-serif;font-weight:600;text-align:left;}
+.ob td{padding:8px 14px;border:1px solid rgba(0,187,214,0.12);}
+.ob tr:nth-child(even) td{background:rgba(0,187,214,0.04);}
 .ob td:first-child{font-weight:600;color:var(--c2);}
 .ob ul,.ob ol{padding-left:22px;margin:8px 0;}
 .ob li{margin-bottom:5px;font-size:13px;line-height:1.6;}
-.ob blockquote{border-left:4px solid var(--accent);background:var(--accent-lt);padding:12px 18px;border-radius:0 8px 8px 0;margin:12px 0;font-size:12px;}
-.ob hr{border:none;height:3px;background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));border-radius:2px;margin:24px 0;}
+.ob blockquote{border-left:4px solid var(--accent);background:var(--accent-lt);padding:12px 18px;border-radius:0 10px 10px 0;margin:12px 0;font-size:12px;}
+.ob hr{border:none;height:2px;background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));border-radius:2px;margin:24px 0;opacity:.35;}
 .ob em{color:var(--text-s);}
 .ob p{margin:6px 0;}
 
 /* Section Tabs (within output) */
 .section-tabs{display:flex;gap:4px;padding:8px 0 14px;overflow-x:auto;flex-wrap:wrap;}
-.section-tab{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;white-space:nowrap;}
-.section-tab:hover{border-color:var(--c1);background:#f0fcfe;}
+.section-tab{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--glass-b);background:rgba(255,255,255,0.65);cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;white-space:nowrap;color:var(--c2);}
+.section-tab:hover{border-color:var(--c1);background:rgba(0,187,214,0.07);}
 .section-tab.active{background:var(--c1);color:#fff;border-color:var(--c1);}
 .section-pane{display:none;}
 .section-pane.active{display:block;}
@@ -183,35 +214,44 @@ textarea{resize:vertical;min-height:60px;}
 /* Quiz Type Grid */
 .qt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media(max-width:600px){.qt-grid{grid-template-columns:1fr;}}
-.qt{padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
-.qt:hover{border-color:var(--c1);}
-.qt.on{border-color:var(--c1);background:#e0f7fa;}
+.qt{padding:10px 14px;border:1.5px solid var(--glass-b);border-radius:12px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.5);}
+.qt:hover{border-color:rgba(0,187,214,0.45);}
+.qt.on{border-color:var(--c1);background:rgba(0,187,214,0.09);}
 .qt-n{font-size:12px;font-weight:600;}
 .qt-d{font-size:10px;color:var(--text-s);}
 
 .oa{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
 .tabs{display:none;margin-bottom:14px;gap:4px;}
 .tabs.on{display:flex;}
-.tab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;}
+.tab{padding:7px 18px;border-radius:10px;font-size:12px;font-weight:600;border:1.5px solid var(--glass-b);background:rgba(255,255,255,0.65);cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;color:var(--c2);}
+.tab:hover{border-color:var(--c1);}
 .tab.a{background:var(--c2);color:#fff;border-color:var(--c2);}
-.mode-tab{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;flex:1;text-align:center;}
+.mode-tab{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:1.5px solid var(--glass-b);background:rgba(255,255,255,0.65);cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;flex:1;text-align:center;color:var(--c2);}
 .mode-tab:hover{border-color:var(--c1);}
 .mode-tab.a{background:var(--c1);color:#fff;border-color:var(--c1);}
-.star{cursor:pointer;color:#dfe6e9;font-size:28px;transition:color .15s;}
+.star{cursor:pointer;color:rgba(13,31,45,0.15);font-size:28px;transition:color .15s;}
 
-.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--border);margin-top:20px;}
+.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--glass-b);margin-top:20px;letter-spacing:.04em;font-weight:500;}
 
 @media print{.hdr,.steps,.br,.oa,.tabs,.ft,.sp:not(#step4),.section-tabs{display:none!important;}.ob{max-height:none;overflow:visible;box-shadow:none;border:none;}.section-pane{display:block!important;}}
 
 /* Scrollbar */
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:#b2bec3;border-radius:3px;}
+::-webkit-scrollbar-thumb{background:rgba(0,187,214,0.3);border-radius:3px;}
+
+/* Section Regen */
+.rp-chip{padding:5px 12px;border-radius:20px;border:1.5px solid var(--glass-b);background:rgba(255,255,255,0.7);font-size:11px;font-weight:600;cursor:pointer;transition:.15s;color:var(--c2);}
+.rp-chip.sel,.rp-chip:hover{border-color:var(--c1);background:var(--c1);color:#fff;}
+.sec-regen-btn{padding:3px 10px;font-size:11px;font-weight:600;border:1px solid var(--glass-b);border-radius:6px;background:rgba(255,255,255,0.7);cursor:pointer;color:var(--c2);transition:.15s;flex-shrink:0;}
+.sec-regen-btn:hover{border-color:var(--c1);color:var(--c1);}
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.sec-hdr h2{margin:0;}
 </style>
 </head>
 <body>
 
-<div style="background:var(--c2d);color:#fff;padding:6px 20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+<div style="background:var(--c2);color:#fff;padding:6px 20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-family:'Space Grotesk',sans-serif;font-weight:500;">
     <span>Welcome, <strong>{{ session.get('user_name', 'User') }}</strong></span>
     <div style="display:flex;gap:12px;">
         <a href="{{ url_for('landing') }}" style="color:#fff;opacity:0.8;text-decoration:none;">Home</a>
@@ -326,7 +366,7 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 
     <!-- Assessment Package -->
-    <div id="assess-wrap" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+    <div id="assess-wrap" style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
         <div class="crd-t">&#128203; Authentic Assessment Package</div>
         <div class="crd-s">Generate professional assessment tools aligned to the selected competencies.</div>
         <div class="fg"><label>Assessment Output Mode</label><select id="a-mode"><option value="none">No assessment (Lesson Plan only)</option><option value="incorporate">Include IN the lesson plan</option><option value="separate">Generate as SEPARATE document</option><option value="both">Generate BOTH (combined + separate download)</option></select></div>
@@ -345,18 +385,18 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 
     <!-- Quiz Generation -->
-    <div id="quiz-wrap" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+    <div id="quiz-wrap" style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
         <div class="crd-t">&#128221; Quiz Generation</div>
         <div class="crd-s">Generate a downloadable quiz based on the selected competencies.</div>
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;margin-bottom:10px;" id="quiz-box">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--glass-b);border-radius:14px;margin-bottom:10px;background:rgba(255,255,255,0.5);" id="quiz-box">
             <label class="sw"><input type="checkbox" id="f-quiz"><span class="sl"></span></label>
-            <div><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">Enable Quiz Generation</div><div style="font-size:11px;color:var(--text-s);">Creates a standalone quiz with answer key. Download separately for LMS upload (not in SCORM).</div></div>
+            <div><div style="font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;">Enable Quiz Generation</div><div style="font-size:11px;color:var(--text-s);">Creates a standalone quiz with answer key. Download separately for LMS upload (not in SCORM).</div></div>
         </div>
         <div id="quiz-opts" style="display:none;">
             <div class="fr">
                 <div class="fg"><label>Number of Questions (per type)</label><select id="f-qnum"><option value="5" selected>5 questions</option><option value="10">10 questions</option><option value="15">15 questions</option><option value="20">20 questions</option></select></div>
             </div>
-            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;font-family:'Poppins',sans-serif;color:var(--c2);">Question Types</label>
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;font-family:'Space Grotesk',sans-serif;color:var(--c2);">Question Types</label>
             <div class="qt-grid">
                 <div class="qt on" data-qt="multiple_choice"><span style="font-size:18px;">&#9898;</span><div><div class="qt-n">Multiple Choice</div><div class="qt-d">4-option questions (A-D)</div></div></div>
                 <div class="qt on" data-qt="true_false"><span style="font-size:18px;">&#9989;</span><div><div class="qt-n">True or False</div><div class="qt-d">Statement-based questions</div></div></div>
@@ -368,11 +408,11 @@ textarea{resize:vertical;min-height:60px;}
     </div>
 
     <!-- AI Status (always on) -->
-    <div style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--c1);border-radius:10px;background:#f0fcfe;" id="ai-box">
+    <div style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid rgba(0,187,214,0.35);border-radius:14px;background:rgba(0,187,214,0.07);" id="ai-box">
             <div style="width:36px;height:36px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:18px;">&#129302;</span></div>
-            <div style="flex:1;"><div style="font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;">AI-Powered Generation (Claude)</div><div style="font-size:11px;color:var(--text-s);">All content is generated by AI for detailed, classroom-ready lesson plans, assessments, and quizzes.</div></div>
-            <span style="background:var(--success);color:#fff;padding:3px 12px;border-radius:16px;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif;flex-shrink:0;">ACTIVE</span>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;">AI-Powered Generation (Claude)</div><div style="font-size:11px;color:var(--text-s);">All content is generated by AI for detailed, classroom-ready lesson plans, assessments, and quizzes.</div></div>
+            <span style="background:var(--success);color:#fff;padding:3px 12px;border-radius:16px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;flex-shrink:0;">ACTIVE</span>
         </div>
         <input type="hidden" id="f-ai" value="on">
         <input type="hidden" id="f-aip" value="anthropic">
@@ -388,26 +428,48 @@ textarea{resize:vertical;min-height:60px;}
 <div class="crd">
     <div class="crd-t" id="out-t">&#128196; Your Generated Lesson Plan</div>
     <div class="crd-s" id="out-s"></div>
-    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button><button class="tab" id="t-qz" style="display:none">&#128221; Quiz</button></div>
+    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button><button class="tab" id="t-qz" style="display:none">&#128221; Quiz</button><button class="tab" id="t-ppst" style="display:none">&#128203; RPMS-PPST</button></div>
     <div class="ob" id="out-b"></div>
     <div class="oa">
         <button class="btn" id="b-copy">&#128203; Copy</button>
         <button class="btn" id="b-dl">&#128229; Download .md</button>
+        <button class="btn" id="b-gdoc">&#128196; Google Doc</button>
+        <button class="btn" id="b-ppst">&#128203; RPMS-PPST</button>
+        <button class="btn" id="b-dlp" style="display:none">&#128229; PPST .md</button>
         <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
         <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
         <span id="quiz-dl-grp" style="display:none;gap:4px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:11px;font-weight:600;color:var(--text-s);padding:2px 2px;font-family:'Poppins',sans-serif;">Quiz&#x25BE;</span>
+            <span style="font-size:11px;font-weight:600;color:var(--text-s);padding:2px 2px;font-family:'Space Grotesk',sans-serif;">Quiz&#x25BE;</span>
             <button class="btn btn-sm" id="b-dlq-md" title="Human-readable reference">&#128221; .md</button>
             <button class="btn btn-sm" id="b-dlq-gift" title="Import into Moodle">&#128171; Moodle GIFT</button>
             <button class="btn btn-sm" id="b-dlq-qti" title="Import into Canvas or Brightspace">&#128230; QTI (Canvas/D2L)</button>
         </span>
+        <button class="btn" id="b-pptx">&#127912; Download PPTX</button>
+        <button class="btn btn-s2" id="b-activities">&#127918; Open Activities</button>
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
     <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip contains the lesson plan and assessment (if generated). Upload via Add Activity &gt; SCORM Package in Moodle, Canvas, or Brightspace. <strong>Note:</strong> The quiz is a separate LMS activity — use "Download Quiz (LMS)" to save it independently.</span></div>
 
+    <!-- Section Regen Panel -->
+    <div id="regen-panel" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);right:auto;z-index:200;background:rgba(240,249,251,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:2px solid rgba(0,187,214,0.3);box-shadow:0 -4px 32px rgba(0,187,214,0.12);padding:20px 24px;width:100%;max-width:700px;border-radius:18px 18px 0 0;">
+      <div style="font-size:12px;font-weight:700;color:var(--c2);margin-bottom:10px;">&#8635; Regenerate: <span id="regen-sec-name" style="color:var(--c1)"></span></div>
+      <div id="regen-presets" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        <button class="rp-chip" data-v="Make it shorter">Shorter</button>
+        <button class="rp-chip" data-v="Make activities more collaborative">More collaborative</button>
+        <button class="rp-chip" data-v="Add a kinesthetic or hands-on activity">Kinesthetic activity</button>
+        <button class="rp-chip" data-v="Add more detail and examples">More detailed</button>
+        <button class="rp-chip" data-v="Simplify the language for lower reading levels">Simplify language</button>
+      </div>
+      <input id="regen-instr" type="text" placeholder="Or describe what to change..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:12px;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-p" id="regen-go">&#8635; Regenerate</button>
+        <button class="btn" id="regen-cancel">Cancel</button>
+      </div>
+    </div>
+
     <!-- Rating Widget -->
-    <div id="rating-section" style="margin-top:20px;padding-top:16px;border-top:3px solid var(--c1);">
+    <div id="rating-section" style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
         <div class="crd-t">&#11088; Rate This Lesson Plan</div>
         <div class="crd-s">Help us improve by sharing your feedback.</div>
         <div id="star-row" style="display:flex;gap:6px;margin:10px 0;">
@@ -436,7 +498,7 @@ document.addEventListener("DOMContentLoaded",function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
 function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
-let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",activeTab="lp",genMode="curriculum";
+let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",rawPPST="",activeTab="lp",genMode="curriculum";
 
 function go(n){$$(".sp").forEach(p=>p.classList.remove("a"));$(`#step${n}`).classList.add("a");$$(".stp").forEach((s,i)=>{s.classList.remove("a","d");if(i+1<n)s.classList.add("d");if(i+1===n)s.classList.add("a");});step=n;window.scrollTo({top:0,behavior:"smooth"});}
 
@@ -554,7 +616,10 @@ function renderTabbed(html,container){
     let panes='<div class="section-pane active" data-pane="all">'+intro;
     for(let i=0;i<sections.length;i++){panes+='<h2>'+sections[i].title+'</h2>'+sections[i].content;}
     panes+='</div>';
-    for(let i=0;i<sections.length;i++){panes+='<div class="section-pane" data-pane="'+i+'"><h2>'+sections[i].title+'</h2>'+sections[i].content+'</div>';}
+    for(let i=0;i<sections.length;i++){
+        const regenBtn=activeTab==="lp"?`<button class="sec-regen-btn" data-title="${sections[i].title.replace(/"/g,'&quot;')}">&#8635; Regenerate</button>`:'';
+        panes+='<div class="section-pane" data-pane="'+i+'"><div class="sec-hdr"><h2>'+sections[i].title+'</h2>'+regenBtn+'</div>'+sections[i].content+'</div>';
+    }
     container.innerHTML=tabBar+panes;
     const tabs=container.querySelectorAll('.section-tab');
     tabs.forEach(function(tab){
@@ -689,11 +754,15 @@ function setTab(t){
     }else if(t==="quiz"){
         $("#t-qz").classList.add("a");
         renderTabbed(md2h(rawQZ),$("#out-b"));
+    }else if(t==="ppst"){
+        $("#t-ppst").classList.add("a");
+        renderTabbed(md2h(rawPPST),$("#out-b"));
     }
 }
 $("#t-lp").addEventListener("click",()=>setTab("lp"));
 $("#t-as").addEventListener("click",()=>setTab("assess"));
 $("#t-qz").addEventListener("click",()=>setTab("quiz"));
+$("#t-ppst").addEventListener("click",()=>setTab("ppst"));
 
 function md2h(m){if(!m)return"";let h=m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 h=h.replace(/^&gt; (.+)$/gm,"<blockquote>$1</blockquote>");h=h.replace(/<\/blockquote>\n<blockquote>/g,"<br>");
@@ -702,9 +771,15 @@ h=h.replace(/- \[ \]/g,"\u2610");h=h.replace(/- \[x\]/g,"\u2611");
 h=h.replace(/^#### (.+)$/gm,"<h4>$1</h4>");
 h=h.replace(/^### (.+)$/gm,"<h3>$1</h3>");h=h.replace(/^## (.+)$/gm,"<h2>$1</h2>");h=h.replace(/^# (.+)$/gm,"<h1>$1</h1>");
 h=h.replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>");h=h.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");h=h.replace(/\*(.+?)\*/g,"<em>$1</em>");
+// Convert **N.** bold-numbered items → list items (AI often formats these with bold numbers)
+h=h.replace(/^<strong>(\d+)\.<\/strong>\s*(.+)$/gm,"<li>$2</li>");
 h=h.replace(/^\|(.+)\|$/gm,function(m){const c=m.split("|").filter(c=>c.trim());if(c.every(c=>/^[\s\-:]+$/.test(c)))return"<!--s-->";return"<tr>"+c.map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>";});
 h=h.replace(/((<tr>.*?<\/tr>\n?)+)/g,"<table>$1</table>");h=h.replace(/<!--s-->\n?/g,"");
-h=h.replace(/^[-*] (.+)$/gm,"<li>$1</li>");h=h.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>");h=h.replace(/((<li>.*?<\/li>\n?)+)/g,"<ul>$1</ul>");
+h=h.replace(/^\s*[-*] (.+)$/gm,"<li>$1</li>");h=h.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>");
+// Group consecutive list items — allow up to one blank line between items (AI often adds blank lines)
+h=h.replace(/((<li>.*?<\/li>\n?\n?)+)/g,"<ul>$1</ul>");
+// Wrap lines starting with inline elements (<strong>, <em>) that weren't caught as list items
+h=h.replace(/^(<(?:strong|em|code|a)\b[^>]*>.+)$/gm,"<p>$1</p>");
 h=h.replace(/^(?!<[a-z\/])((?!<).+)$/gm,"<p>$1</p>");h=h.replace(/<p>\s*<\/p>/g,"");return h;}
 
 // Actions
@@ -762,16 +837,183 @@ $("#b-scorm").addEventListener("click",function(){
     }).catch(e=>{this.textContent="\u{1F4E6} Download SCORM";this.disabled=false;alert("SCORM build failed: "+e.message);});
 });
 
-$("#b-new").addEventListener("click",()=>{rawLP="";rawAS="";rawQZ="";ratingVal=0;$$(".star").forEach(s=>s.style.color="#dfe6e9");$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";$("#quiz-dl-grp").style.display="none";$("#b-dla").style.display="none";go(1);});
+$("#b-new").addEventListener("click",()=>{rawLP="";rawAS="";rawQZ="";rawPPST="";ratingVal=0;$$(".star").forEach(s=>s.style.color=starEmpty);$("#r-submit").disabled=true;if($("#r-comment"))$("#r-comment").value="";$("#r-msg").style.display="none";$("#quiz-dl-grp").style.display="none";$("#b-dla").style.display="none";$("#t-ppst").style.display="none";$("#b-dlp").style.display="none";$("#regen-panel").style.display="none";go(1);});
+
+// ── Google Doc Export ────────────────────────────────────────
+function mdToDocHtml(md){
+    let h=md.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    h=h.replace(/^&gt; (.+)$/gm,"<blockquote>$1</blockquote>");
+    h=h.replace(/<\/blockquote>\n<blockquote>/g,"<br>");
+    h=h.replace(/^---$/gm,"<hr>");
+    h=h.replace(/- \[ \]/g,"\u2610");h=h.replace(/- \[x\]/g,"\u2611");
+    h=h.replace(/^#### (.+)$/gm,"<h4>$1</h4>");
+    h=h.replace(/^### (.+)$/gm,"<h3>$1</h3>");
+    h=h.replace(/^## (.+)$/gm,"<h2>$1</h2>");
+    h=h.replace(/^# (.+)$/gm,"<h1>$1</h1>");
+    h=h.replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>");
+    h=h.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+    h=h.replace(/\*(.+?)\*/g,"<em>$1</em>");
+    h=h.replace(/^<strong>(\d+)\.<\/strong>\s*(.+)$/gm,"<li>$2</li>");
+    h=h.replace(/^\|(.+)\|$/gm,function(m){const c=m.split("|").filter(c=>c.trim());if(c.every(c=>/^[\s\-:]+$/.test(c)))return"<!--s-->";return"<tr>"+c.map(c=>`<td style="border:1px solid #ccc;padding:6px 10px;">${c.trim()}</td>`).join("")+"</tr>";});
+    h=h.replace(/((<tr>.*?<\/tr>\n?)+)/g,"<table style=\"border-collapse:collapse;width:100%;margin:10px 0;\">$1</table>");
+    h=h.replace(/<!--s-->\n?/g,"");
+    h=h.replace(/^\s*[-*] (.+)$/gm,"<li>$1</li>");
+    h=h.replace(/^\d+\.\s+(.+)$/gm,"<li>$1</li>");
+    h=h.replace(/((<li>.*?<\/li>\n?\n?)+)/g,"<ul>$1</ul>");
+    h=h.replace(/^(<(?:strong|em|code|a)\b[^>]*>.+)$/gm,"<p>$1</p>");
+    h=h.replace(/^(?!<[a-z\/])((?!<).+)$/gm,"<p>$1</p>");
+    h=h.replace(/<p>\s*<\/p>/g,"");
+    const css=`body{font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:11pt;line-height:1.6;max-width:800px;margin:0 auto;padding:40px}h1,h2,h3{font-family:'Space Grotesk',Arial,sans-serif}h1{font-size:18pt;color:#0d1f2d;border-bottom:2px solid #00bbd6;padding-bottom:6pt}h2{font-size:14pt;color:#0d1f2d;margin-top:24pt}h3{font-size:12pt;color:#1b4a6e}blockquote{border-left:3px solid #00bbd6;padding-left:12px;color:#556;font-style:italic}table,td,th{border-collapse:collapse;border:1px solid #c8e8ee;padding:6px 10px}`;
+    return`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${h}</body></html>`;
+}
+
+$("#b-gdoc").addEventListener("click",function(){
+    const content=activeTab==="assess"?rawAS:activeTab==="quiz"?rawQZ:activeTab==="ppst"?rawPPST:rawLP;
+    if(!content){alert("No content to export. Generate a lesson plan first.");return;}
+    let fn;
+    if(genMode==="topic"){fn=`Lesson_Plan_${(window._topicCtx?.topic||"Topic").replace(/\s+/g,"_")}.html`;}
+    else{fn=`Lesson_Plan_${S.value}_G${G.value}_Q${Q.value}.html`;}
+    const html=mdToDocHtml(content);
+    const b=new Blob([html],{type:"text/html"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fn;a.click();
+});
+
+// ── RPMS-PPST Alignment ──────────────────────────────────────
+$("#b-ppst").addEventListener("click",function(){
+    if(!rawLP){alert("Generate a lesson plan first.");return;}
+    const orig=this.textContent;
+    this.textContent="Analyzing...";this.disabled=true;
+    const ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic";
+    let subject="",grade="",comps="";
+    if(genMode==="topic"){const ctx=window._topicCtx||{};subject=ctx.subject_name||"";grade=ctx.grade||"";comps=ctx.competencies_text||"";}
+    else{subject=S.options[S.selectedIndex]?.text||"";grade=G.value||"";comps=Array.from(selC).map(id=>{const c=cData.find(x=>x.id===id);return c?c.learning_competency:"";}).filter(Boolean).join("; ");}
+    fetch(aurl("/api/generate-rpms-ppst"),{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({lesson_plan:rawLP,subject,grade,competencies_summary:comps,api_key:ak,ai_provider:ap})
+    }).then(r=>r.json()).then(d=>{
+        this.textContent=orig;this.disabled=false;
+        if(d.error){alert("RPMS-PPST error: "+d.error);return;}
+        rawPPST=d.content||"";
+        $("#t-ppst").style.display="inline-flex";
+        $("#out-tabs").classList.add("on");
+        $("#b-dlp").style.display="inline-flex";
+        setTab("ppst");
+    }).catch(e=>{this.textContent=orig;this.disabled=false;alert("Error: "+e.message);});
+});
+
+$("#b-dlp").addEventListener("click",()=>{dl(rawPPST,"RPMS_PPST_Alignment.md");});
+
+// ── Section Regen ────────────────────────────────────────────
+function getSectionFromMarkdown(md,title){
+    const lines=md.split('\n');let inside=false,result=[];
+    for(let i=0;i<lines.length;i++){
+        const l=lines[i];
+        if(l.startsWith('## ')&&l.slice(3).trim()===title){inside=true;result.push(l);continue;}
+        if(inside&&l.startsWith('## ')&&l.slice(3).trim()!==title)break;
+        if(inside)result.push(l);
+    }
+    return result.join('\n');
+}
+
+function replaceSectionInMarkdown(md,title,newSection){
+    const lines=md.split('\n');let result=[],inside=false,replaced=false;
+    for(let i=0;i<lines.length;i++){
+        const l=lines[i];
+        if(l.startsWith('## ')&&l.slice(3).trim()===title){
+            if(!replaced){const ns=newSection.trimEnd();ns.split('\n').forEach(nl=>result.push(nl));replaced=true;}
+            inside=true;continue;
+        }
+        if(inside&&l.startsWith('## ')&&l.slice(3).trim()!==title){inside=false;}
+        if(!inside)result.push(l);
+    }
+    return result.join('\n');
+}
+
+let currentRegenTitle="",selectedPreset="";
+
+$("#out-b").addEventListener("click",function(e){
+    const btn=e.target.closest(".sec-regen-btn");
+    if(!btn)return;
+    currentRegenTitle=btn.dataset.title||"";
+    selectedPreset="";
+    $("#regen-sec-name").textContent=currentRegenTitle;
+    $("#regen-instr").value="";
+    $$(".rp-chip").forEach(c=>c.classList.remove("sel"));
+    $("#regen-panel").style.display="block";
+});
+
+$$(".rp-chip").forEach(c=>{c.addEventListener("click",function(){
+    $$(".rp-chip").forEach(x=>x.classList.remove("sel"));
+    this.classList.add("sel");
+    selectedPreset=this.dataset.v;
+    $("#regen-instr").value=selectedPreset;
+});});
+
+$("#regen-instr").addEventListener("input",function(){
+    if(this.value!==selectedPreset){$$(".rp-chip").forEach(c=>c.classList.remove("sel"));selectedPreset="";}
+});
+
+$("#regen-cancel").addEventListener("click",()=>{$("#regen-panel").style.display="none";});
+
+$("#regen-go").addEventListener("click",function(){
+    const instr=($("#regen-instr").value||"").trim()||"Improve this section";
+    const sectionMd=getSectionFromMarkdown(rawLP,currentRegenTitle);
+    if(!sectionMd){alert("Could not find section: "+currentRegenTitle);return;}
+    const orig=this.textContent;this.textContent="Regenerating...";this.disabled=true;
+    const ak=$("#f-aik")?.value||"",ap=$("#f-aip")?.value||"anthropic";
+    let subject="",grade="",comps="";
+    if(genMode==="topic"){const ctx=window._topicCtx||{};subject=ctx.subject_name||"";grade=ctx.grade||"";comps=ctx.competencies_text||"";}
+    else{subject=S.options[S.selectedIndex]?.text||"";grade=G.value||"";comps=Array.from(selC).map(id=>{const c=cData.find(x=>x.id===id);return c?c.learning_competency:"";}).filter(Boolean).join("; ");}
+    fetch(aurl("/api/regenerate-section"),{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({section_title:currentRegenTitle,section_content:sectionMd,lesson_context:{subject,grade,competencies_summary:comps},instruction:instr,api_key:ak,ai_provider:ap})
+    }).then(r=>r.json()).then(d=>{
+        this.textContent=orig;this.disabled=false;
+        if(d.error){alert("Regen error: "+d.error);return;}
+        rawLP=replaceSectionInMarkdown(rawLP,currentRegenTitle,d.content||sectionMd);
+        $("#regen-panel").style.display="none";
+        setTab("lp");
+    }).catch(e=>{this.textContent=orig;this.disabled=false;alert("Error: "+e.message);});
+});
+
+// ── Download PPTX ────────────────────────────────────────────
+$("#b-pptx").addEventListener("click",function(){
+    if(!rawLP){alert("Generate a lesson plan first.");return;}
+    let title;
+    if(genMode==="topic"){const ctx=window._topicCtx||{};title=`${ctx.topic||"Lesson"} ${ctx.grade||""}`.trim();}
+    else{const sn=S.options[S.selectedIndex]?.text||"Lesson";const gn=G.value||"";title=`${sn} Grade ${gn} Q${Q.value||""}`;}
+    const orig=this.textContent;this.textContent="Building PPTX...";this.disabled=true;
+    fetch(aurl("/api/download-pptx"),{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({lesson_md:rawLP,title:title})
+    }).then(r=>{if(!r.ok)throw new Error("Failed");return r.blob();}).then(b=>{
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(b);
+        a.download=`LessonPlan_${title.replace(/\s+/g,"_")}.pptx`;
+        a.click();
+        this.textContent=orig;this.disabled=false;
+    }).catch(e=>{this.textContent=orig;this.disabled=false;alert("PPTX build failed: "+e.message);});
+});
+
+// ── Open Activities ───────────────────────────────────────────
+$("#b-activities").addEventListener("click",function(){
+    if(!rawLP){alert("Generate a lesson plan first.");return;}
+    localStorage.setItem("skooled_lesson_md",rawLP);
+    localStorage.setItem("skooled_quiz_md",rawQZ||"");
+    localStorage.setItem("skooled_use_ai","true");
+    localStorage.setItem("skooled_api_key",$("#f-aik")?.value||"");
+    localStorage.setItem("skooled_ai_provider",$("#f-aip")?.value||"anthropic");
+    window.open(aurl("/activities"),"_blank");
+});
 
 // Rating widget
 let ratingVal=0;
 const stars=$$(".star");
-stars.forEach(s=>{s.style.color="#dfe6e9";});
+const starEmpty="rgba(13,31,45,0.12)";
+stars.forEach(s=>{s.style.color=starEmpty;});
 stars.forEach(s=>{
-    s.addEventListener("mouseenter",function(){const v=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<v?"var(--accent)":"#dfe6e9");});
-    s.addEventListener("mouseleave",()=>{stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":"#dfe6e9");});
-    s.addEventListener("click",function(){ratingVal=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":"#dfe6e9");$("#r-submit").disabled=false;});
+    s.addEventListener("mouseenter",function(){const v=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<v?"var(--accent)":starEmpty);});
+    s.addEventListener("mouseleave",()=>{stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":starEmpty);});
+    s.addEventListener("click",function(){ratingVal=parseInt(this.dataset.v);stars.forEach((x,i)=>x.style.color=i<ratingVal?"var(--accent)":starEmpty);$("#r-submit").disabled=false;});
 });
 $("#r-submit").addEventListener("click",function(){
     if(!ratingVal)return;
