@@ -220,6 +220,21 @@ textarea{resize:vertical;min-height:60px;}
 .qt-n{font-size:12px;font-weight:600;}
 .qt-d{font-size:10px;color:var(--text-s);}
 
+/* Activities & PPTX quick-action strip */
+.qa-strip{display:flex;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.qa-btn{flex:1;min-width:160px;display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;border:2px solid transparent;transition:.2s;}
+.qa-btn-act{background:linear-gradient(135deg,var(--c2) 0%,#1b4a6e 100%);color:#fff;border-color:var(--c1);box-shadow:0 4px 18px rgba(0,187,214,.18);}
+.qa-btn-act:hover{box-shadow:0 8px 28px rgba(0,187,214,.32);transform:translateY(-1px);}
+.qa-btn-pptx{background:linear-gradient(135deg,#fff8ed 0%,#fff3d6 100%);color:var(--c2);border-color:var(--accent);}
+.qa-btn-pptx:hover{box-shadow:0 8px 28px rgba(250,163,43,.22);transform:translateY(-1px);}
+.qa-btn .qi{font-size:26px;flex-shrink:0;}
+.qa-btn .qt-wrap .ql{font-size:14px;font-weight:800;}
+.qa-btn .qt-wrap .qs{font-size:11px;opacity:.72;font-weight:400;font-family:'Plus Jakarta Sans',sans-serif;}
+/* Step 3 activities preview banner */
+.act-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,rgba(0,187,214,.08) 0%,rgba(13,31,45,.06) 100%);border:1.5px solid rgba(0,187,214,.25);margin-top:20px;}
+.act-banner-icons{display:flex;gap:4px;flex-wrap:wrap;font-size:20px;}
+.act-banner-txt .abt{font-size:13px;font-weight:700;color:var(--c2);}
+.act-banner-txt .abs{font-size:11px;color:var(--text-s);margin-top:2px;}
 .oa{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
 .tabs{display:none;margin-bottom:14px;gap:4px;}
 .tabs.on{display:flex;}
@@ -419,6 +434,15 @@ textarea{resize:vertical;min-height:60px;}
         <input type="hidden" id="f-aik" value="">
     </div>
 
+    <!-- Activities Preview Banner -->
+    <div class="act-banner" style="margin-top:18px;">
+        <div class="act-banner-icons">&#127918;&#127912;&#127744;&#11036;&#128269;&#9989;&#127942;&#9889;</div>
+        <div class="act-banner-txt">
+            <div class="abt">&#10024; After generating, you'll get 16 interactive games &amp; a PowerPoint!</div>
+            <div class="abs">Wheel of Names · Crossword · Word Search · Flashcards · Jeopardy · Kahoot-Style Quiz · Hangman · Bingo · and more — all auto-filled from your lesson content.</div>
+        </div>
+    </div>
+
     <div class="br"><button class="btn" id="bb3">&#8592; Back</button><button class="btn btn-g" id="bgen">&#9889; Generate Lesson Plan</button></div>
 </div>
 </div>
@@ -429,6 +453,25 @@ textarea{resize:vertical;min-height:60px;}
     <div class="crd-t" id="out-t">&#128196; Your Generated Lesson Plan</div>
     <div class="crd-s" id="out-s"></div>
     <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button><button class="tab" id="t-qz" style="display:none">&#128221; Quiz</button><button class="tab" id="t-ppst" style="display:none">&#128203; RPMS-PPST</button></div>
+
+    <!-- ★ ACTIVITIES & PPTX QUICK ACTIONS ★ -->
+    <div class="qa-strip">
+        <button class="qa-btn qa-btn-act" id="b-activities">
+            <span class="qi">&#127918;</span>
+            <div class="qt-wrap">
+                <div class="ql">Open Activities</div>
+                <div class="qs">16 interactive games · auto-populated from your lesson</div>
+            </div>
+        </button>
+        <button class="qa-btn qa-btn-pptx" id="b-pptx">
+            <span class="qi">&#127912;</span>
+            <div class="qt-wrap">
+                <div class="ql">Download PPTX</div>
+                <div class="qs">Branded PowerPoint · ready for classroom presentation</div>
+            </div>
+        </button>
+    </div>
+
     <div class="ob" id="out-b"></div>
     <div class="oa">
         <button class="btn" id="b-copy">&#128203; Copy</button>
@@ -444,8 +487,6 @@ textarea{resize:vertical;min-height:60px;}
             <button class="btn btn-sm" id="b-dlq-gift" title="Import into Moodle">&#128171; Moodle GIFT</button>
             <button class="btn btn-sm" id="b-dlq-qti" title="Import into Canvas or Brightspace">&#128230; QTI (Canvas/D2L)</button>
         </span>
-        <button class="btn" id="b-pptx">&#127912; Download PPTX</button>
-        <button class="btn btn-s2" id="b-activities">&#127918; Open Activities</button>
         <button class="btn" id="b-pr">&#128424; Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
