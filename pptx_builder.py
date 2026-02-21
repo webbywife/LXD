@@ -1,7 +1,7 @@
 """
 pptx_builder.py
 PowerPoint generation for SKOOLED-AI lesson plans.
-Color scheme: BG #0d1f2d (dark navy), accent #00bbd6 (cyan), secondary #faa32b (orange)
+Color scheme: Light theme — white BG, cyan/orange accents, navy text.
 """
 
 import re
@@ -35,7 +35,7 @@ CONTENT_H     = SLIDE_H - Inches(1.65) - Inches(0.45)   # bottom margin
 
 # ── Low-level helpers ─────────────────────────────────────────
 
-def _set_bg(slide, color=NAVY):
+def _set_bg(slide, color=WHITE):
     fill = slide.background.fill
     fill.solid()
     fill.fore_color.rgb = color
@@ -50,7 +50,7 @@ def _add_rect(slide, left, top, width, height, color):
 
 
 def _add_textbox(slide, text, left, top, width, height,
-                 font_size=18, bold=False, color=WHITE,
+                 font_size=18, bold=False, color=NAVY,
                  align=PP_ALIGN.LEFT, italic=False):
     txBox = slide.shapes.add_textbox(left, top, width, height)
     tf = txBox.text_frame
@@ -71,13 +71,13 @@ def _add_textbox(slide, text, left, top, width, height,
 def _auto_font_size(n_items):
     """Return font size and line spacing based on item count."""
     if n_items <= 3:
-        return 16, 1.5   # font pt, line_spacing multiplier
+        return 20, 1.5   # font pt, line_spacing multiplier
     elif n_items <= 5:
-        return 14, 1.45
+        return 18, 1.45
     elif n_items <= 7:
-        return 13, 1.4
+        return 16, 1.4
     else:
-        return 12, 1.35
+        return 14, 1.35
 
 
 def _rich_bullets(slide, items, left=CONTENT_LEFT, top=CONTENT_TOP,
@@ -114,7 +114,7 @@ def _rich_bullets(slide, items, left=CONTENT_LEFT, top=CONTENT_TOP,
         run = p.add_run()
         run.text = f"{bullet_char}  {item}"
         run.font.size = Pt(fs)
-        run.font.color.rgb = WHITE
+        run.font.color.rgb = NAVY
         run.font.bold = False
 
 
@@ -138,7 +138,7 @@ def _add_header(slide, title, subtitle="", title_color=NAVY):
     title_top = Inches(0.14) if not subtitle else Inches(0.1)
     _add_textbox(slide, title,
                  Inches(0.55), title_top, Inches(12.2), Inches(0.78),
-                 font_size=30, bold=True, color=title_color)
+                 font_size=34, bold=True, color=title_color)
     if subtitle:
         _add_textbox(slide, subtitle,
                      Inches(0.55), Inches(0.94), Inches(12.2), Inches(0.42),
@@ -187,7 +187,7 @@ def _slide_title(prs, parsed):
     title = parsed["title"] or "Lesson Plan"
     _add_textbox(slide, title,
                  Inches(0.7), Inches(1.55), Inches(11.6), Inches(1.9),
-                 font_size=38, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+                 font_size=38, bold=True, color=NAVY, align=PP_ALIGN.CENTER)
 
     # Meta pills row
     meta_parts = []
@@ -201,12 +201,12 @@ def _slide_title(prs, parsed):
     if meta:
         _add_textbox(slide, meta,
                      Inches(0.7), Inches(3.6), Inches(11.6), Inches(0.55),
-                     font_size=17, color=GREY, align=PP_ALIGN.CENTER)
+                     font_size=17, color=RGBColor(0x33, 0x55, 0x66), align=PP_ALIGN.CENTER)
 
     # Brand label above bottom bar
     _add_textbox(slide, "SKOOLED-AI  ·  AI-Generated Lesson Plan",
                  Inches(0.7), SLIDE_H - Inches(0.72), Inches(11.6), Inches(0.36),
-                 font_size=10, color=DIMWHITE, align=PP_ALIGN.CENTER)
+                 font_size=10, color=NAVY, align=PP_ALIGN.CENTER)
 
 
 def _slides_bullets(prs, title, items, subtitle="", bullet_color=CYAN,
