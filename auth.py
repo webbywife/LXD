@@ -100,6 +100,18 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS syllabus_shares (
+                    id             INT AUTO_INCREMENT PRIMARY KEY,
+                    syllabus_token VARCHAR(64) NOT NULL,
+                    shared_email   VARCHAR(255) NOT NULL,
+                    shared_by_id   INT NOT NULL,
+                    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uq_share (syllabus_token, shared_email),
+                    INDEX idx_share_token (syllabus_token),
+                    INDEX idx_share_email (shared_email)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS lesson_plans (
                     id            INT AUTO_INCREMENT PRIMARY KEY,
                     token         VARCHAR(64) NOT NULL UNIQUE,

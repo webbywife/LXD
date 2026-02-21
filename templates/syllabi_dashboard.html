@@ -91,6 +91,28 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .btn-confirm-del{background:#c0392b;color:#fff;}
 .btn-confirm-del:hover{background:#e74c3c;}
 
+/* ── Access modal ── */
+.access-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.access-modal-overlay.show{opacity:1;pointer-events:all;}
+.access-modal{background:#0d1f2d;border:1px solid rgba(0,187,214,0.25);border-radius:18px;width:90%;max-width:480px;padding:28px 30px;font-family:'Plus Jakarta Sans',sans-serif;}
+.access-modal h3{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;color:#eef2f3;}
+.access-modal-sub{font-size:11px;color:rgba(238,242,243,0.4);margin-bottom:18px;}
+.access-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:200px;overflow-y:auto;}
+.access-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 12px;}
+.access-row-email{font-size:12px;color:#eef2f3;}
+.access-row-del{background:none;border:none;color:rgba(231,76,60,0.55);cursor:pointer;font-size:14px;padding:0 3px;}
+.access-row-del:hover{color:#e74c3c;}
+.access-add-row{display:flex;gap:8px;}
+.access-add-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;color:#eef2f3;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;}
+.access-add-input:focus{border-color:rgba(0,187,214,0.5);}
+.access-add-input::placeholder{color:rgba(238,242,243,0.3);}
+.access-add-submit{padding:8px 18px;background:#00bbd6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+.access-add-submit:hover{background:#009bb3;}
+.access-feedback{font-size:11px;margin-top:8px;min-height:14px;}
+.access-modal-close{float:right;background:none;border:none;color:rgba(238,242,243,0.4);font-size:20px;cursor:pointer;line-height:1;margin-top:-4px;}
+.syl-btn-access{background:rgba(250,163,43,0.12);color:#faa32b;border:1px solid rgba(250,163,43,0.25);}
+.syl-btn-access:hover{background:rgba(250,163,43,0.22);}
+
 @media(max-width:640px){
   .page{padding:24px 14px 60px;}
   .syl-grid{grid-template-columns:1fr;}
@@ -140,6 +162,21 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   </div>
 
   <div class="syl-grid" id="syl-grid"></div>
+</div>
+
+<!-- Manage Access overlay -->
+<div class="access-modal-overlay" id="access-overlay">
+  <div class="access-modal">
+    <button class="access-modal-close" id="access-modal-close">&times;</button>
+    <h3>Manage Access</h3>
+    <p class="access-modal-sub" id="access-modal-sub">Who can view this syllabus</p>
+    <div class="access-list" id="access-list"><div style="font-size:12px;color:rgba(238,242,243,0.35);padding:8px 0;">Loading…</div></div>
+    <div class="access-add-row">
+      <input class="access-add-input" id="access-add-input" type="email" placeholder="Invite by email address" />
+      <button class="access-add-submit" id="access-add-submit">Add</button>
+    </div>
+    <div class="access-feedback" id="access-feedback"></div>
+  </div>
 </div>
 
 <!-- Confirm delete overlay -->
@@ -220,6 +257,7 @@ function renderCards(list){
       <div class="syl-actions">
         <button class="syl-btn syl-btn-view" onclick="window.open('${viewUrl}','_blank')">View</button>
         ${canEdit ? `<button class="syl-btn syl-btn-edit" onclick="editSyllabus('${esc(s.token)}')">Edit</button>` : ''}
+        ${canEdit ? `<button class="syl-btn syl-btn-access" onclick="openAccessModal('${esc(s.token)}','${esc(s.course_title)}')">Manage Access</button>` : ''}
         <button class="syl-btn syl-btn-share" onclick="copyLink('${esc(s.token)}')">Copy Link</button>
         ${canEdit ? `<button class="syl-btn syl-btn-del" onclick="confirmDelete('${esc(s.token)}','${esc(s.course_title)}')">Delete</button>` : ''}
       </div>
@@ -300,6 +338,79 @@ document.getElementById('confirm-del').onclick = async function(){
 
 // ── Init ──────────────────────────────────────────────────
 loadSyllabi();
+
+// ── Manage Access ──────────────────────────────────────────
+let _accessToken = null;
+
+function openAccessModal(token, title){
+  _accessToken = token;
+  document.getElementById('access-modal-sub').textContent = '"' + title + '" — who can view';
+  document.getElementById('access-overlay').classList.add('show');
+  document.getElementById('access-add-input').value = '';
+  document.getElementById('access-feedback').textContent = '';
+  loadAccessList();
+}
+
+document.getElementById('access-modal-close').onclick = function(){
+  document.getElementById('access-overlay').classList.remove('show');
+  _accessToken = null;
+};
+document.getElementById('access-overlay').addEventListener('click', function(e){
+  if(e.target === this){ this.classList.remove('show'); _accessToken = null; }
+});
+
+async function loadAccessList(){
+  const listEl = document.getElementById('access-list');
+  listEl.innerHTML = '<div style="font-size:12px;color:rgba(238,242,243,0.35);padding:8px 0;">Loading…</div>';
+  try{
+    const r = await fetch(apiUrl('/api/syllabus-shares/'+_accessToken));
+    const data = await r.json();
+    if(!Array.isArray(data)){ listEl.innerHTML='<div style="font-size:12px;color:#e74c3c;">Error loading.</div>'; return; }
+    if(!data.length){
+      listEl.innerHTML='<div style="font-size:12px;color:rgba(238,242,243,0.35);padding:8px 0;">No one else has access yet. Add emails below.</div>';
+      return;
+    }
+    listEl.innerHTML = data.map(s=>`<div class="access-row">
+      <span class="access-row-email">${esc(s.email)}</span>
+      <button class="access-row-del" onclick="removeAccessEmail('${esc(s.email)}')" title="Remove access">&times;</button>
+    </div>`).join('');
+  }catch(e){ listEl.innerHTML='<div style="font-size:12px;color:#e74c3c;">Error: '+e.message+'</div>'; }
+}
+
+async function removeAccessEmail(email){
+  try{
+    const r = await fetch(apiUrl('/api/syllabus-shares/'+_accessToken+'/'+encodeURIComponent(email)), {method:'DELETE'});
+    const d = await r.json();
+    if(d.ok){ loadAccessList(); setAccessFeedback('Access removed for '+email, false); }
+    else setAccessFeedback(d.error || 'Failed to remove.', true);
+  }catch(e){ setAccessFeedback('Error: '+e.message, true); }
+}
+
+document.getElementById('access-add-submit').addEventListener('click', async function(){
+  const email = document.getElementById('access-add-input').value.trim().toLowerCase();
+  if(!email || !email.includes('@')){ setAccessFeedback('Enter a valid email.', true); return; }
+  this.disabled = true;
+  try{
+    const r = await fetch(apiUrl('/api/syllabus-shares/'+_accessToken), {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    const d = await r.json();
+    if(d.ok){ document.getElementById('access-add-input').value=''; loadAccessList(); setAccessFeedback(email+' can now view this syllabus.', false); }
+    else setAccessFeedback(d.error || 'Failed to add.', true);
+  }catch(e){ setAccessFeedback('Error: '+e.message, true); }
+  finally{ this.disabled=false; }
+});
+
+document.getElementById('access-add-input').addEventListener('keydown', function(e){
+  if(e.key==='Enter') document.getElementById('access-add-submit').click();
+});
+
+function setAccessFeedback(msg, isErr){
+  const el = document.getElementById('access-feedback');
+  el.textContent = msg;
+  el.style.color = isErr ? '#e74c3c' : '#2ecc71';
+}
 </script>
 </body>
 </html>

@@ -1185,8 +1185,9 @@ def api_delete_syllabus(token):
 
 
 @app.route("/syllabus/view/<token>")
+@login_required
 def syllabus_view(token):
-    """Public (no login) view of a saved syllabus. Edit button shown to owner/admin."""
+    """Restricted syllabus view: owner, admin, or explicitly invited email only."""
     from auth import get_db
     conn = get_db()
     try:
@@ -1196,23 +1197,126 @@ def syllabus_view(token):
                 (token,),
             )
             row = cur.fetchone()
+            if not row:
+                return render_template("syllabus_view.html", syllabus=None,
+                                       course_title=None, can_edit=False,
+                                       can_manage=False, syllabus_token=None,
+                                       error="Syllabus not found or link has expired.")
+
+            uid        = session.get("user_id")
+            user_email = session.get("user_email", "").lower().strip()
+            is_admin   = session.get("user_role") == "admin"
+            is_owner   = uid == row["owner_id"]
+            can_edit   = is_owner or is_admin
+            can_manage = can_edit  # only owner/admin can manage shares
+
+            if not can_edit:
+                # Check if this user's email was explicitly invited
+                cur.execute(
+                    "SELECT id FROM syllabus_shares WHERE syllabus_token = %s AND shared_email = %s",
+                    (token, user_email),
+                )
+                can_view = bool(cur.fetchone())
+            else:
+                can_view = True
     finally:
         conn.close()
 
-    if not row:
+    if not can_view:
         return render_template("syllabus_view.html", syllabus=None,
-                               course_title=None, can_edit=False, syllabus_token=None,
-                               error="Syllabus not found or link has expired.")
-
-    can_edit = False
-    uid = session.get("user_id")
-    if uid:
-        can_edit = (uid == row["owner_id"]) or (session.get("user_role") == "admin")
+                               course_title=None, can_edit=False,
+                               can_manage=False, syllabus_token=None,
+                               error="You don't have access to this syllabus. Ask the owner to share it with your email address.")
 
     syllabus = json.loads(row["syllabus_json"])
     return render_template("syllabus_view.html", syllabus=syllabus,
                            course_title=row["course_title"], error=None,
-                           can_edit=can_edit, syllabus_token=token)
+                           can_edit=can_edit, can_manage=can_manage,
+                           syllabus_token=token)
+
+
+# ── Syllabus share management ──────────────────────────────
+
+@app.route("/api/syllabus-shares/<token>")
+@login_required
+def api_list_syllabus_shares(token):
+    """List emails that have been granted access to a syllabus."""
+    from auth import get_db
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT owner_id FROM syllabi WHERE token = %s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found"}), 404
+            if not is_admin and row["owner_id"] != session["user_id"]:
+                return jsonify({"error": "Access denied"}), 403
+            cur.execute(
+                "SELECT shared_email, created_at FROM syllabus_shares WHERE syllabus_token = %s ORDER BY created_at ASC",
+                (token,),
+            )
+            shares = [{"email": r["shared_email"],
+                       "created_at": r["created_at"].isoformat() if r["created_at"] else ""}
+                      for r in cur.fetchall()]
+    finally:
+        conn.close()
+    return jsonify(shares)
+
+
+@app.route("/api/syllabus-shares/<token>", methods=["POST"])
+@login_required
+def api_add_syllabus_share(token):
+    """Grant a specific email access to view a syllabus."""
+    from auth import get_db
+    data = request.get_json()
+    email = (data or {}).get("email", "").lower().strip()
+    if not email or "@" not in email:
+        return jsonify({"error": "Valid email required"}), 400
+
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT owner_id FROM syllabi WHERE token = %s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found"}), 404
+            if not is_admin and row["owner_id"] != session["user_id"]:
+                return jsonify({"error": "Access denied"}), 403
+            cur.execute(
+                "INSERT IGNORE INTO syllabus_shares (syllabus_token, shared_email, shared_by_id) VALUES (%s, %s, %s)",
+                (token, email, session["user_id"]),
+            )
+    finally:
+        conn.close()
+    _log_activity("syllabus_share_add", email)
+    return jsonify({"ok": True, "email": email})
+
+
+@app.route("/api/syllabus-shares/<token>/<path:email>", methods=["DELETE"])
+@login_required
+def api_remove_syllabus_share(token, email):
+    """Remove a specific email's access to a syllabus."""
+    from auth import get_db
+    email = email.lower().strip()
+    conn = get_db()
+    is_admin = session.get("user_role") == "admin"
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT owner_id FROM syllabi WHERE token = %s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found"}), 404
+            if not is_admin and row["owner_id"] != session["user_id"]:
+                return jsonify({"error": "Access denied"}), 403
+            cur.execute(
+                "DELETE FROM syllabus_shares WHERE syllabus_token = %s AND shared_email = %s",
+                (token, email),
+            )
+    finally:
+        conn.close()
+    return jsonify({"ok": True})
 
 
 if __name__ == "__main__":

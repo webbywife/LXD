@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="auth-token" content="{{ auth_token }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>{% if course_title %}{{ course_title }} — {% endif %}Syllabus · SKOOLED-AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,6 +21,23 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .btn-outline:hover{border-color:#fff;}
 .btn-cyan{background:#00bbd6;color:#fff;}
 .btn-cyan:hover{background:#009bb3;}
+.btn-manage{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#fff;}
+.btn-manage:hover{background:rgba(255,255,255,0.18);}
+
+/* Access management panel */
+.access-panel{background:#0d1f2d;border-bottom:1px solid rgba(0,187,214,0.2);padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'Space Grotesk',sans-serif;}
+.access-panel-label{font-size:11px;font-weight:700;color:rgba(238,242,243,0.5);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;}
+.access-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
+.access-chip{display:flex;align-items:center;gap:5px;background:rgba(0,187,214,0.12);border:1px solid rgba(0,187,214,0.28);border-radius:20px;padding:3px 10px 3px 12px;font-size:11px;color:#00bbd6;font-weight:500;}
+.access-chip button{background:none;border:none;color:rgba(0,187,214,0.6);cursor:pointer;font-size:13px;line-height:1;padding:0 1px;}
+.access-chip button:hover{color:#e74c3c;}
+.access-add{display:flex;gap:6px;align-items:center;}
+.access-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 10px;color:#eef2f3;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;width:210px;}
+.access-input::placeholder{color:rgba(238,242,243,0.35);}
+.access-input:focus{border-color:rgba(0,187,214,0.5);}
+.access-add-btn{padding:5px 14px;background:#00bbd6;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+.access-add-btn:hover{background:#009bb3;}
+.access-msg{font-size:11px;color:#e74c3c;}
 
 .page{padding:28px;display:flex;justify-content:center;}
 .error-box{background:#fff;border-radius:12px;padding:48px 36px;text-align:center;max-width:400px;margin:60px auto;box-shadow:0 4px 24px rgba(0,0,0,.08);}
@@ -78,14 +96,30 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     {% if can_edit and syllabus_token %}
     <a href="/syllabus?load={{ syllabus_token }}{% if auth_token %}&_t={{ auth_token }}{% endif %}" class="btn btn-cyan">Edit Syllabus</a>
     {% endif %}
+    {% if can_manage and syllabus_token %}
+    <button class="btn btn-manage" id="btn-toggle-access">Manage Access</button>
+    {% endif %}
     <button class="btn btn-outline" onclick="printDoc()">Print / Save PDF</button>
   </div>
 </div>
 
+{% if can_manage and syllabus_token %}
+<div class="access-panel" id="access-panel" style="display:none;">
+  <span class="access-panel-label">Who can view</span>
+  <div class="access-chips" id="access-chips"><span style="font-size:11px;color:rgba(238,242,243,0.35);">Loading…</span></div>
+  <div class="access-add">
+    <input class="access-input" id="access-email-input" type="email" placeholder="email@school.edu" />
+    <button class="access-add-btn" id="access-add-btn">+ Add</button>
+  </div>
+  <span class="access-msg" id="access-msg" style="display:none;"></span>
+</div>
+{% endif %}
+
 {% if error %}
 <div class="error-box">
-  <h2>Syllabus Not Found</h2>
+  <h2>Access Restricted</h2>
   <p>{{ error }}</p>
+  <p style="margin-top:12px;font-size:12px;">Logged in as <strong>{{ session.get('user_email','') }}</strong>. <a href="{{ url_for('auth.logout') }}" style="color:#00bbd6;">Switch account</a></p>
 </div>
 {% else %}
 <div class="page">
@@ -211,6 +245,81 @@ function render(){
   document.getElementById('syldoc').innerHTML=h;
 }
 render();
+
+{% if can_manage and syllabus_token %}
+(function(){
+  const TOKEN = '{{ syllabus_token }}';
+  const AT    = document.querySelector('meta[name="auth-token"]').content;
+  function aurl(p){ return AT ? p+(p.includes('?')?'&':'?')+'_t='+encodeURIComponent(AT) : p; }
+
+  const panel    = document.getElementById('access-panel');
+  const chips    = document.getElementById('access-chips');
+  const msgEl    = document.getElementById('access-msg');
+  const emailIn  = document.getElementById('access-email-input');
+  const addBtn   = document.getElementById('access-add-btn');
+
+  document.getElementById('btn-toggle-access').addEventListener('click', function(){
+    if(panel.style.display === 'none'){
+      panel.style.display = 'flex';
+      loadShares();
+    } else {
+      panel.style.display = 'none';
+    }
+  });
+
+  function showMsg(msg, isErr=true){
+    msgEl.textContent = msg;
+    msgEl.style.color = isErr ? '#e74c3c' : '#2ecc71';
+    msgEl.style.display = '';
+    setTimeout(()=>{ msgEl.style.display='none'; }, 3000);
+  }
+
+  function renderChips(list){
+    if(!list.length){
+      chips.innerHTML = '<span style="font-size:11px;color:rgba(238,242,243,0.35);">No one else has access yet.</span>';
+      return;
+    }
+    chips.innerHTML = list.map(s => `<span class="access-chip">${esc(s.email)}<button onclick="removeShare('${esc(s.email)}')" title="Remove access">&times;</button></span>`).join('');
+  }
+
+  async function loadShares(){
+    chips.innerHTML = '<span style="font-size:11px;color:rgba(238,242,243,0.35);">Loading…</span>';
+    try{
+      const r = await fetch(aurl('/api/syllabus-shares/'+TOKEN));
+      const list = await r.json();
+      if(!Array.isArray(list)){ chips.innerHTML='<span style="font-size:11px;color:#e74c3c;">Error loading.</span>'; return; }
+      renderChips(list);
+    }catch(e){ chips.innerHTML='<span style="font-size:11px;color:#e74c3c;">Error loading.</span>'; }
+  }
+
+  window.removeShare = async function(email){
+    try{
+      const r = await fetch(aurl('/api/syllabus-shares/'+TOKEN+'/'+encodeURIComponent(email)), {method:'DELETE'});
+      const d = await r.json();
+      if(d.ok){ loadShares(); showMsg('Access removed for '+email, false); }
+      else showMsg(d.error || 'Failed to remove.');
+    }catch(e){ showMsg('Error: '+e.message); }
+  };
+
+  addBtn.addEventListener('click', async function(){
+    const email = emailIn.value.trim().toLowerCase();
+    if(!email || !email.includes('@')){ showMsg('Enter a valid email.'); return; }
+    addBtn.disabled = true;
+    try{
+      const r = await fetch(aurl('/api/syllabus-shares/'+TOKEN), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email})
+      });
+      const d = await r.json();
+      if(d.ok){ emailIn.value=''; loadShares(); showMsg(email+' can now view this syllabus.', false); }
+      else showMsg(d.error || 'Failed to add.');
+    }catch(e){ showMsg('Error: '+e.message); }
+    finally{ addBtn.disabled=false; }
+  });
+
+  emailIn.addEventListener('keydown', function(e){ if(e.key==='Enter') addBtn.click(); });
+})();
+{% endif %}
 
 function printDoc(){
   const syldoc=document.getElementById('syldoc');
