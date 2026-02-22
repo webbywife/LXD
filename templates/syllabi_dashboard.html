@@ -151,13 +151,13 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   </div>
 
   <div id="syl-state" class="state-box" style="display:none">
-    <div class="state-icon">📄</div>
+    
     <div class="state-title">No syllabi yet</div>
     <p class="state-sub">You haven't built any syllabi. <a href="{{ turl('syllabus') }}">Create one now →</a></p>
   </div>
 
   <div id="syl-loading" class="state-box">
-    <div class="state-icon">⏳</div>
+    
     <div class="state-title">Loading…</div>
   </div>
 
@@ -250,10 +250,10 @@ function renderCards(list){
       <div class="syl-title">${esc(s.course_title)}</div>
       <div class="syl-school">${s.revision_comment ? esc(s.revision_comment) : '&nbsp;'}</div>
       <div class="syl-meta">
-        <span>📅 ${createdDisplay}</span>
-        <span>🕒 ${dtDisplay}</span>
+        <span>${createdDisplay}</span>
+        <span>${dtDisplay}</span>
       </div>
-      ${IS_ADMIN && s.owner_name ? `<div class="syl-owner">👤 ${esc(s.owner_name)}</div>` : ''}
+      ${IS_ADMIN && s.owner_name ? `<div class="syl-owner">${esc(s.owner_name)}</div>` : ''}
       <div class="syl-actions">
         <button class="syl-btn syl-btn-view" onclick="window.open('${viewUrl}','_blank')">View</button>
         ${canEdit ? `<button class="syl-btn syl-btn-edit" onclick="editSyllabus('${esc(s.token)}')">Edit</button>` : ''}
@@ -270,14 +270,14 @@ async function loadSyllabi(){
   try{
     const resp = await fetch(apiUrl('/api/my-syllabi'));
     if(resp.status === 401){
-      document.getElementById('syl-loading').innerHTML = '<div class="state-icon">🔒</div><div class="state-title">Session expired</div><p class="state-sub">Please <a href="/login">log in again</a>.</p>';
+      document.getElementById('syl-loading').innerHTML = '<div class="state-title">Session expired</div><p class="state-sub">Please <a href="/login">log in again</a>.</p>';
       document.getElementById('count-badge').textContent = '—';
       return;
     }
     const list = await resp.json();
     renderCards(list);
   }catch(e){
-    document.getElementById('syl-loading').innerHTML = '<div class="state-icon">⚠️</div><div class="state-title">Error loading syllabi</div><p class="state-sub">'+e.message+'</p>';
+    document.getElementById('syl-loading').innerHTML = '<div class="state-title">Error loading syllabi</div><p class="state-sub">'+e.message+'</p>';
     document.getElementById('count-badge').textContent = '—';
   }
 }

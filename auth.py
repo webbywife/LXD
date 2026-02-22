@@ -5,6 +5,7 @@ Cloudways Nginx strips Cookie headers, so we pass auth via URL tokens.
 """
 
 import os
+import secrets
 import functools
 import pymysql
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash, jsonify, g, current_app
@@ -126,6 +127,15 @@ def init_db():
                     INDEX idx_rub_owner (owner_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            # Patch existing installs — add verification_token if missing
+            try:
+                cur.execute(
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
+                    "verification_token VARCHAR(64) DEFAULT NULL"
+                )
+            except Exception:
+                pass
+
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS lesson_plans (
                     id            INT AUTO_INCREMENT PRIMARY KEY,
@@ -221,6 +231,33 @@ def admin_required(f):
     return wrapped
 
 
+def send_email(to_email, subject, html_body):
+    """Send a transactional email via SMTP. Silently skips if SMTP not configured."""
+    import smtplib, ssl
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    server   = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+    port     = int(os.environ.get("MAIL_PORT", "587"))
+    username = os.environ.get("MAIL_USERNAME", "")
+    password = os.environ.get("MAIL_PASSWORD", "")
+    frm      = os.environ.get("MAIL_FROM", f"SKOOLED-AI <{username}>")
+    if not username or not password:
+        print(f"[email] SMTP not configured — skipping to {to_email}")
+        return
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = frm
+    msg["To"] = to_email
+    msg.attach(MIMEText(html_body, "html"))
+    try:
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP(server, port) as s:
+            s.ehlo(); s.starttls(context=ctx); s.login(username, password)
+            s.sendmail(username, to_email, msg.as_string())
+    except Exception as e:
+        print(f"[email] Failed to send to {to_email}: {e}")
+
+
 # ── Routes ──────────────────────────────────────────────────
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -246,6 +283,10 @@ def login():
 
         if not user or not check_password_hash(user["password_hash"], password):
             flash("Invalid email or password.", "error")
+            return render_template("login.html")
+
+        if user.get("verification_token"):
+            flash("Please verify your email first. Check your inbox.", "warning")
             return render_template("login.html")
 
         if user["status"] == "pending":
@@ -310,10 +351,12 @@ def signup():
 
                 role = "admin" if count == 0 else "user"
                 status = "approved" if count == 0 else "pending"
+                vtok = None if count == 0 else secrets.token_urlsafe(32)
 
                 cur.execute(
-                    "INSERT INTO users (email, name, password_hash, role, status) VALUES (%s, %s, %s, %s, %s)",
-                    (email, name, generate_password_hash(password), role, status),
+                    "INSERT INTO users (email, name, password_hash, role, status, verification_token) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (email, name, generate_password_hash(password), role, status, vtok),
                 )
         finally:
             conn.close()
@@ -321,10 +364,54 @@ def signup():
         if status == "approved":
             flash("Admin account created! You can now log in.", "success")
         else:
-            flash("Account created! Please wait for admin approval.", "success")
+            # Send verification email
+            verify_url = url_for("auth.verify_email", token=vtok, _external=True)
+            send_email(
+                email,
+                "Verify your email — SKOOLED-AI",
+                f"""
+                <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;">
+                  <h2 style="color:#1e293b;margin-bottom:8px;">Welcome to SKOOLED-AI, {name}!</h2>
+                  <p style="color:#475569;">Please verify your email address to continue.</p>
+                  <p style="color:#475569;">After verifying, an admin will review and approve your account.</p>
+                  <a href="{verify_url}"
+                     style="display:inline-block;margin:24px 0;padding:12px 28px;
+                            background:#4f46e5;color:#fff;text-decoration:none;
+                            border-radius:6px;font-weight:600;">
+                    Verify My Email
+                  </a>
+                  <p style="color:#94a3b8;font-size:12px;">
+                    If you didn't create an account, you can ignore this email.<br>
+                    This link will remain valid until used.
+                  </p>
+                </div>
+                """,
+            )
+            flash("Account created! Please check your email to verify your address.", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("signup.html")
+
+
+@auth_bp.route("/verify-email/<token>")
+def verify_email(token):
+    """Confirm a user's email address via the token sent at signup."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE verification_token = %s", (token,))
+            user = cur.fetchone()
+            if not user:
+                flash("Invalid or expired verification link.", "error")
+                return redirect(url_for("auth.login"))
+            cur.execute(
+                "UPDATE users SET verification_token = NULL WHERE id = %s",
+                (user["id"],),
+            )
+    finally:
+        conn.close()
+    flash("Email verified! Your account is pending admin approval.", "success")
+    return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/logout")

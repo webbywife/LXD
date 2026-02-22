@@ -130,6 +130,30 @@ def add_security_headers(response):
     return response
 
 
+# ── Email Helpers ────────────────────────────────────────────
+
+def _syllabus_share_email_html(owner, title, url):
+    """Return styled HTML body for a syllabus-share notification email."""
+    return f"""
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;">
+      <h2 style="color:#1e293b;margin-bottom:8px;">A syllabus was shared with you</h2>
+      <p style="color:#475569;">
+        <strong>{owner}</strong> has given you access to
+        <strong>&ldquo;{title}&rdquo;</strong> on SKOOLED-AI.
+      </p>
+      <a href="{url}"
+         style="display:inline-block;margin:24px 0;padding:12px 28px;
+                background:#4f46e5;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:600;">
+        View Syllabus
+      </a>
+      <p style="color:#94a3b8;font-size:12px;">
+        If you don't have a SKOOLED-AI account yet, you can sign up for free at the link above.
+      </p>
+    </div>
+    """
+
+
 # ── Activity Logging ────────────────────────────────────────
 
 def _log_activity(action_type, detail="", subject="", grade=""):
@@ -1288,8 +1312,22 @@ def api_add_syllabus_share(token):
                 "INSERT IGNORE INTO syllabus_shares (syllabus_token, shared_email, shared_by_id) VALUES (%s, %s, %s)",
                 (token, email, session["user_id"]),
             )
+            # Fetch syllabus info for the notification email
+            cur.execute("SELECT course_title, owner_name FROM syllabi WHERE token = %s", (token,))
+            syl = cur.fetchone()
     finally:
         conn.close()
+
+    course_title = (syl or {}).get("course_title", "a syllabus")
+    owner_name   = session.get("user_name", "A colleague")
+    share_url    = url_for("syllabus_view", token=token, _external=True)
+    from auth import send_email
+    send_email(
+        email,
+        f"{owner_name} shared a syllabus with you — SKOOLED-AI",
+        _syllabus_share_email_html(owner_name, course_title, share_url),
+    )
+
     _log_activity("syllabus_share_add", email)
     return jsonify({"ok": True, "email": email})
 

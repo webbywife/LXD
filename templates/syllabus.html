@@ -9,13 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a1929;--nav:#0d1f2d;--card:rgba(255,255,255,0.05);
-  --cyan:#00bbd6;--cyan-d:#009bb3;--orange:#faa32b;--green:#00b894;
-  --red:#e74c3c;--white:#ffffff;--grey:rgba(255,255,255,0.6);
-  --border:rgba(0,187,214,0.2);--rad:14px;
+  --bg:#f0f4f8;--nav:#0d1f2d;--card:#ffffff;
+  --cyan:#0099b8;--cyan-d:#007a93;--orange:#faa32b;--green:#00b894;
+  --red:#e74c3c;--white:#ffffff;--text:#1e293b;--grey:#64748b;
+  --border:#cbd5e1;--rad:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
 h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
 /* ── Nav ── */
@@ -23,22 +23,22 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .nav-brand{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:800;color:var(--white);letter-spacing:-0.03em;text-decoration:none;}
 .nav-brand span{color:var(--cyan);}
 .nav-links{display:flex;gap:6px;align-items:center;}
-.nav-links a{color:var(--grey);text-decoration:none;font-size:12px;font-weight:500;padding:5px 12px;border-radius:8px;transition:.2s;}
-.nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.06);}
-.nav-links a.active{color:var(--cyan);background:rgba(0,187,214,0.1);}
-.nav-links .sep{color:rgba(255,255,255,0.15);font-size:16px;margin:0 2px;}
-.nav-user{font-size:12px;color:var(--grey);padding:5px 12px;border-left:1px solid var(--border);margin-left:6px;}
+.nav-links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:12px;font-weight:500;padding:5px 12px;border-radius:8px;transition:.2s;}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,0.08);}
+.nav-links a.active{color:var(--cyan);background:rgba(0,187,214,0.15);}
+.nav-links .sep{color:rgba(255,255,255,0.2);font-size:16px;margin:0 2px;}
+.nav-user{font-size:12px;color:rgba(255,255,255,0.5);padding:5px 12px;border-left:1px solid rgba(255,255,255,0.15);margin-left:6px;}
 
 /* ── Page ── */
 .page{max-width:900px;margin:0 auto;padding:28px 20px 60px;width:100%;}
 .page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
-.page-title{font-size:24px;font-weight:800;letter-spacing:-0.04em;color:var(--white);}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-0.04em;color:var(--text);}
 .page-sub{font-size:13px;color:var(--grey);margin-top:3px;font-weight:400;}
 .btn-preview{padding:11px 28px;border-radius:11px;border:none;background:var(--cyan);color:#000;font-size:13px;font-weight:800;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.2s;letter-spacing:-0.02em;white-space:nowrap;}
 .btn-preview:hover{background:#00d4f0;box-shadow:0 6px 24px rgba(0,187,214,.35);}
 
 /* ── Form Cards ── */
-.card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--rad);padding:22px 24px;margin-bottom:16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rad);padding:22px 24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
 .card-hdr{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .card-hdr::before{content:'';width:3px;height:13px;background:var(--cyan);border-radius:2px;flex-shrink:0;}
 
@@ -50,28 +50,28 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* ── Fields ── */
 .fg{margin-bottom:12px;}
 .fg:last-child{margin-bottom:0;}
-.fg label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);margin-bottom:4px;letter-spacing:.01em;}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--grey);margin-bottom:4px;letter-spacing:.01em;}
 .fg input,.fg select,.fg textarea{
   width:100%;padding:9px 12px;font-size:13px;font-family:inherit;
-  border:1.5px solid rgba(0,187,214,0.22);border-radius:9px;
-  background:rgba(255,255,255,0.06);color:var(--white);transition:.2s;
+  border:1.5px solid var(--border);border-radius:9px;
+  background:#fff;color:var(--text);transition:.2s;
 }
-.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,0.28);}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--cyan);background:rgba(0,187,214,0.07);}
-.fg select option{background:#0d1f2d;color:#fff;}
+.fg input::placeholder,.fg textarea::placeholder{color:#94a3b8;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--cyan);background:#f0fafd;}
+.fg select option{background:#fff;color:var(--text);}
 .fg textarea{resize:vertical;min-height:80px;line-height:1.65;}
 .fg .hint{font-size:10px;color:var(--grey);margin-top:3px;line-height:1.4;}
 
 /* ── Type Tabs ── */
 .type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
 .type-tab{padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:'Space Grotesk',sans-serif;}
-.type-tab:hover{border-color:var(--cyan);color:var(--white);}
-.type-tab.on{border-color:var(--cyan);background:rgba(0,187,214,0.1);color:var(--white);}
+.type-tab:hover{border-color:var(--cyan);color:var(--text);}
+.type-tab.on{border-color:var(--cyan);background:rgba(0,153,184,0.1);color:var(--text);}
 
 /* ── Grading ── */
 .grading-row{display:grid;grid-template-columns:1fr 70px 28px;gap:8px;align-items:center;margin-bottom:8px;}
 .grading-row input{padding:8px 10px;font-size:12px;}
-.gr-del{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:16px;padding:4px;transition:.2s;border-radius:4px;}
+.gr-del{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:16px;padding:4px;transition:.2s;border-radius:4px;}
 .gr-del:hover{color:var(--red);background:rgba(231,76,60,0.1);}
 .grading-total{font-size:12px;font-weight:700;color:var(--grey);text-align:right;margin-top:4px;}
 .grading-total.ok{color:var(--green);}
@@ -82,13 +82,13 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* ── Week Accordion ── */
 .week-row{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:.2s;}
 .week-row:hover{border-color:rgba(0,187,214,0.35);}
-.week-hdr{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;background:rgba(255,255,255,0.03);user-select:none;}
-.week-hdr:hover{background:rgba(0,187,214,0.06);}
+.week-hdr{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;background:#f8fafc;user-select:none;}
+.week-hdr:hover{background:#eef9fb;}
 .week-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:var(--cyan);white-space:nowrap;min-width:56px;}
 .week-preview{flex:1;font-size:12px;color:var(--grey);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .week-chevron{font-size:11px;color:var(--grey);transition:transform .2s;flex-shrink:0;}
 .week-row.open .week-chevron{transform:rotate(180deg);}
-.week-body{display:none;padding:14px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,0.15);}
+.week-body{display:none;padding:14px 16px;border-top:1px solid var(--border);background:#f4f7fa;}
 .week-row.open .week-body{display:block;}
 .week-body .fg label{font-size:10.5px;}
 .week-body .fg input,.week-body .fg textarea{font-size:12px;}
@@ -97,7 +97,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .weeks-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
 .weeks-toolbar span{font-size:12px;color:var(--grey);}
 .btn-expand-all{background:none;border:1px solid var(--border);color:var(--grey);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;font-family:inherit;transition:.2s;}
-.btn-expand-all:hover{border-color:var(--cyan);color:var(--white);}
+.btn-expand-all:hover{border-color:var(--cyan);color:var(--cyan);}
 
 /* ── Toast ── */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#e74c3c;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transition:transform .3s;box-shadow:0 6px 24px rgba(0,0,0,.25);}
@@ -199,14 +199,14 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .syl-sig-role{font-size:9.5pt;color:#000;}
 
 /* ── Draft Bar & Edit Banner ── */
-.draft-bar{font-size:11px;color:var(--grey);background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:7px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.draft-bar{font-size:11px;color:var(--grey);background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:7px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .draft-bar a{color:var(--cyan);text-decoration:underline;cursor:pointer;background:none;border:none;font-size:11px;font-family:inherit;padding:0;}
 .edit-banner{font-size:12px;color:#0d1f2d;background:rgba(0,187,214,0.15);border:1px solid rgba(0,187,214,0.4);border-radius:8px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .edit-banner strong{color:var(--cyan);}
 
 /* ── My Syllabi Button ── */
 .btn-my-syllabi{padding:9px 18px;border-radius:11px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.2s;white-space:nowrap;}
-.btn-my-syllabi:hover{border-color:var(--cyan);color:var(--white);}
+.btn-my-syllabi:hover{border-color:var(--cyan);color:var(--cyan);}
 
 /* ── Update Syllabus Controls (preview toolbar) ── */
 .rev-comment-wrap{display:flex;align-items:center;gap:8px;flex:1;}
@@ -229,9 +229,9 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
 /* ── Assessment Rubrics (builder card) ── */
 .rubric-attached-list{margin-bottom:12px;}
-.rubric-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.rubric-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
 .rubric-item-info{flex:1;min-width:0;}
-.rubric-item-name{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rubric-item-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rubric-item-meta{font-size:11px;color:var(--grey);margin-top:2px;}
 .rubric-item-btns{display:flex;gap:6px;flex-shrink:0;}
 .btn-rub-edit{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
@@ -245,29 +245,29 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* ── Rubric overlays (library + builder) ── */
 .rub-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
 .rub-overlay.show{opacity:1;pointer-events:all;}
-.rub-modal{background:#101c28;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:820px;width:94%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6);}
+.rub-modal{background:#ffffff;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:820px;width:94%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.15);}
 .rub-modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-shrink:0;}
-.rub-modal-hdr h3{font-size:15px;font-weight:800;color:var(--white);font-family:'Space Grotesk',sans-serif;}
+.rub-modal-hdr h3{font-size:15px;font-weight:800;color:var(--text);font-family:'Space Grotesk',sans-serif;}
 .rub-modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--grey);padding:2px 7px;border-radius:4px;transition:.2s;}
-.rub-modal-close:hover{color:var(--white);background:rgba(255,255,255,0.08);}
+.rub-modal-close:hover{color:var(--text);background:#f1f5f9;}
 .rub-modal-body{flex:1;overflow-y:auto;padding-right:4px;}
 .rub-modal-footer{display:flex;align-items:center;gap:10px;margin-top:20px;flex-shrink:0;border-top:1px solid var(--border);padding-top:16px;flex-wrap:wrap;}
 .btn-rub-primary{padding:9px 20px;border-radius:10px;border:none;background:var(--cyan);color:#0d1f2d;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;}
 .btn-rub-primary:hover{background:#00a0bb;}
 .btn-rub-cancel{padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
-.btn-rub-cancel:hover{border-color:var(--white);color:var(--white);}
+.btn-rub-cancel:hover{border-color:var(--text);color:var(--text);}
 
 /* Rubric builder field group */
 .rub-fg{margin-bottom:14px;}
 .rub-fg label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--grey);margin-bottom:5px;}
-.rub-fg input,.rub-fg textarea{width:100%;padding:9px 12px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:inherit;font-size:13px;}
+.rub-fg input,.rub-fg textarea{width:100%;padding:9px 12px;background:#ffffff;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;}
 .rub-fg textarea{resize:vertical;min-height:52px;}
 .rub-sec-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--cyan);margin:18px 0 10px;}
 
 /* Level chips */
 .rub-levels-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
 .rub-level-chip{display:flex;align-items:center;gap:4px;background:rgba(0,187,214,0.1);border:1.5px solid rgba(0,187,214,0.3);border-radius:10px;padding:5px 8px;}
-.rub-level-chip input{background:transparent;border:none;color:var(--white);font-family:inherit;font-size:12px;font-weight:700;width:80px;outline:none;}
+.rub-level-chip input{background:transparent;border:none;color:var(--text);font-family:inherit;font-size:12px;font-weight:700;width:80px;outline:none;}
 .rub-level-chip input.score-inp{width:32px;color:var(--cyan);text-align:center;}
 .rub-level-chip .sep{color:var(--grey);font-size:11px;}
 .rub-chip-del{background:none;border:none;color:var(--grey);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;transition:.2s;}
@@ -275,21 +275,21 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
 /* Criterion accordion */
 .rub-criterion{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-.rub-crit-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:rgba(255,255,255,0.04);transition:.2s;}
-.rub-crit-hdr:hover{background:rgba(255,255,255,0.07);}
+.rub-crit-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:#f8fafc;transition:.2s;}
+.rub-crit-hdr:hover{background:#f1f5f9;}
 .rub-crit-hdr-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-.rub-crit-title{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rub-crit-title{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rub-crit-wt{font-size:11px;color:var(--cyan);flex-shrink:0;}
 .rub-crit-chevron{color:var(--grey);font-size:11px;transition:.3s;flex-shrink:0;}
 .rub-criterion.open .rub-crit-chevron{transform:rotate(180deg);}
 .rub-crit-body{display:none;padding:14px;}
 .rub-criterion.open .rub-crit-body{display:block;}
 .rub-crit-fields{display:grid;grid-template-columns:1fr 90px;gap:10px;margin-bottom:12px;align-items:end;}
-.rub-crit-fields input{padding:8px 10px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:inherit;font-size:13px;width:100%;}
+.rub-crit-fields input{padding:8px 10px;background:#ffffff;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;width:100%;}
 .rub-desc-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--grey);margin-bottom:6px;}
 .rub-desc-grid{display:grid;gap:8px;}
 .rub-desc-cell label{display:block;font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:3px;}
-.rub-desc-cell textarea{width:100%;padding:7px 9px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);border-radius:7px;color:var(--white);font-family:inherit;font-size:11px;resize:vertical;min-height:56px;}
+.rub-desc-cell textarea{width:100%;padding:7px 9px;background:#f8fafc;border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-family:inherit;font-size:11px;resize:vertical;min-height:56px;}
 .btn-rub-del-crit{padding:4px 9px;border-radius:6px;border:1.5px solid rgba(231,76,60,0.3);background:transparent;color:rgba(231,76,60,0.7);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;flex-shrink:0;}
 .btn-rub-del-crit:hover{border-color:#e74c3c;color:#e74c3c;background:rgba(231,76,60,0.1);}
 
@@ -297,7 +297,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .rub-lib-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
 .rub-lib-item:last-child{border-bottom:none;}
 .rub-lib-info{flex:1;min-width:0;}
-.rub-lib-name{font-size:13px;font-weight:700;color:var(--white);}
+.rub-lib-name{font-size:13px;font-weight:700;color:var(--text);}
 .rub-lib-meta{font-size:11px;color:var(--grey);margin-top:2px;}
 .btn-use-rubric{padding:6px 14px;border-radius:8px;border:none;background:var(--cyan);color:#0d1f2d;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;flex-shrink:0;}
 .btn-use-rubric:hover{background:#00a0bb;}
@@ -483,20 +483,20 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Activities">
         <input type="number" class="g-wt" min="0" max="100" value="30" placeholder="%">
-        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">&times;</button>
       </div>
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Projects">
         <input type="number" class="g-wt" min="0" max="100" value="30" placeholder="%">
-        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">&times;</button>
       </div>
       <div class="grading-row">
         <input type="text" class="g-comp" placeholder="Component name" value="Final Project">
         <input type="number" class="g-wt" min="0" max="100" value="40" placeholder="%">
-        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>
+        <button class="gr-del" onclick="removeGradingRow(this)" title="Remove">&times;</button>
       </div>
     </div>
-    <div class="grading-total ok" id="grading-total">Total: 100% ✓</div>
+    <div class="grading-total ok" id="grading-total">Total: 100%</div>
     <button class="btn-add-row" onclick="addGradingRow()">+ Add Component</button>
   </div>
 
@@ -507,7 +507,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <p style="font-size:12px;color:var(--grey);margin-bottom:10px;">No rubrics attached yet.</p>
     </div>
     <div class="rubric-actions">
-      <button class="btn-rub-action" id="btn-rub-library">&#128218; Pick from Library</button>
+      <button class="btn-rub-action" id="btn-rub-library">Pick from Library</button>
       <button class="btn-rub-action" id="btn-rub-create">+ Create New Rubric</button>
     </div>
   </div>
@@ -718,7 +718,7 @@ function updateGradingTotal(){
   let t=0;
   document.querySelectorAll('.g-wt').forEach(el=>t+=parseInt(el.value||0));
   const el=document.getElementById('grading-total');
-  el.textContent='Total: '+t+'%'+(t===100?' ✓':' ✗ (must equal 100%)');
+  el.textContent='Total: '+t+'%'+(t===100?'':' (must equal 100%)');
   el.className='grading-total '+(t===100?'ok':'err');
 }
 document.addEventListener('input',e=>{
@@ -731,7 +731,7 @@ function removeGradingRow(btn){
 function addGradingRow(){
   const d=document.createElement('div');
   d.className='grading-row';
-  d.innerHTML=`<input type="text" class="g-comp" placeholder="Component name"><input type="number" class="g-wt" min="0" max="100" value="0" placeholder="%"><button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>`;
+  d.innerHTML=`<input type="text" class="g-comp" placeholder="Component name"><input type="number" class="g-wt" min="0" max="100" value="0" placeholder="%"><button class="gr-del" onclick="removeGradingRow(this)" title="Remove">&times;</button>`;
   document.getElementById('grading-rows').appendChild(d);
   updateGradingTotal();
 }
@@ -1187,7 +1187,7 @@ function restoreFormState(state){
     state.grading.forEach(g=>{
       const d=document.createElement('div');
       d.className='grading-row';
-      d.innerHTML=`<input type="text" class="g-comp" placeholder="Component name" value="${esc(g.comp||'')}"><input type="number" class="g-wt" min="0" max="100" value="${esc(g.wt||'0')}" placeholder="%"><button class="gr-del" onclick="removeGradingRow(this)" title="Remove">✕</button>`;
+      d.innerHTML=`<input type="text" class="g-comp" placeholder="Component name" value="${esc(g.comp||'')}"><input type="number" class="g-wt" min="0" max="100" value="${esc(g.wt||'0')}" placeholder="%"><button class="gr-del" onclick="removeGradingRow(this)" title="Remove">&times;</button>`;
       container.appendChild(d);
     });
   }

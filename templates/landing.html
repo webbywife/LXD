@@ -384,7 +384,7 @@ body::before{
 <nav class="nav">
     <div class="nav-pill">
         <a href="{{ url_for('landing') }}" class="nav-logo">
-            <div class="nav-logo-icon">&#128218;</div>
+            
             <span>SKOOLED<span class="ac">&#8209;AI</span></span>
         </a>
         <div class="nav-links">
@@ -482,13 +482,13 @@ body::before{
         </div>
         <div class="feat-grid">
             <div class="feat-card rv">
-                <div class="feat-icon">&#129302;</div>
+                
                 <div class="feat-tag">AI Generation</div>
                 <h3>Claude AI at the Core</h3>
                 <p>Every lesson plan, activity, assessment, and differentiation strategy is written by Claude AI — specific to your grade, subject, and competency code.</p>
             </div>
             <div class="feat-card rv">
-                <div class="feat-icon">&#127919;</div>
+                
                 <div class="feat-tag">Curriculum</div>
                 <h3>MATATAG-Aligned</h3>
                 <p>Maps directly to official DepEd learning competencies, content standards, and performance standards. No guessing. No approximation.</p>
@@ -500,31 +500,31 @@ body::before{
                 <p>Choose from 5E, 4A's, DepEd DLP, Design Thinking, or Direct Instruction. Toggle sections, set timing, and add your own materials and objectives.</p>
             </div>
             <div class="feat-card rv">
-                <div class="feat-icon">&#128203;</div>
+                
                 <div class="feat-tag">Assessment</div>
                 <h3>Authentic Assessment</h3>
                 <p>Generate GRASPS performance tasks, 4-point rubrics, portfolio frameworks, project-based assessments, and self-assessment forms.</p>
             </div>
             <div class="feat-card rv">
-                <div class="feat-icon">&#128221;</div>
+                
                 <div class="feat-tag">Quiz Export</div>
                 <h3>LMS&#8209;Ready Quizzes</h3>
                 <p>Download quizzes as Moodle GIFT files or Canvas / Brightspace QTI 1.2 packages. Import directly into your LMS with no reformatting.</p>
             </div>
             <div class="feat-card rv">
-                <div class="feat-icon">&#128230;</div>
+                
                 <div class="feat-tag">SCORM</div>
                 <h3>SCORM 1.2 Export</h3>
                 <p>Package the full lesson plan and assessment as a SCORM 1.2 .zip. Upload directly to Moodle, Canvas, or Brightspace as a course activity.</p>
             </div>
             <div class="feat-card feat-card-new rv">
-                <div class="feat-icon">&#127918;</div>
+                
                 <div class="feat-tag feat-tag-new">NEW</div>
                 <h3>16 Interactive Games</h3>
                 <p>One click opens a full Activities page auto-populated from your lesson — Wheel of Names, Crossword, Word Search, Jeopardy, Kahoot-Style Quiz, Hangman, Bingo, Memory Cards, and 8 more.</p>
             </div>
             <div class="feat-card feat-card-new rv">
-                <div class="feat-icon">&#127912;</div>
+                
                 <div class="feat-tag feat-tag-new">NEW</div>
                 <h3>PowerPoint Export</h3>
                 <p>Download your lesson plan as a branded .pptx slide deck with SKOOLED&#8209;AI's navy and cyan theme — ready to present in class without any reformatting.</p>
@@ -674,7 +674,7 @@ const ticon=document.getElementById('theme-icon');
 function setTheme(t){
     html.setAttribute('data-theme',t);
     // Show the icon for the OTHER mode (what you'll switch to)
-    ticon.innerHTML=t==='dark'?'&#9728;&#65039;':'&#127769;';
+    ticon.innerHTML=t==='dark'?'&#9728;&#65039;':'';
     localStorage.setItem('sa-theme',t);
 }
 

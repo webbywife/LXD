@@ -304,10 +304,10 @@ textarea{resize:vertical;min-height:60px;}
     <h1>SKOOLED-AI Lesson Plan Generator</h1>
     <p>AI-Generated Lesson Plans for K-12 &amp; SHS</p>
     <div class="stats">
-        <span class="st">&#128218; 3,400+ Competencies</span>
-        <span class="st">&#128214; 13 Subjects</span>
-        <span class="st">&#127891; Grades K-10</span>
-        <span class="st">&#128230; SCORM 1.2 Ready</span>
+        <span class="st">3,400+ Competencies</span>
+        <span class="st">13 Subjects</span>
+        <span class="st">Grades K-10</span>
+        <span class="st">SCORM 1.2 Ready</span>
     </div>
 </div>
 
@@ -333,18 +333,18 @@ textarea{resize:vertical;min-height:60px;}
 <!-- STEP 1 -->
 <div class="sp a" id="step1">
 <div class="crd">
-    <div class="crd-t">&#128204; Step 1: Choose Your Approach</div>
+    <div class="crd-t">Step 1: Choose Your Approach</div>
     <div class="crd-s">Select from the curriculum database or enter a custom topic.</div>
 
     <!-- Mode Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:18px;">
-        <button class="mode-tab a" data-mode="curriculum" id="mtab-c">&#128218; Select from Curriculum</button>
+        <button class="mode-tab a" data-mode="curriculum" id="mtab-c">Select from Curriculum</button>
         <button class="mode-tab" data-mode="topic" id="mtab-t">&#9998;&#65039; Enter Custom Topic</button>
     </div>
 
     <!-- Curriculum Mode -->
     <div id="mode-curriculum">
-        <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
+        <div class="tip"><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
         <div class="fg"><label>Subject / Learning Area</label><select id="sel-s"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.id }}">{{ s.display_name }}</option>{% endfor %}</select></div>
         <div class="fr">
             <div class="fg"><label>Grade Level</label><select id="sel-g" disabled><option value="">-- Choose Grade --</option></select></div>
@@ -354,7 +354,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- Topic Mode -->
     <div id="mode-topic" style="display:none;">
-        <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Enter any topic and subject to generate a lesson plan without selecting from the curriculum. Great for custom or supplementary lessons.</span></div>
+        <div class="tip"><span class="tt"><strong>Tip:</strong> Enter any topic and subject to generate a lesson plan without selecting from the curriculum. Great for custom or supplementary lessons.</span></div>
         <div class="fg"><label>Topic / Lesson Title *</label><input type="text" id="t-topic" placeholder="e.g., The Water Cycle, Fractions, Philippine Independence"></div>
         <div class="fr">
             <div class="fg"><label>Subject / Learning Area *</label><select id="sel-ts"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.display_name }}">{{ s.display_name }}</option>{% endfor %}</select></div>
@@ -370,9 +370,9 @@ textarea{resize:vertical;min-height:60px;}
 <!-- STEP 2 -->
 <div class="sp" id="step2">
 <div class="crd">
-    <div class="crd-t">&#127919; Choose Learning Competencies</div>
+    <div class="crd-t">Choose Learning Competencies</div>
     <div class="crd-s" id="s2sub">Select which competencies to include in your lesson plan.</div>
-    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> You can select multiple competencies. Each one will be mapped to learning objectives in your lesson plan. Performance tasks in assessments will align to these.</span></div>
+    <div class="tip"><span class="tt"><strong>Tip:</strong> You can select multiple competencies. Each one will be mapped to learning objectives in your lesson plan. Performance tasks in assessments will align to these.</span></div>
     <div class="sb"><span class="sc" id="scnt">0 selected</span><div><button class="btn btn-sm" id="bsa">Select All</button> <button class="btn btn-sm" id="bda">Deselect All</button></div></div>
     <div class="cg" id="cl"></div>
     <div class="br"><button class="btn" id="bb2">&#8592; Back</button><button class="btn btn-p" id="bn2" disabled>Next: Customize &#8594;</button></div>
@@ -386,48 +386,48 @@ textarea{resize:vertical;min-height:60px;}
     <div class="crd-s">Toggle sections on/off and click &#9660; to customize each one.</div>
 
     <div id="ttoggles">
-    <div class="tc on" data-s="title_info"><span class="tc-i">&#128196;</span><span class="tc-n">Lesson Plan Header</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="title_info">&#9660;</button></div>
-    <div class="to" id="o-title_info"><div class="fg"><label>Custom Title</label><input type="text" id="f-title" placeholder="Leave blank for auto-generated title"></div><div class="fg"><label>Time Allotment</label><select id="f-time"><option value="30 minutes">30 min</option><option value="45 minutes">45 min</option><option value="60 minutes" selected>60 min</option><option value="90 minutes">90 min</option><option value="120 minutes">120 min</option></select></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">The header includes subject, grade, quarter, domain, and standards automatically from the curriculum data.</span></div></div>
+    <div class="tc on" data-s="title_info"><span class="tc-n">Lesson Plan Header</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="title_info">&#9660;</button></div>
+    <div class="to" id="o-title_info"><div class="fg"><label>Custom Title</label><input type="text" id="f-title" placeholder="Leave blank for auto-generated title"></div><div class="fg"><label>Time Allotment</label><select id="f-time"><option value="30 minutes">30 min</option><option value="45 minutes">45 min</option><option value="60 minutes" selected>60 min</option><option value="90 minutes">90 min</option><option value="120 minutes">120 min</option></select></div><div class="tip"><span class="tt">The header includes subject, grade, quarter, domain, and standards automatically from the curriculum data.</span></div></div>
 
-    <div class="tc on" data-s="twenty_first_century_skills"><span class="tc-i">&#127775;</span><span class="tc-n">21st Century Skills</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="twenty_first_century_skills">&#9660;</button></div>
-    <div class="to" id="o-twenty_first_century_skills"><div class="fg"><label>Focus Skills</label><div id="sk-cb"></div></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Skills are loaded from the MATATAG curriculum data for your selected subject. Check the most relevant ones for this lesson.</span></div></div>
+    <div class="tc on" data-s="twenty_first_century_skills"><span class="tc-n">21st Century Skills</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="twenty_first_century_skills">&#9660;</button></div>
+    <div class="to" id="o-twenty_first_century_skills"><div class="fg"><label>Focus Skills</label><div id="sk-cb"></div></div><div class="tip"><span class="tt">Skills are loaded from the MATATAG curriculum data for your selected subject. Check the most relevant ones for this lesson.</span></div></div>
 
-    <div class="tc on" data-s="learning_objectives"><span class="tc-i">&#127919;</span><span class="tc-n">Learning Objectives (SWBAT)</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="learning_objectives">&#9660;</button></div>
-    <div class="to" id="o-learning_objectives"><div class="fr"><div class="fg"><label>Number of Objectives</label><select id="f-nobj"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><div class="fg"><label>Custom Objectives (one per line)</label><textarea id="f-cobj" rows="3" placeholder="SWBAT identify the parts of...&#10;SWBAT explain the relationship..."></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">If left blank, objectives are auto-generated from the selected learning competencies using Bloom's taxonomy verbs.</span></div></div>
+    <div class="tc on" data-s="learning_objectives"><span class="tc-n">Learning Objectives (SWBAT)</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="learning_objectives">&#9660;</button></div>
+    <div class="to" id="o-learning_objectives"><div class="fr"><div class="fg"><label>Number of Objectives</label><select id="f-nobj"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><div class="fg"><label>Custom Objectives (one per line)</label><textarea id="f-cobj" rows="3" placeholder="SWBAT identify the parts of...&#10;SWBAT explain the relationship..."></textarea></div><div class="tip"><span class="tt">If left blank, objectives are auto-generated from the selected learning competencies using Bloom's taxonomy verbs.</span></div></div>
 
-    <div class="tc on" data-s="materials_technology"><span class="tc-i">&#128221;</span><span class="tc-n">Materials / Technology</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="materials_technology">&#9660;</button></div>
+    <div class="tc on" data-s="materials_technology"><span class="tc-n">Materials / Technology</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="materials_technology">&#9660;</button></div>
     <div class="to" id="o-materials_technology"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-digi" checked> Include digital tools</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-trad" checked> Include traditional materials</label><div class="fg"><label>Custom Materials (one per line)</label><textarea id="f-mats" rows="2" placeholder="Science kit&#10;Magnifying glass"></textarea></div></div>
 
-    <div class="tc on" data-s="prior_knowledge"><span class="tc-i">&#128218;</span><span class="tc-n">Prior Knowledge / Prerequisites</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="prior_knowledge">&#9660;</button></div>
-    <div class="to" id="o-prior_knowledge"><div class="fg"><label>Custom Prerequisites (one per line)</label><textarea id="f-prereq" rows="2" placeholder="Students can count to 100"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Listing prerequisites helps teachers identify if students need review before the lesson begins.</span></div></div>
+    <div class="tc on" data-s="prior_knowledge"><span class="tc-n">Prior Knowledge / Prerequisites</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="prior_knowledge">&#9660;</button></div>
+    <div class="to" id="o-prior_knowledge"><div class="fg"><label>Custom Prerequisites (one per line)</label><textarea id="f-prereq" rows="2" placeholder="Students can count to 100"></textarea></div><div class="tip"><span class="tt">Listing prerequisites helps teachers identify if students need review before the lesson begins.</span></div></div>
 
-    <div class="tc on" data-s="lesson_procedure"><span class="tc-i">&#128203;</span><span class="tc-n">Lesson Procedure</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="lesson_procedure">&#9660;</button></div>
-    <div class="to" id="o-lesson_procedure"><div class="fg"><label>Instructional Design Model</label></div><div class="mg"><div class="mc sel" data-m="5e"><div class="mc-n">5E Model</div><div class="mc-d">Engage, Explore, Explain, Elaborate, Evaluate</div></div><div class="mc" data-m="4as"><div class="mc-n">4A's Model</div><div class="mc-d">Activity, Analysis, Abstraction, Application</div></div><div class="mc" data-m="deped_dlp"><div class="mc-n">DepEd DLP</div><div class="mc-d">Review, Motivation, Activity, Analysis, Application, Assessment</div></div><div class="mc" data-m="design_thinking"><div class="mc-n">Design Thinking</div><div class="mc-d">Empathize, Define, Ideate, Prototype, Test</div></div></div><label style="font-size:12px;display:flex;gap:6px;margin-top:10px;cursor:pointer"><input type="checkbox" id="f-timing" checked> Include time allocation per phase</label><div class="tip"><span class="ti">&#128161;</span><span class="tt">The <strong>DepEd DLP</strong> format follows the official Daily Lesson Plan structure. The <strong>5E</strong> model is great for inquiry-based science and math lessons.</span></div></div>
+    <div class="tc on" data-s="lesson_procedure"><span class="tc-n">Lesson Procedure</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="lesson_procedure">&#9660;</button></div>
+    <div class="to" id="o-lesson_procedure"><div class="fg"><label>Instructional Design Model</label></div><div class="mg"><div class="mc sel" data-m="5e"><div class="mc-n">5E Model</div><div class="mc-d">Engage, Explore, Explain, Elaborate, Evaluate</div></div><div class="mc" data-m="4as"><div class="mc-n">4A's Model</div><div class="mc-d">Activity, Analysis, Abstraction, Application</div></div><div class="mc" data-m="deped_dlp"><div class="mc-n">DepEd DLP</div><div class="mc-d">Review, Motivation, Activity, Analysis, Application, Assessment</div></div><div class="mc" data-m="design_thinking"><div class="mc-n">Design Thinking</div><div class="mc-d">Empathize, Define, Ideate, Prototype, Test</div></div></div><label style="font-size:12px;display:flex;gap:6px;margin-top:10px;cursor:pointer"><input type="checkbox" id="f-timing" checked> Include time allocation per phase</label><div class="tip"><span class="tt">The <strong>DepEd DLP</strong> format follows the official Daily Lesson Plan structure. The <strong>5E</strong> model is great for inquiry-based science and math lessons.</span></div></div>
 
-    <div class="tc on" data-s="differentiation"><span class="tc-i">&#129309;</span><span class="tc-n">Differentiation / Scaffolding</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="differentiation">&#9660;</button></div>
-    <div class="to" id="o-differentiation"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-ds" checked> Struggling Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-da" checked> Advanced Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-de" checked> English Language Learners</label><div class="fg"><label>Additional Strategies</label><textarea id="f-diff" rows="2" placeholder="Use manipulatives for kinesthetic learners"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Differentiation ensures every student can access the lesson regardless of their current skill level.</span></div></div>
+    <div class="tc on" data-s="differentiation"><span class="tc-n">Differentiation / Scaffolding</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="differentiation">&#9660;</button></div>
+    <div class="to" id="o-differentiation"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-ds" checked> Struggling Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-da" checked> Advanced Learners</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-de" checked> English Language Learners</label><div class="fg"><label>Additional Strategies</label><textarea id="f-diff" rows="2" placeholder="Use manipulatives for kinesthetic learners"></textarea></div><div class="tip"><span class="tt">Differentiation ensures every student can access the lesson regardless of their current skill level.</span></div></div>
 
-    <div class="tc on" data-s="assessment"><span class="tc-i">&#128202;</span><span class="tc-n">Assessment</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="assessment">&#9660;</button></div>
+    <div class="tc on" data-s="assessment"><span class="tc-n">Assessment</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="assessment">&#9660;</button></div>
     <div class="to" id="o-assessment"><label style="font-size:12px;display:flex;gap:6px;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="f-af" checked> Formative Assessment</label><label style="font-size:12px;display:flex;gap:6px;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="f-as" checked> Summative Assessment</label><div class="fg"><label>Custom Assessments</label><textarea id="f-cass" rows="2" placeholder="Group presentation rubric"></textarea></div></div>
 
-    <div class="tc on" data-s="reflection"><span class="tc-i">&#129300;</span><span class="tc-n">Teacher Reflection</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="reflection">&#9660;</button></div>
-    <div class="to" id="o-reflection"><div class="fg"><label>Number of Prompts</label><select id="f-nref"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div class="fg"><label>Custom Prompts</label><textarea id="f-cref" rows="2" placeholder="Did students engage with the activity?"></textarea></div><div class="tip"><span class="ti">&#128161;</span><span class="tt">Reflection prompts help teachers continuously improve their practice through self-evaluation after each lesson.</span></div></div>
+    <div class="tc on" data-s="reflection"><span class="tc-n">Teacher Reflection</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="reflection">&#9660;</button></div>
+    <div class="to" id="o-reflection"><div class="fg"><label>Number of Prompts</label><select id="f-nref"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div class="fg"><label>Custom Prompts</label><textarea id="f-cref" rows="2" placeholder="Did students engage with the activity?"></textarea></div><div class="tip"><span class="tt">Reflection prompts help teachers continuously improve their practice through self-evaluation after each lesson.</span></div></div>
     </div>
 
     <!-- Assessment Package -->
     <div id="assess-wrap" style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
-        <div class="crd-t">&#128203; Authentic Assessment Package</div>
+        <div class="crd-t">Authentic Assessment Package</div>
         <div class="crd-s">Generate professional assessment tools aligned to the selected competencies.</div>
         <div class="fg"><label>Assessment Output Mode</label><select id="a-mode"><option value="none">No assessment (Lesson Plan only)</option><option value="incorporate">Include IN the lesson plan</option><option value="separate">Generate as SEPARATE document</option><option value="both">Generate BOTH (combined + separate download)</option></select></div>
         <div id="a-sec" style="display:none;">
-            <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> Performance Task + Rubric is the most common combination. Add Portfolio for long-term tracking, or Self & Peer Assessment for collaborative learning.</span></div>
+            <div class="tip"><span class="tt"><strong>Tip:</strong> Performance Task + Rubric is the most common combination. Add Portfolio for long-term tracking, or Self & Peer Assessment for collaborative learning.</span></div>
             <div class="at-grid">
-                <div class="at on" data-a="performance_task"><span class="at-i">&#127919;</span><div><div class="at-n">Performance Task</div><div class="at-d">Real-world GRASPS scenario</div></div></div>
-                <div class="at on" data-a="rubric"><span class="at-i">&#128200;</span><div><div class="at-n">Scoring Rubric</div><div class="at-d">4-point criteria-based scale</div></div></div>
-                <div class="at" data-a="portfolio"><span class="at-i">&#128194;</span><div><div class="at-n">Portfolio</div><div class="at-d">Student work collection</div></div></div>
-                <div class="at" data-a="project_based"><span class="at-i">&#128736;</span><div><div class="at-n">Project-Based</div><div class="at-d">Multi-day real-world project</div></div></div>
-                <div class="at" data-a="product_based"><span class="at-i">&#127912;</span><div><div class="at-n">Product-Based</div><div class="at-d">Poster, model, presentation</div></div></div>
-                <div class="at" data-a="self_peer"><span class="at-i">&#128101;</span><div><div class="at-n">Self & Peer Assessment</div><div class="at-d">Evaluation forms & reflection</div></div></div>
+                <div class="at on" data-a="performance_task"><div><div class="at-n">Performance Task</div><div class="at-d">Real-world GRASPS scenario</div></div></div>
+                <div class="at on" data-a="rubric"><div><div class="at-n">Scoring Rubric</div><div class="at-d">4-point criteria-based scale</div></div></div>
+                <div class="at" data-a="portfolio"><div><div class="at-n">Portfolio</div><div class="at-d">Student work collection</div></div></div>
+                <div class="at" data-a="project_based"><div><div class="at-n">Project-Based</div><div class="at-d">Multi-day real-world project</div></div></div>
+                <div class="at" data-a="product_based"><div><div class="at-n">Product-Based</div><div class="at-d">Poster, model, presentation</div></div></div>
+                <div class="at" data-a="self_peer"><div><div class="at-n">Self & Peer Assessment</div><div class="at-d">Evaluation forms & reflection</div></div></div>
             </div>
             <div class="fg" style="margin-top:10px;"><label>Assessment Context (optional)</label><textarea id="a-ctx" rows="2" placeholder="e.g., Students apply learning to a community garden project..."></textarea></div>
         </div>
@@ -435,7 +435,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- Quiz Generation -->
     <div id="quiz-wrap" style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
-        <div class="crd-t">&#128221; Quiz Generation</div>
+        <div class="crd-t">Quiz Generation</div>
         <div class="crd-s">Generate a downloadable quiz based on the selected competencies.</div>
         <div style="display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--glass-b);border-radius:14px;margin-bottom:10px;background:rgba(255,255,255,0.5);" id="quiz-box">
             <label class="sw"><input type="checkbox" id="f-quiz"><span class="sl"></span></label>
@@ -450,16 +450,16 @@ textarea{resize:vertical;min-height:60px;}
                 <div class="qt on" data-qt="multiple_choice"><span style="font-size:18px;">&#9898;</span><div><div class="qt-n">Multiple Choice</div><div class="qt-d">4-option questions (A-D)</div></div></div>
                 <div class="qt on" data-qt="true_false"><span style="font-size:18px;">&#9989;</span><div><div class="qt-n">True or False</div><div class="qt-d">Statement-based questions</div></div></div>
                 <div class="qt" data-qt="identification"><span style="font-size:18px;">&#9999;&#65039;</span><div><div class="qt-n">Identification</div><div class="qt-d">Fill-in-the-blank</div></div></div>
-                <div class="qt" data-qt="matching"><span style="font-size:18px;">&#128279;</span><div><div class="qt-n">Matching Type</div><div class="qt-d">Two-column matching</div></div></div>
+                <div class="qt" data-qt="matching"><span style="font-size:18px;"></span><div><div class="qt-n">Matching Type</div><div class="qt-d">Two-column matching</div></div></div>
             </div>
-            <div class="tip" style="margin-top:10px;"><span class="ti">&#128161;</span><span class="tt"><strong>Tip:</strong> The quiz is a SEPARATE downloadable activity — not included in the SCORM package. Use the "Download Quiz (LMS)" button to save it, then upload to Moodle, Canvas, or Brightspace as a Quiz activity.</span></div>
+            <div class="tip" style="margin-top:10px;"><span class="tt"><strong>Tip:</strong> The quiz is a SEPARATE downloadable activity — not included in the SCORM package. Use the "Download Quiz (LMS)" button to save it, then upload to Moodle, Canvas, or Brightspace as a Quiz activity.</span></div>
         </div>
     </div>
 
     <!-- AI Status (always on) -->
     <div style="margin-top:20px;padding-top:16px;border-top:2px solid var(--glass-b);">
         <div style="display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid rgba(0,187,214,0.35);border-radius:14px;background:rgba(0,187,214,0.07);" id="ai-box">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:18px;">&#129302;</span></div>
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:18px;"></span></div>
             <div style="flex:1;"><div style="font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;">AI-Powered Generation (Claude)</div><div style="font-size:11px;color:var(--text-s);">All content is generated by AI for detailed, classroom-ready lesson plans, assessments, and quizzes.</div></div>
             <span style="background:var(--success);color:#fff;padding:3px 12px;border-radius:16px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;flex-shrink:0;">ACTIVE</span>
         </div>
@@ -470,7 +470,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- Activities Preview Banner -->
     <div class="act-banner" style="margin-top:18px;">
-        <div class="act-banner-icons">&#127918;&#127912;&#127744;&#11036;&#128269;&#9989;&#127942;&#9889;</div>
+        
         <div class="act-banner-txt">
             <div class="abt">&#10024; After generating, you'll get 16 interactive games &amp; a PowerPoint!</div>
             <div class="abs">Wheel of Names · Crossword · Word Search · Flashcards · Jeopardy · Kahoot-Style Quiz · Hangman · Bingo · and more — all auto-filled from your lesson content.</div>
@@ -484,21 +484,21 @@ textarea{resize:vertical;min-height:60px;}
 <!-- STEP 4 -->
 <div class="sp" id="step4">
 <div class="crd">
-    <div class="crd-t" id="out-t">&#128196; Your Generated Lesson Plan</div>
+    <div class="crd-t" id="out-t">Your Generated Lesson Plan</div>
     <div class="crd-s" id="out-s"></div>
-    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">&#128196; Lesson Plan</button><button class="tab" id="t-as">&#128203; Assessment</button><button class="tab" id="t-qz" style="display:none">&#128221; Quiz</button><button class="tab" id="t-ppst" style="display:none">&#128203; RPMS-PPST</button></div>
+    <div class="tabs" id="out-tabs"><button class="tab a" id="t-lp">Lesson Plan</button><button class="tab" id="t-as">Assessment</button><button class="tab" id="t-qz" style="display:none">Quiz</button><button class="tab" id="t-ppst" style="display:none">RPMS-PPST</button></div>
 
-    <!-- ★ ACTIVITIES & PPTX QUICK ACTIONS ★ -->
+    <!--  ACTIVITIES & PPTX QUICK ACTIONS  -->
     <div class="qa-strip">
         <button class="qa-btn qa-btn-act" id="b-activities">
-            <span class="qi">&#127918;</span>
+            
             <div class="qt-wrap">
                 <div class="ql">Open Activities</div>
                 <div class="qs">16 interactive games · auto-populated from your lesson</div>
             </div>
         </button>
         <button class="qa-btn qa-btn-pptx" id="b-pptx">
-            <span class="qi">&#127912;</span>
+            
             <div class="qt-wrap">
                 <div class="ql">Download PPTX</div>
                 <div class="qs">Branded PowerPoint · ready for classroom presentation</div>
@@ -508,25 +508,25 @@ textarea{resize:vertical;min-height:60px;}
 
     <div class="ob" id="out-b"></div>
     <div class="oa">
-        <button class="btn btn-save-lp" id="b-save-lp">&#128190; Save Lesson Plan</button>
-        <button class="btn" id="b-copy">&#128203; Copy</button>
-        <button class="btn" id="b-dl">&#128229; Download .md</button>
-        <button class="btn" id="b-gdoc">&#128196; Google Doc</button>
-        <button class="btn" id="b-ppst">&#128203; RPMS-PPST</button>
-        <button class="btn" id="b-dlp" style="display:none">&#128229; PPST .md</button>
-        <button class="btn btn-s2" id="b-scorm">&#128230; Download SCORM</button>
-        <button class="btn" id="b-dla" style="display:none">&#128229; Assessment .md</button>
+        <button class="btn btn-save-lp" id="b-save-lp">Save Lesson Plan</button>
+        <button class="btn" id="b-copy">Copy</button>
+        <button class="btn" id="b-dl">Download .md</button>
+        <button class="btn" id="b-gdoc">Google Doc</button>
+        <button class="btn" id="b-ppst">RPMS-PPST</button>
+        <button class="btn" id="b-dlp" style="display:none">PPST .md</button>
+        <button class="btn btn-s2" id="b-scorm">Download SCORM</button>
+        <button class="btn" id="b-dla" style="display:none">Assessment .md</button>
         <span id="quiz-dl-grp" style="display:none;gap:4px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:11px;font-weight:600;color:var(--text-s);padding:2px 2px;font-family:'Space Grotesk',sans-serif;">Quiz&#x25BE;</span>
-            <button class="btn btn-sm" id="b-dlq-md" title="Human-readable reference">&#128221; .md</button>
-            <button class="btn btn-sm" id="b-dlq-gift" title="Import into Moodle">&#128171; Moodle GIFT</button>
-            <button class="btn btn-sm" id="b-dlq-qti" title="Import into Canvas or Brightspace">&#128230; QTI (Canvas/D2L)</button>
+            <button class="btn btn-sm" id="b-dlq-md" title="Human-readable reference">.md</button>
+            <button class="btn btn-sm" id="b-dlq-gift" title="Import into Moodle">Moodle GIFT</button>
+            <button class="btn btn-sm" id="b-dlq-qti" title="Import into Canvas or Brightspace">QTI (Canvas/D2L)</button>
         </span>
-        <button class="btn" id="b-pr">&#128424; Print</button>
+        <button class="btn" id="b-pr">Print</button>
         <button class="btn btn-p" id="b-new">&#43; Create Another</button>
     </div>
     <div id="lp-save-msg" style="display:none;margin:8px 0 0;font-size:12px;color:var(--c1);font-weight:600;font-family:'Space Grotesk',sans-serif;"></div>
-    <div class="tip"><span class="ti">&#128161;</span><span class="tt"><strong>SCORM Package:</strong> The .zip contains the lesson plan and assessment (if generated). Upload via Add Activity &gt; SCORM Package in Moodle, Canvas, or Brightspace. <strong>Note:</strong> The quiz is a separate LMS activity — use "Download Quiz (LMS)" to save it independently.</span></div>
+    <div class="tip"><span class="tt"><strong>SCORM Package:</strong> The .zip contains the lesson plan and assessment (if generated). Upload via Add Activity &gt; SCORM Package in Moodle, Canvas, or Brightspace. <strong>Note:</strong> The quiz is a separate LMS activity — use "Download Quiz (LMS)" to save it independently.</span></div>
 
     <!-- Section Regen Panel -->
     <div id="regen-panel" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);right:auto;z-index:200;background:rgba(240,249,251,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:2px solid rgba(0,187,214,0.3);box-shadow:0 -4px 32px rgba(0,187,214,0.12);padding:20px 24px;width:100%;max-width:700px;border-radius:18px 18px 0 0;">
@@ -819,7 +819,7 @@ if(genMode==="topic"){
     $("#b-dla").style.display=(tHasAS&&am!=="incorporate")?"inline-flex":"none";$("#quiz-dl-grp").style.display=tHasQZ?"inline-flex":"none";
     if(am==="both"&&tHasAS){rawLP=rawLP+"\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
     let tParts=["Lesson Plan"];if(rawAS)tParts.push("Assessment");if(tHasQZ)tParts.push("Quiz");
-    $("#out-t").textContent="\u{1F4C4} "+tParts.join(" + ");
+    $("#out-t").textContent=tParts.join(" + ");
     saveGenContent(_outLabel);
     setTab("lp");go(4);},700);
     }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
@@ -875,7 +875,7 @@ if(am==="both"&&hasAS){
 let titleParts=["Lesson Plan"];
 if(rawAS)titleParts.push("Assessment");
 if(hasQZ)titleParts.push("Quiz");
-$("#out-t").textContent="\u{1F4C4} "+titleParts.join(" + ");
+$("#out-t").textContent=titleParts.join(" + ");
 
 saveGenContent(_outLabel);
 
@@ -1249,16 +1249,16 @@ $("#b-save-lp").addEventListener("click", async function(){
     const data = await resp.json();
     if(data.token){
       msg.style.cssText = "display:block;color:#00bbd6;font-size:12px;margin-top:8px;font-weight:600;";
-      msg.textContent = "✓ Saved! You can reload it anytime from \"My Lesson Plans\".";
-      btn.textContent = "✓ Saved";
-      setTimeout(()=>{ btn.textContent = "💾 Save Lesson Plan"; btn.disabled = false; }, 3000);
+      msg.textContent = "Saved! You can reload it anytime from \"My Lesson Plans\".";
+      btn.textContent = "Saved";
+      setTimeout(()=>{ btn.textContent = "Save Lesson Plan"; btn.disabled = false; }, 3000);
     } else {
       throw new Error(data.error || "Save failed");
     }
   } catch(e) {
     msg.style.cssText = "display:block;color:#e74c3c;font-size:12px;margin-top:8px;";
     msg.textContent = "Error: " + e.message;
-    btn.textContent = "💾 Save Lesson Plan";
+    btn.textContent = "Save Lesson Plan";
     btn.disabled = false;
   }
 });
@@ -1294,7 +1294,7 @@ async function openMyLPs(){
         </div>
         <div class="lp-list-actions">
           <button class="btn-lp-load" onclick="loadLP('${esc(lp.token)}')">Load</button>
-          <button class="btn-lp-del"  onclick="deleteLP('${esc(lp.token)}')">✕</button>
+          <button class="btn-lp-del"  onclick="deleteLP('${esc(lp.token)}')">&times;</button>
         </div>
       </div>`;
     }).join("");
@@ -1336,7 +1336,7 @@ window.loadLP = async function loadLP(token){
     // Render and navigate
     setTab("lp");
     go(4);
-    $("#out-t").textContent = "📄 " + (data.title || "Lesson Plan");
+    $("#out-t").textContent = (data.title || "Lesson Plan");
     // Enable activities button
     localStorage.setItem("skooled_use_ai", "true");
   } catch(e) {
