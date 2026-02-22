@@ -112,6 +112,21 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS rubrics (
+                    id           INT AUTO_INCREMENT PRIMARY KEY,
+                    token        VARCHAR(64) NOT NULL UNIQUE,
+                    owner_id     INT NOT NULL,
+                    owner_name   VARCHAR(255),
+                    name         VARCHAR(500) NOT NULL,
+                    description  TEXT,
+                    rubric_json  LONGTEXT NOT NULL,
+                    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_rub_token (token),
+                    INDEX idx_rub_owner (owner_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS lesson_plans (
                     id            INT AUTO_INCREMENT PRIMARY KEY,
                     token         VARCHAR(64) NOT NULL UNIQUE,

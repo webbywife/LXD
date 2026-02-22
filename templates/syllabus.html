@@ -226,6 +226,95 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .btn-load-edit:hover{background:#009bb3;}
 
 /* ── Print handled by printSyllabus() clean-window function ── */
+
+/* ── Assessment Rubrics (builder card) ── */
+.rubric-attached-list{margin-bottom:12px;}
+.rubric-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.rubric-item-info{flex:1;min-width:0;}
+.rubric-item-name{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rubric-item-meta{font-size:11px;color:var(--grey);margin-top:2px;}
+.rubric-item-btns{display:flex;gap:6px;flex-shrink:0;}
+.btn-rub-edit{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-rub-edit:hover{border-color:var(--cyan);color:var(--white);}
+.btn-rub-remove{padding:4px 10px;border-radius:6px;border:1.5px solid rgba(231,76,60,0.3);background:transparent;color:rgba(231,76,60,0.7);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-rub-remove:hover{border-color:#e74c3c;color:#e74c3c;background:rgba(231,76,60,0.1);}
+.rubric-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-rub-action{padding:7px 14px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;color:var(--grey);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-rub-action:hover{border-color:var(--cyan);color:var(--white);}
+
+/* ── Rubric overlays (library + builder) ── */
+.rub-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.rub-overlay.show{opacity:1;pointer-events:all;}
+.rub-modal{background:#101c28;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:820px;width:94%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6);}
+.rub-modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-shrink:0;}
+.rub-modal-hdr h3{font-size:15px;font-weight:800;color:var(--white);font-family:'Space Grotesk',sans-serif;}
+.rub-modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--grey);padding:2px 7px;border-radius:4px;transition:.2s;}
+.rub-modal-close:hover{color:var(--white);background:rgba(255,255,255,0.08);}
+.rub-modal-body{flex:1;overflow-y:auto;padding-right:4px;}
+.rub-modal-footer{display:flex;align-items:center;gap:10px;margin-top:20px;flex-shrink:0;border-top:1px solid var(--border);padding-top:16px;flex-wrap:wrap;}
+.btn-rub-primary{padding:9px 20px;border-radius:10px;border:none;background:var(--cyan);color:#0d1f2d;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-rub-primary:hover{background:#00a0bb;}
+.btn-rub-cancel{padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--grey);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-rub-cancel:hover{border-color:var(--white);color:var(--white);}
+
+/* Rubric builder field group */
+.rub-fg{margin-bottom:14px;}
+.rub-fg label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--grey);margin-bottom:5px;}
+.rub-fg input,.rub-fg textarea{width:100%;padding:9px 12px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:inherit;font-size:13px;}
+.rub-fg textarea{resize:vertical;min-height:52px;}
+.rub-sec-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--cyan);margin:18px 0 10px;}
+
+/* Level chips */
+.rub-levels-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.rub-level-chip{display:flex;align-items:center;gap:4px;background:rgba(0,187,214,0.1);border:1.5px solid rgba(0,187,214,0.3);border-radius:10px;padding:5px 8px;}
+.rub-level-chip input{background:transparent;border:none;color:var(--white);font-family:inherit;font-size:12px;font-weight:700;width:80px;outline:none;}
+.rub-level-chip input.score-inp{width:32px;color:var(--cyan);text-align:center;}
+.rub-level-chip .sep{color:var(--grey);font-size:11px;}
+.rub-chip-del{background:none;border:none;color:var(--grey);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;transition:.2s;}
+.rub-chip-del:hover{color:#e74c3c;}
+
+/* Criterion accordion */
+.rub-criterion{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.rub-crit-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:rgba(255,255,255,0.04);transition:.2s;}
+.rub-crit-hdr:hover{background:rgba(255,255,255,0.07);}
+.rub-crit-hdr-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.rub-crit-title{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rub-crit-wt{font-size:11px;color:var(--cyan);flex-shrink:0;}
+.rub-crit-chevron{color:var(--grey);font-size:11px;transition:.3s;flex-shrink:0;}
+.rub-criterion.open .rub-crit-chevron{transform:rotate(180deg);}
+.rub-crit-body{display:none;padding:14px;}
+.rub-criterion.open .rub-crit-body{display:block;}
+.rub-crit-fields{display:grid;grid-template-columns:1fr 90px;gap:10px;margin-bottom:12px;align-items:end;}
+.rub-crit-fields input{padding:8px 10px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:inherit;font-size:13px;width:100%;}
+.rub-desc-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--grey);margin-bottom:6px;}
+.rub-desc-grid{display:grid;gap:8px;}
+.rub-desc-cell label{display:block;font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:3px;}
+.rub-desc-cell textarea{width:100%;padding:7px 9px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);border-radius:7px;color:var(--white);font-family:inherit;font-size:11px;resize:vertical;min-height:56px;}
+.btn-rub-del-crit{padding:4px 9px;border-radius:6px;border:1.5px solid rgba(231,76,60,0.3);background:transparent;color:rgba(231,76,60,0.7);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;flex-shrink:0;}
+.btn-rub-del-crit:hover{border-color:#e74c3c;color:#e74c3c;background:rgba(231,76,60,0.1);}
+
+/* Library list */
+.rub-lib-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.rub-lib-item:last-child{border-bottom:none;}
+.rub-lib-info{flex:1;min-width:0;}
+.rub-lib-name{font-size:13px;font-weight:700;color:var(--white);}
+.rub-lib-meta{font-size:11px;color:var(--grey);margin-top:2px;}
+.btn-use-rubric{padding:6px 14px;border-radius:8px;border:none;background:var(--cyan);color:#0d1f2d;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;flex-shrink:0;}
+.btn-use-rubric:hover{background:#00a0bb;}
+
+/* Rubric save-to-lib checkbox */
+.rub-save-lib-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--grey);}
+.rub-save-lib-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--cyan);}
+
+/* ── Rubric preview (inside syldoc) ── */
+.syl-rubric-wrap{margin:8px 0 18px;}
+.syl-rubric-name{font-size:11pt;font-weight:bold;color:#0d1f2d;margin-bottom:3px;}
+.syl-rubric-desc{font-size:10pt;color:#444;margin-bottom:6px;}
+.syl-rubric-table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:14px;}
+.syl-rubric-table th{border:1px solid #888;padding:5px 8px;background:#f0f0f0;color:#000;font-weight:bold;text-align:center;}
+.syl-rubric-table td{border:1px solid #aaa;padding:5px 8px;vertical-align:top;color:#111;}
+.syl-rubric-table .crit-name{font-weight:bold;}
+.syl-rubric-table .crit-wt{text-align:center;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -411,6 +500,18 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <button class="btn-add-row" onclick="addGradingRow()">+ Add Component</button>
   </div>
 
+  <!-- Assessment Rubrics -->
+  <div class="card">
+    <div class="card-hdr">Assessment Rubrics</div>
+    <div id="rubric-attached-list" class="rubric-attached-list">
+      <p style="font-size:12px;color:var(--grey);margin-bottom:10px;">No rubrics attached yet.</p>
+    </div>
+    <div class="rubric-actions">
+      <button class="btn-rub-action" id="btn-rub-library">&#128218; Pick from Library</button>
+      <button class="btn-rub-action" id="btn-rub-create">+ Create New Rubric</button>
+    </div>
+  </div>
+
   <!-- References -->
   <div class="card">
     <div class="card-hdr">References</div>
@@ -476,6 +577,60 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     </div>
     <div id="my-syllabi-content">
       <div class="saving-indicator">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     RUBRIC LIBRARY OVERLAY
+════════════════════════════════════════════ -->
+<div class="rub-overlay" id="rub-library-overlay">
+  <div class="rub-modal" style="max-width:600px;">
+    <div class="rub-modal-hdr">
+      <h3>Rubric Library</h3>
+      <button class="rub-modal-close" id="rub-lib-close">&times;</button>
+    </div>
+    <div class="rub-modal-body" id="rub-lib-content">
+      <div class="saving-indicator">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     RUBRIC BUILDER OVERLAY
+════════════════════════════════════════════ -->
+<div class="rub-overlay" id="rub-builder-overlay">
+  <div class="rub-modal">
+    <div class="rub-modal-hdr">
+      <h3 id="rub-builder-title">Create New Rubric</h3>
+      <button class="rub-modal-close" id="rub-builder-close">&times;</button>
+    </div>
+    <div class="rub-modal-body">
+      <div class="rub-fg">
+        <label>Rubric Name *</label>
+        <input type="text" id="rub-name" placeholder="e.g. Group Project Rubric">
+      </div>
+      <div class="rub-fg">
+        <label>Description (optional)</label>
+        <textarea id="rub-desc" rows="2" placeholder="Brief description of what this rubric evaluates"></textarea>
+      </div>
+
+      <div class="rub-sec-hdr">Performance Levels</div>
+      <div id="rub-levels-row" class="rub-levels-row"></div>
+      <button class="btn-rub-action" id="btn-add-level" style="margin-bottom:6px;">+ Add Level</button>
+
+      <div class="rub-sec-hdr">Criteria</div>
+      <div id="rub-criteria-list"></div>
+      <button class="btn-rub-action" id="btn-add-criterion">+ Add Criterion</button>
+    </div>
+    <div class="rub-modal-footer">
+      <label class="rub-save-lib-row">
+        <input type="checkbox" id="rub-save-lib" checked>
+        Save to Library (share with all users)
+      </label>
+      <div style="flex:1;"></div>
+      <button class="btn-rub-cancel" id="btn-rub-builder-cancel">Cancel</button>
+      <button class="btn-rub-primary" id="btn-rub-builder-save">Add Rubric to Syllabus</button>
     </div>
   </div>
 </div>
@@ -648,6 +803,7 @@ function buildSyllabusFromForm(){
       books: booksText.split('\n').map(l=>l.trim()).filter(Boolean),
       websites: sitesText.split('\n').map(l=>l.trim()).filter(Boolean),
     },
+    rubrics: JSON.parse(JSON.stringify(window._rubrics||[])),
   };
 }
 
@@ -745,7 +901,7 @@ function nl2p(s){return s?s.split(/\n+/).filter(l=>l.trim()).map(l=>`<p>${esc(l.
 function renderSyllabusDoc(s){
   return renderDocHeader(s)+renderCourseBlock(s)+renderCourseInfo(s)+renderDescription(s)
     +renderPOs(s)+renderCOs(s)+renderCoursePlan(s)
-    +renderGrading(s)+renderPolicies()+renderReferences(s)+renderSignatures();
+    +renderGrading(s)+renderRubrics(s)+renderPolicies()+renderReferences(s)+renderSignatures();
 }
 
 function renderDocHeader(s){
@@ -910,6 +1066,14 @@ body{background:#fff;font-family:Calibri,'Trebuchet MS','Segoe UI',Arial,sans-se
 .syl-sig-line{border-bottom:1px solid #000;margin:0 10px 5px;height:40px;}
 .syl-sig-name{font-size:10.5pt;font-weight:bold;color:#000;}
 .syl-sig-role{font-size:9.5pt;color:#000;}
+.syl-rubric-wrap{margin:8px 0 18px;}
+.syl-rubric-name{font-size:11pt;font-weight:bold;color:#000;margin-bottom:3px;}
+.syl-rubric-desc{font-size:10pt;color:#333;margin-bottom:6px;}
+.syl-rubric-table{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:14px;}
+.syl-rubric-table th{border:1px solid #000;padding:5px 7px;background:#fff;color:#000;font-weight:bold;text-align:center;}
+.syl-rubric-table td{border:1px solid #000;padding:5px 7px;vertical-align:top;color:#000;}
+.syl-rubric-table .crit-name{font-weight:bold;}
+.syl-rubric-table .crit-wt{text-align:center;white-space:nowrap;}
 </style>
 </head><body>
 ${bodyEl.innerHTML}
@@ -970,6 +1134,7 @@ function collectRawFormState(){
     grading:         grading,
     refBooks:        document.getElementById('ref-books').value,
     refWebsites:     document.getElementById('ref-websites').value,
+    rubrics:         JSON.parse(JSON.stringify(window._rubrics||[])),
     savedAt:         new Date().toISOString(),
   };
 }
@@ -1027,6 +1192,8 @@ function restoreFormState(state){
     });
   }
   updateGradingTotal();
+  window._rubrics = state.rubrics ? JSON.parse(JSON.stringify(state.rubrics)) : [];
+  renderAttachedRubrics();
 }
 
 function fmtTime(d){ return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0'); }
@@ -1140,6 +1307,8 @@ async function loadSyllabusForEdit(token){
     };
 
     restoreFormState(state);
+    window._rubrics = s.rubrics ? JSON.parse(JSON.stringify(s.rubrics)) : [];
+    renderAttachedRubrics();
     editToken = data.token;
     editRevision = data.revision || 1;
     editUpdatedAt = data.updated_at || '';
@@ -1239,6 +1408,312 @@ updateGradingTotal();
   const loadToken = params.get('load');
   if(loadToken && AUTH_TOKEN){ loadSyllabusForEdit(loadToken); }
 })();
+
+// ══════════════════════════════════════════════════════════════
+// RUBRIC MAKER
+// ══════════════════════════════════════════════════════════════
+window._rubrics = [];
+let _editingRubricIdx = -1;
+
+function defaultLevels(){
+  return [
+    {label:'Excellent',  score:4},
+    {label:'Proficient', score:3},
+    {label:'Developing', score:2},
+    {label:'Beginning',  score:1},
+  ];
+}
+
+function renderAttachedRubrics(){
+  const el = document.getElementById('rubric-attached-list');
+  if(!window._rubrics.length){
+    el.innerHTML = '<p style="font-size:12px;color:var(--grey);margin-bottom:10px;">No rubrics attached yet.</p>';
+    return;
+  }
+  el.innerHTML = window._rubrics.map((r,i)=>`
+    <div class="rubric-item">
+      <div class="rubric-item-info">
+        <div class="rubric-item-name">${esc(r.name)}</div>
+        <div class="rubric-item-meta">${r.criteria?r.criteria.length:0} criteria &nbsp;·&nbsp; ${r.levels?r.levels.length:0} levels</div>
+      </div>
+      <div class="rubric-item-btns">
+        <button class="btn-rub-edit" onclick="openRubricBuilder(${i})">Edit</button>
+        <button class="btn-rub-remove" onclick="removeRubric(${i})">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function removeRubric(idx){
+  window._rubrics.splice(idx,1);
+  renderAttachedRubrics();
+  scheduleDraftSave();
+}
+
+function renderBuilderLevels(levels){
+  const row = document.getElementById('rub-levels-row');
+  row.innerHTML = levels.map((lv,i)=>`
+    <div class="rub-level-chip" data-idx="${i}">
+      <input class="level-label" type="text" value="${esc(lv.label)}" placeholder="Level name" oninput="updateCriterionHeaders()">
+      <span class="sep">/</span>
+      <input class="score-inp" type="number" value="${lv.score}" placeholder="pts" min="0" max="99">
+      <button class="rub-chip-del" onclick="removeLevel(${i})">&#10005;</button>
+    </div>`).join('');
+}
+
+function removeLevel(idx){
+  const chips = document.querySelectorAll('#rub-levels-row .rub-level-chip');
+  chips[idx].remove();
+  // Remove descriptor textarea for that level from each criterion
+  document.querySelectorAll('#rub-criteria-list .rub-criterion').forEach(crit=>{
+    const cells = crit.querySelectorAll('.rub-desc-cell');
+    if(cells[idx]) cells[idx].remove();
+  });
+  // Re-index chip delete buttons
+  document.querySelectorAll('#rub-levels-row .rub-level-chip').forEach((chip,i)=>{
+    chip.dataset.idx = i;
+    chip.querySelector('.rub-chip-del').setAttribute('onclick','removeLevel('+i+')');
+  });
+  updateCriterionHeaders();
+}
+
+function updateCriterionHeaders(){
+  const labels = currentLevelLabels();
+  document.querySelectorAll('#rub-criteria-list .rub-criterion').forEach(crit=>{
+    const cells = crit.querySelectorAll('.rub-desc-cell label');
+    labels.forEach((lbl,i)=>{ if(cells[i]) cells[i].textContent = lbl; });
+  });
+}
+
+function currentLevelLabels(){
+  return Array.from(document.querySelectorAll('#rub-levels-row .level-label')).map(inp=>inp.value||'Level');
+}
+
+function addCriterionRow(criterion){
+  const idx = document.querySelectorAll('#rub-criteria-list .rub-criterion').length;
+  const labels = currentLevelLabels();
+  const descs = criterion ? (criterion.descriptors||[]) : [];
+  const descCells = labels.map((lbl,i)=>`
+    <div class="rub-desc-cell">
+      <label>${esc(lbl)}</label>
+      <textarea placeholder="Describe performance at this level…">${esc(descs[i]||'')}</textarea>
+    </div>`).join('');
+
+  const div = document.createElement('div');
+  div.className = 'rub-criterion open';
+  div.innerHTML = `
+    <div class="rub-crit-hdr" onclick="this.closest('.rub-criterion').classList.toggle('open')">
+      <div class="rub-crit-hdr-info">
+        <span class="rub-crit-title">${criterion?esc(criterion.name):'New Criterion'}</span>
+        <span class="rub-crit-wt">${criterion&&criterion.weight?criterion.weight+'%':''}</span>
+      </div>
+      <span class="rub-crit-chevron">&#9660;</span>
+      <button class="btn-rub-del-crit" onclick="event.stopPropagation();this.closest('.rub-criterion').remove()">&#10005;</button>
+    </div>
+    <div class="rub-crit-body">
+      <div class="rub-crit-fields">
+        <input type="text" class="crit-name-inp" placeholder="Criterion name" value="${criterion?esc(criterion.name):''}"
+          oninput="this.closest('.rub-criterion').querySelector('.rub-crit-title').textContent=this.value||'New Criterion'">
+        <input type="number" class="crit-wt-inp" placeholder="Weight %" min="0" max="100" value="${criterion&&criterion.weight?criterion.weight:''}"
+          oninput="this.closest('.rub-criterion').querySelector('.rub-crit-wt').textContent=this.value?this.value+'%':''">
+      </div>
+      <div class="rub-desc-label">Performance Descriptors</div>
+      <div class="rub-desc-grid" style="grid-template-columns:repeat(${labels.length},1fr);">${descCells}</div>
+    </div>`;
+  document.getElementById('rub-criteria-list').appendChild(div);
+}
+
+function collectRubricFromBuilder(){
+  const name = (document.getElementById('rub-name').value||'').trim();
+  if(!name) return null;
+  const description = (document.getElementById('rub-desc').value||'').trim();
+  const levels = Array.from(document.querySelectorAll('#rub-levels-row .rub-level-chip')).map(chip=>({
+    label: chip.querySelector('.level-label').value.trim()||'Level',
+    score: parseFloat(chip.querySelector('.score-inp').value)||0,
+  }));
+  const criteria = Array.from(document.querySelectorAll('#rub-criteria-list .rub-criterion')).map(crit=>({
+    name: (crit.querySelector('.crit-name-inp').value||'').trim(),
+    weight: parseFloat(crit.querySelector('.crit-wt-inp').value)||0,
+    descriptors: Array.from(crit.querySelectorAll('.rub-desc-cell textarea')).map(ta=>ta.value.trim()),
+  }));
+  return {name, description, levels, criteria};
+}
+
+function openRubricBuilder(editIdx){
+  _editingRubricIdx = (editIdx !== undefined) ? editIdx : -1;
+  const title = document.getElementById('rub-builder-title');
+  const nameInp = document.getElementById('rub-name');
+  const descInp = document.getElementById('rub-desc');
+  document.getElementById('rub-criteria-list').innerHTML = '';
+
+  if(_editingRubricIdx >= 0){
+    const r = window._rubrics[_editingRubricIdx];
+    title.textContent = 'Edit Rubric';
+    nameInp.value = r.name||'';
+    descInp.value = r.description||'';
+    renderBuilderLevels(r.levels||defaultLevels());
+    (r.criteria||[]).forEach(c=>addCriterionRow(c));
+  } else {
+    title.textContent = 'Create New Rubric';
+    nameInp.value = '';
+    descInp.value = '';
+    renderBuilderLevels(defaultLevels());
+    addCriterionRow();
+  }
+  document.getElementById('rub-builder-overlay').classList.add('show');
+}
+
+document.getElementById('rub-builder-close').addEventListener('click',()=>{
+  document.getElementById('rub-builder-overlay').classList.remove('show');
+});
+document.getElementById('btn-rub-builder-cancel').addEventListener('click',()=>{
+  document.getElementById('rub-builder-overlay').classList.remove('show');
+});
+document.getElementById('rub-builder-overlay').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('show');
+});
+
+document.getElementById('btn-add-level').addEventListener('click',()=>{
+  const chips = document.querySelectorAll('#rub-levels-row .rub-level-chip');
+  const newIdx = chips.length;
+  const chip = document.createElement('div');
+  chip.className = 'rub-level-chip';
+  chip.dataset.idx = newIdx;
+  chip.innerHTML = `
+    <input class="level-label" type="text" value="Level ${newIdx+1}" placeholder="Level name" oninput="updateCriterionHeaders()">
+    <span class="sep">/</span>
+    <input class="score-inp" type="number" value="${newIdx+1}" placeholder="pts" min="0" max="99">
+    <button class="rub-chip-del" onclick="removeLevel(${newIdx})">&#10005;</button>`;
+  document.getElementById('rub-levels-row').appendChild(chip);
+  // Add a new descriptor column to each criterion
+  const label = 'Level '+(newIdx+1);
+  document.querySelectorAll('#rub-criteria-list .rub-criterion').forEach(crit=>{
+    const grid = crit.querySelector('.rub-desc-grid');
+    const colCount = grid.querySelectorAll('.rub-desc-cell').length + 1;
+    grid.style.gridTemplateColumns = `repeat(${colCount},1fr)`;
+    const cell = document.createElement('div');
+    cell.className = 'rub-desc-cell';
+    cell.innerHTML = `<label>${esc(label)}</label><textarea placeholder="Describe performance at this level…"></textarea>`;
+    grid.appendChild(cell);
+  });
+});
+
+document.getElementById('btn-add-criterion').addEventListener('click',()=>addCriterionRow());
+
+document.getElementById('btn-rub-builder-save').addEventListener('click', async function(){
+  const rub = collectRubricFromBuilder();
+  if(!rub){ showToast('Please enter a rubric name.'); return; }
+
+  const orig = this.textContent;
+  this.textContent = 'Saving…'; this.disabled = true;
+
+  if(document.getElementById('rub-save-lib').checked){
+    try{
+      const resp = await fetch(apiUrl('/api/rubrics'),{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({rubric: rub})
+      });
+      if(resp.ok){
+        const data = await resp.json();
+        rub.token = data.token;
+      }
+    }catch(e){ /* non-fatal — still attach locally */ }
+  }
+
+  if(_editingRubricIdx >= 0){
+    window._rubrics[_editingRubricIdx] = rub;
+  } else {
+    window._rubrics.push(rub);
+  }
+  renderAttachedRubrics();
+  scheduleDraftSave();
+  document.getElementById('rub-builder-overlay').classList.remove('show');
+  showToast(_editingRubricIdx >= 0 ? 'Rubric updated.' : 'Rubric added to syllabus.');
+  this.textContent = orig; this.disabled = false;
+});
+
+document.getElementById('btn-rub-create').addEventListener('click',()=>openRubricBuilder());
+document.getElementById('btn-rub-library').addEventListener('click',()=>openRubricLibrary());
+
+async function openRubricLibrary(){
+  const overlay = document.getElementById('rub-library-overlay');
+  const content = document.getElementById('rub-lib-content');
+  content.innerHTML = '<div class="saving-indicator">Loading library…</div>';
+  overlay.classList.add('show');
+  try{
+    const resp = await fetch(apiUrl('/api/rubrics'));
+    if(!resp.ok) throw new Error('Failed');
+    const list = await resp.json();
+    if(!list.length){
+      content.innerHTML = '<p style="font-size:12px;color:var(--grey);padding:8px 0">No rubrics in the library yet. Create one and check "Save to Library".</p>';
+      return;
+    }
+    content.innerHTML = list.map(r=>`
+      <div class="rub-lib-item">
+        <div class="rub-lib-info">
+          <div class="rub-lib-name">${esc(r.name)}</div>
+          <div class="rub-lib-meta">${esc(r.owner_name||'Unknown')} &nbsp;·&nbsp; ${r.criteria_count} criteria &nbsp;·&nbsp; ${r.level_count} levels${r.description?' &nbsp;·&nbsp; '+esc(r.description):''}</div>
+        </div>
+        <button class="btn-use-rubric" onclick="useRubricFromLib('${esc(r.token)}')">Use</button>
+      </div>`).join('');
+  }catch(e){
+    content.innerHTML = '<p style="color:#e74c3c;font-size:12px">Error loading library.</p>';
+  }
+}
+
+document.getElementById('rub-lib-close').addEventListener('click',()=>{
+  document.getElementById('rub-library-overlay').classList.remove('show');
+});
+document.getElementById('rub-library-overlay').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('show');
+});
+
+window.useRubricFromLib = async function(token){
+  // Check for duplicate
+  if(window._rubrics.some(r=>r.token===token)){
+    showToast('This rubric is already attached.'); return;
+  }
+  try{
+    const resp = await fetch(apiUrl('/api/rubrics/'+token));
+    if(!resp.ok) throw new Error('Not found');
+    const data = await resp.json();
+    const rub = data.rubric;
+    rub.token = data.token;
+    window._rubrics.push(rub);
+    renderAttachedRubrics();
+    scheduleDraftSave();
+    document.getElementById('rub-library-overlay').classList.remove('show');
+    showToast('Rubric "'+esc(data.name)+'" added to syllabus.');
+  }catch(e){
+    showToast('Error loading rubric.');
+  }
+};
+
+function renderRubrics(s){
+  if(!s.rubrics||!s.rubrics.length) return '';
+  let html = '<div class="syl-sec-hdr">Assessment Rubrics</div>';
+  s.rubrics.forEach(rub=>{
+    const levels = rub.levels||[];
+    const criteria = rub.criteria||[];
+    const levelHeaders = levels.map(lv=>`<th>${esc(lv.label)}${lv.score!=null?' ('+lv.score+')':''}</th>`).join('');
+    const rows = criteria.map(cr=>{
+      const descs = (cr.descriptors||[]).map(d=>`<td>${esc(d)}</td>`).join('');
+      return `<tr><td class="crit-name">${esc(cr.name)}</td><td class="crit-wt">${cr.weight?cr.weight+'%':''}</td>${descs}</tr>`;
+    }).join('');
+    html += `<div class="syl-rubric-wrap">
+      <div class="syl-rubric-name">${esc(rub.name)}</div>
+      ${rub.description?`<div class="syl-rubric-desc">${esc(rub.description)}</div>`:''}
+      <table class="syl-rubric-table">
+        <thead><tr><th>Criteria</th><th>Weight</th>${levelHeaders}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  });
+  return html;
+}
+
+// Init
+renderAttachedRubrics();
 </script>
 </body>
 </html>

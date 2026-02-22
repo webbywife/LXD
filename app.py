@@ -1319,5 +1319,122 @@ def api_remove_syllabus_share(token, email):
     return jsonify({"ok": True})
 
 
+# ── Rubric library routes ──────────────────────────────
+
+@app.route("/api/rubrics")
+@login_required
+def api_list_rubrics():
+    """List all rubrics (community library — all users see all)."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT token, owner_name, name, description, rubric_json
+                FROM rubrics
+                ORDER BY created_at DESC
+                LIMIT 100
+            """)
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+    results = []
+    for r in rows:
+        try:
+            rj = json.loads(r["rubric_json"])
+        except Exception:
+            rj = {}
+        results.append({
+            "token": r["token"],
+            "owner_name": r["owner_name"],
+            "name": r["name"],
+            "description": r["description"] or "",
+            "criteria_count": len(rj.get("criteria", [])),
+            "level_count": len(rj.get("levels", [])),
+        })
+    return jsonify(results)
+
+
+@app.route("/api/rubrics", methods=["POST"])
+@login_required
+def api_save_rubric():
+    """Save a rubric to the shared library."""
+    import secrets as _sec
+    from auth import get_db
+    data = request.get_json()
+    rub = data.get("rubric", {})
+    name = (rub.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "Rubric name is required"}), 400
+    description = (rub.get("description") or "").strip()
+    owner_id = session["user_id"]
+    owner_name = session.get("user_name") or session.get("user_email", "")
+    token = _sec.token_hex(16)
+    rubric_json = json.dumps(rub)
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO rubrics (token, owner_id, owner_name, name, description, rubric_json)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (token, owner_id, owner_name, name, description, rubric_json))
+        conn.commit()
+    finally:
+        conn.close()
+    _log_activity("rubric_save", name)
+    return jsonify({"token": token, "name": name})
+
+
+@app.route("/api/rubrics/<token>")
+@login_required
+def api_get_rubric(token):
+    """Get full rubric data by token."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT token, owner_name, name, description, rubric_json FROM rubrics WHERE token = %s",
+                (token,)
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    try:
+        rj = json.loads(row["rubric_json"])
+    except Exception:
+        rj = {}
+    return jsonify({
+        "token": row["token"],
+        "name": row["name"],
+        "description": row["description"] or "",
+        "owner_name": row["owner_name"],
+        "rubric": rj,
+    })
+
+
+@app.route("/api/rubrics/<token>", methods=["DELETE"])
+@login_required
+def api_delete_rubric(token):
+    """Delete a rubric (owner or admin only)."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT owner_id FROM rubrics WHERE token = %s", (token,))
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"error": "Not found"}), 404
+            if row["owner_id"] != session["user_id"] and not session.get("is_admin"):
+                return jsonify({"error": "Access denied"}), 403
+            cur.execute("DELETE FROM rubrics WHERE token = %s", (token,))
+        conn.commit()
+    finally:
+        conn.close()
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=8080)
