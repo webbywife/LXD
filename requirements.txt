@@ -4,4 +4,5 @@ anthropic>=0.39.0
 python-dotenv>=1.0.0
 gunicorn>=21.2.0
 pymysql>=1.1.0
+cryptography>=42.0.0
 python-pptx>=0.6.21
