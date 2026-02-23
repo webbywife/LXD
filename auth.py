@@ -634,7 +634,11 @@ def admin_approve(user_id):
     conn = get_db()
     try:
         with conn.cursor() as cur:
-            cur.execute("UPDATE users SET status = 'approved' WHERE id = %s", (user_id,))
+            # Also clear verification_token so the user can log in immediately
+            cur.execute(
+                "UPDATE users SET status = 'approved', verification_token = NULL WHERE id = %s",
+                (user_id,),
+            )
     finally:
         conn.close()
     flash("User approved.", "success")
