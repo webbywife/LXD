@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="auth-token" content="{{ auth_token }}">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<title>SKOOLED-AI · Interactive Activities</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<title>SKOOLED-AI · Practice Activity</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -18,13 +17,11 @@
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
 h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
-/* Navbar */
-.nav{background:var(--nav);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-.nav-brand{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:var(--white);letter-spacing:-0.03em;}
-.nav-brand span{color:var(--cyan);}
-.nav-links{display:flex;gap:16px;align-items:center;}
-.nav-links a{color:var(--grey);text-decoration:none;font-size:13px;font-weight:500;transition:.2s;}
-.nav-links a:hover{color:var(--white);}
+/* Play nav */
+.play-nav{background:var(--nav);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.play-brand{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:var(--white);letter-spacing:-0.03em;}
+.play-brand span{color:var(--cyan);}
+.play-label{font-size:13px;font-weight:600;color:var(--grey);}
 
 /* Layout */
 .layout{display:flex;flex:1;overflow:hidden;}
@@ -41,7 +38,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .game-tab .gb{font-size:9px;background:var(--orange);color:#000;padding:1px 5px;border-radius:4px;font-weight:700;flex-shrink:0;}
 
 /* Game Panels */
-.game-panel{display:none;}
+.game-panel{display:none;max-width:860px;}
 .game-panel.active{display:block;}
 .game-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-0.03em;}
 .game-desc{color:var(--grey);font-size:13px;margin-bottom:20px;}
@@ -71,8 +68,6 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .hud-item{background:rgba(0,187,214,0.08);border:1px solid var(--border);border-radius:10px;padding:8px 18px;text-align:center;}
 .hud-v{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--cyan);}
 .hud-l{font-size:11px;color:var(--grey);}
-
-/* ─── GAME STYLES ──────────────────────────────────── */
 
 /* Wheel of Names */
 #wheel-canvas{display:block;margin:0 auto 12px;}
@@ -147,7 +142,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 
 /* Memory Cards */
 .mem-grid{display:grid;gap:8px;}
-.mem-card{aspect-ratio:1;background:rgba(0,187,214,0.08);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;padding:8px;text-align:center;transition:transform .3s,background .2s;transform-style:preserve-3d;position:relative;}
+.mem-card{aspect-ratio:unset;min-height:80px;height:auto;background:rgba(0,187,214,0.08);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;padding:8px;text-align:center;transition:transform .3s,background .2s;transform-style:preserve-3d;position:relative;}
 .mem-card.flipped{background:rgba(0,187,214,0.15);border-color:var(--cyan);}
 .mem-card.matched{background:rgba(0,184,148,0.12);border-color:var(--green);cursor:default;}
 .mem-back{font-size:20px;}
@@ -179,6 +174,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .bingo-cell.bingo{background:rgba(0,184,148,0.2);border-color:var(--green);}
 .caller-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;margin-bottom:14px;}
 .caller-word{font-size:20px;font-weight:800;color:var(--orange);font-family:'Space Grotesk',sans-serif;}
+.bingo-controls{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
 
 /* Kahoot */
 .kah-q{font-size:20px;font-weight:700;text-align:center;padding:24px;min-height:90px;display:flex;align-items:center;justify-content:center;}
@@ -196,6 +192,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .hot-name{padding:8px 16px;border-radius:20px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);font-size:14px;font-weight:600;transition:.3s;}
 .hot-name.active{background:rgba(250,163,43,0.25);border-color:var(--orange);color:var(--orange);transform:scale(1.1);}
 .hot-timer{font-size:60px;font-weight:900;text-align:center;font-family:'Space Grotesk',sans-serif;color:var(--orange);}
+.hot-selected-box{background:rgba(250,163,43,0.1);border:1px solid var(--orange);border-radius:10px;padding:10px 18px;text-align:center;margin:10px 0;min-height:44px;display:flex;align-items:center;justify-content:center;}
 
 /* Crossword */
 .cw-grid{display:inline-block;border-collapse:collapse;}
@@ -220,7 +217,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .ws-word{font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);}
 .ws-word.found-word{text-decoration:line-through;color:var(--green);border-color:var(--green);}
 
-/* Timeline Challenge */
+/* Timeline */
 .tl-slots{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .tl-slot{min-height:48px;border:2px dashed var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;font-size:13px;transition:.15s;}
 .tl-slot.over{border-color:var(--cyan);background:rgba(0,187,214,0.06);}
@@ -236,23 +233,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .result-banner.lose{background:rgba(231,76,60,0.1);border:1px solid #e74c3c;color:#e74c3c;}
 .result-banner.draw{background:rgba(250,163,43,0.1);border:1px solid var(--orange);color:var(--orange);}
 
-/* Responsive */
-@media(max-width:700px){
-  .layout{flex-direction:column;}
-  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);}
-  .sidebar{overflow-x:auto;overflow-y:hidden;display:flex;padding:8px 0;}
-  .sb-section{display:none;}
-  .game-tab{flex-direction:column;gap:2px;padding:8px 12px;border-left:none;border-bottom:3px solid transparent;min-width:72px;font-size:11px;text-align:center;}
-  .game-tab.active{border-left:none;border-bottom-color:var(--cyan);}
-  .game-tab .gb{display:none;}
-}
-
-/* ── POLISH ADDITIONS ─────────────────────────────────────── */
-
-/* Game panel max-width so content doesn't stretch on wide screens */
-.game-panel{max-width:860px;}
-
-/* How-to instruction box */
+/* How-to */
 .how-to{background:rgba(0,187,214,0.045);border:1px solid rgba(0,187,214,0.22);border-radius:10px;padding:13px 16px;margin-bottom:18px;}
 .how-to-title{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase;margin-bottom:7px;}
 .how-to ol{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px;}
@@ -260,78 +241,35 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .how-to li strong{color:var(--white);}
 .how-to-tip{margin-top:6px;font-size:12px;color:var(--orange);font-style:italic;}
 
-/* Topic/lesson info bar */
+/* Topic bar */
 .topic-bar{background:rgba(0,187,214,0.04);border:1px solid var(--border);border-radius:10px;padding:11px 18px;margin-bottom:22px;display:flex;gap:0;flex-wrap:wrap;align-items:stretch;}
 .topic-pill{display:flex;flex-direction:column;gap:2px;padding-right:20px;}
 .topic-pill+.topic-pill{padding-left:20px;border-left:1px solid var(--border);}
 .topic-pill-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;}
 .topic-pill-val{font-size:13px;font-weight:700;color:var(--white);line-height:1.3;}
 
-/* Matching game column headers */
 .match-col-hd{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase;padding-bottom:6px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:4px;}
-
-/* Bingo controls centered */
-.bingo-controls{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
-
-/* Memory card — no forced aspect-ratio so long text fits */
-.mem-card{aspect-ratio:unset;min-height:80px;height:auto;}
-
-/* Game title row */
 .game-hd-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px;}
-.game-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;margin-bottom:0;}
 
-/* Hot Potato selected name highlight */
-.hot-selected-box{background:rgba(250,163,43,0.1);border:1px solid var(--orange);border-radius:10px;padding:10px 18px;text-align:center;margin:10px 0;min-height:44px;display:flex;align-items:center;justify-content:center;}
+/* Error */
+.error-state{padding:24px;text-align:center;}
+.error-state a{color:var(--cyan);text-decoration:none;}
 
-/* Share with Students button */
-.btn-share-act{
-  padding:8px 18px;border-radius:9px;border:none;
-  background:#00bbd6;color:#fff;font-size:13px;font-weight:700;
-  cursor:pointer;font-family:inherit;transition:.2s;
+@media(max-width:700px){
+  .layout{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;display:flex;padding:8px 0;}
+  .sb-section{display:none;}
+  .game-tab{flex-direction:column;gap:2px;padding:8px 12px;border-left:none;border-bottom:3px solid transparent;min-width:72px;font-size:11px;text-align:center;}
+  .game-tab.active{border-left:none;border-bottom-color:var(--cyan);}
+  .game-tab .gb{display:none;}
 }
-.btn-share-act:hover{background:#009bb3;}
-
-/* Share modal */
-.share-act-overlay{
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.55);z-index:900;
-  display:flex;align-items:center;justify-content:center;
-}
-.share-act-modal{
-  background:#fff;border-radius:14px;padding:28px;
-  max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);
-}
-.share-act-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.share-act-hdr h3{font-size:16px;font-weight:800;color:#0d1f2d;}
-.share-act-hdr button{background:none;border:none;font-size:20px;cursor:pointer;color:#6b8fa3;}
-.share-act-sub{font-size:13px;color:#475569;margin-bottom:16px;}
-.share-act-url-row{display:flex;gap:8px;}
-.share-act-url-row input{
-  flex:1;padding:9px 12px;font-size:12px;
-  border:1.5px solid #cbd5e1;border-radius:8px;color:#1e293b;
-  font-family:inherit;
-}
-.share-act-url-row button{
-  padding:9px 16px;border-radius:8px;border:none;
-  background:#0d1f2d;color:#fff;font-size:12px;font-weight:700;
-  cursor:pointer;white-space:nowrap;
-}
-.share-act-note{font-size:11px;color:#94a3b8;margin-top:10px;}
 </style>
 </head>
 <body>
 
-<div class="nav">
-  <div class="nav-brand">SKOOLED<span>-AI</span></div>
-  <div class="nav-links">
-    <a href="{{ turl('generator') }}">Lesson Generator</a>
-    <a href="{{ turl('activities') }}" style="color:var(--white)">Activities</a>
-    <a href="{{ turl('syllabus') }}">Syllabus</a>
-    {% if session.get('user_role') == 'admin' %}
-    <a href="{{ turl('auth.admin_panel') }}">Admin</a>
-    {% endif %}
-    <a href="{{ url_for('auth.logout') }}">Logout</a>
-  </div>
+<div class="play-nav">
+  <span class="play-brand">SKOOLED<span>-AI</span></span>
+  <span class="play-label">Practice Activity</span>
 </div>
 
 <div class="layout">
@@ -362,16 +300,15 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- Loader -->
   <div class="loader" id="loader">
     <div class="spin"></div>
-    <div class="loader-t">Generating activity content…</div>
-    <div class="loader-s">Extracting vocabulary, questions, and games from your lesson plan.</div>
+    <div class="loader-t">Loading activities…</div>
+    <div class="loader-s">Fetching game content for this activity link.</div>
   </div>
 
   <!-- Error state -->
-  <div id="err-state" style="display:none;" class="card">
-    <div style="color:#e74c3c;font-size:16px;font-weight:700;margin-bottom:8px;">&#9888; Could not load lesson content</div>
-    <div id="err-msg" style="color:var(--grey);font-size:13px;margin-bottom:12px;"></div>
-    <div style="font-size:12px;color:var(--grey);">Go back to the Generator, generate a lesson plan, then click <strong>Open Activities</strong>.</div>
-    <a href="{{ turl('generator') }}" style="display:inline-block;margin-top:14px;padding:9px 20px;background:var(--cyan);color:#000;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;">Go to Generator</a>
+  <div id="error-state" style="display:none;" class="card error-state">
+    <div style="color:#e74c3c;font-size:18px;font-weight:700;margin-bottom:10px;">&#9888; Activity not found</div>
+    <div style="color:var(--grey);font-size:14px;margin-bottom:16px;">This activity link may have expired or is invalid.</div>
+    <a href="/" style="display:inline-block;padding:9px 20px;background:var(--cyan);color:#000;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;">Back to Home</a>
   </div>
 
   <!-- Game panels (hidden until loaded) -->
@@ -383,22 +320,20 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="topic-pill"><div class="topic-pill-lbl">Subject</div><div class="topic-pill-val" id="tb-subject">—</div></div>
     <div class="topic-pill"><div class="topic-pill-lbl">Grade</div><div class="topic-pill-val" id="tb-grade">—</div></div>
     <div class="topic-pill" style="margin-left:auto;padding-left:0;border-left:none;"><div class="topic-pill-lbl">Games Ready</div><div class="topic-pill-val" style="color:var(--green);">16 &#10003;</div></div>
-    <button id="btn-share-activity" class="btn-share-act" style="display:none;margin-left:12px;">Share with Students</button>
   </div>
 
   <!-- 1. Wheel of Names -->
   <div class="game-panel active" id="gp-wheel">
     <div class="game-title">&#127744; Wheel of Names</div>
-    <div class="game-desc">Randomly pick a student or vocabulary word — great for cold-calling or warm-ups.</div>
+    <div class="game-desc">Randomly pick a vocabulary word — great for warm-ups.</div>
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Use</div>
       <ol>
         <li>The wheel is pre-loaded with <strong>vocabulary words</strong> from your lesson.</li>
         <li>Click <strong>Spin!</strong> and wait for the wheel to slow down and stop.</li>
-        <li>The pointer on the right indicates the selected word or name.</li>
-        <li>Use the <strong>Edit Names / Words</strong> panel below to add student names or swap in custom entries.</li>
+        <li>The pointer on the right indicates the selected word.</li>
+        <li>Use the <strong>Edit Names / Words</strong> panel below to add custom entries.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Replace vocabulary words with student names for a fun random cold-call selector!</div>
     </div>
     <div class="card">
       <canvas id="wheel-canvas" width="380" height="380"></canvas>
@@ -426,8 +361,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
         <li>Read the clues in the <strong>Across</strong> and <strong>Down</strong> sections below the grid.</li>
-        <li>Click any white square and <strong>type a letter</strong> to fill it in. Use <strong>Tab</strong> to move to the next cell.</li>
-        <li>When finished, click <strong>Check Answers</strong> — correct letters turn green, wrong ones turn red.</li>
+        <li>Click any white square and <strong>type a letter</strong> to fill it in.</li>
+        <li>Click <strong>Check Answers</strong> — correct letters turn green, wrong ones turn red.</li>
         <li>Stuck? Click <strong>Reveal</strong> to see the full solution, or <strong>Reset</strong> to start over.</li>
       </ol>
     </div>
@@ -451,7 +386,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
         <li>Find all the vocabulary words listed below the grid.</li>
-        <li><strong>Click and drag</strong> across letters to select a word (release to check).</li>
+        <li><strong>Click and drag</strong> across letters to select a word.</li>
         <li>Words can run horizontally, vertically, or diagonally in any direction.</li>
         <li>Found words are highlighted green and struck through in the word list.</li>
         <li>Click <strong>New Puzzle</strong> to generate a fresh layout.</li>
@@ -478,9 +413,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
         <li>The <strong>word</strong> is shown on the front of the card.</li>
         <li><strong>Click the card</strong> (or the Flip button) to reveal the definition on the back.</li>
         <li>Use <strong>Prev / Next</strong> to move between cards.</li>
-        <li>Try to say the definition aloud before flipping — it improves retention!</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Go through all cards once, then shuffle by going backwards from the last card.</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="fc-idx">1</div><div class="hud-l">Card</div></div>
@@ -509,7 +442,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
         <li><strong>Click a TERM</strong> on the left column — it will highlight in cyan.</li>
         <li>Then <strong>click the matching DEFINITION</strong> on the right column.</li>
         <li>A correct pair turns <strong>green</strong> and locks in. A wrong pair <strong>shakes red</strong> — try again.</li>
-        <li>Match all pairs to complete the game. Click <strong>Reset</strong> to play again with a new shuffle.</li>
+        <li>Match all pairs to complete the game. Click <strong>Reset</strong> to play again.</li>
       </ol>
     </div>
     <div class="hud">
@@ -532,12 +465,12 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>Each sentence has a <strong>blank field</strong> (the underlined box) where a word is missing.</li>
+        <li>Each sentence has a <strong>blank field</strong> where a word is missing.</li>
         <li>Type the correct vocabulary word into the blank — spelling matters!</li>
         <li>Click <strong>Check Answers</strong> to score — correct answers turn green, wrong ones turn red.</li>
         <li>Click <strong>Reset</strong> to clear all answers and try again.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Answers are case-insensitive — "photosynthesis" and "Photosynthesis" both work.</div>
+      <div class="how-to-tip">&#128161; Tip: Answers are case-insensitive.</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="fb-score">0</div><div class="hud-l">Score</div></div>
@@ -554,16 +487,14 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 7. Jeopardy -->
   <div class="game-panel" id="gp-jeopardy">
     <div class="game-title">&#127942; Jeopardy Board</div>
-    <div class="game-desc">Whole-class quiz game — categories worth increasing points.</div>
+    <div class="game-desc">Quiz game — categories worth increasing points.</div>
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>The board has <strong>3 categories</strong> (Vocabulary, Concepts, Application) and 5 point values each.</li>
-        <li>A student or team <strong>picks a category and point value</strong> — teacher clicks the cell.</li>
+        <li>Pick a <strong>category and point value</strong> by clicking a cell.</li>
         <li>A question pops up. Choose the correct answer to <strong>earn the points</strong>.</li>
-        <li>Used cells grey out. Try to clear the full board for maximum score!</li>
+        <li>Used cells grey out. Try to clear the full board!</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Split the class into teams and keep score on the board.</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="jep-score">0</div><div class="hud-l">Points</div></div>
@@ -589,9 +520,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
         <li>Read the statement shown in the box carefully.</li>
         <li>Click <strong>TRUE</strong> &#10003; or <strong>FALSE</strong> &#10007; — instant feedback is shown.</li>
         <li>The game automatically moves to the next question after each answer.</li>
-        <li>Your final score appears at the end of all questions.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Project this on screen and let students raise hands before revealing the answer.</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="tf-score">0</div><div class="hud-l">Score</div></div>
@@ -615,9 +544,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
         <li>The <strong>left panel</strong> has all the steps in a shuffled order.</li>
-        <li><strong>Drag a step</strong> from the left and <strong>drop it onto a numbered slot</strong> on the right (1 = first step).</li>
-        <li>Fill all slots, then click <strong>Check Order</strong> to see which positions are correct (green) or wrong (red).</li>
-        <li>Click <strong>Reset</strong> to start over with a new shuffle.</li>
+        <li><strong>Drag a step</strong> from the left and <strong>drop it onto a numbered slot</strong> on the right.</li>
+        <li>Click <strong>Check Order</strong> to see which positions are correct.</li>
       </ol>
     </div>
     <div class="dnd-container">
@@ -644,10 +572,9 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>All cards are face-down. Each card shows either a <strong>term</strong> or its <strong>definition</strong>.</li>
-        <li><strong>Click a card</strong> to flip it, then click a second card to try to find its match.</li>
-        <li>A matched pair (term + definition) stays <strong>face-up in green</strong>. A non-match flips back over.</li>
-        <li>Find all pairs in as few flips as possible. Click <strong>New Game</strong> to reshuffle.</li>
+        <li><strong>Click a card</strong> to flip it, then click a second card to find its match.</li>
+        <li>A matched pair stays <strong>face-up in green</strong>. A non-match flips back over.</li>
+        <li>Find all pairs in as few flips as possible.</li>
       </ol>
     </div>
     <div class="hud">
@@ -667,9 +594,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
         <li>The <strong>scrambled word</strong> is shown in large orange letters.</li>
-        <li>A hint (the definition) appears below — use it if you're stuck.</li>
-        <li>Type your answer in the input field and press <strong>Enter</strong> or click <strong>Submit</strong>.</li>
-        <li>Click <strong>Skip</strong> to move on, or <strong>Reveal</strong> to see the answer and advance.</li>
+        <li>A hint (the definition) appears below.</li>
+        <li>Type your answer and press <strong>Enter</strong> or click <strong>Submit</strong>.</li>
       </ol>
     </div>
     <div class="hud">
@@ -698,12 +624,10 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>A vocabulary word is hidden — each dash represents one letter.</li>
-        <li>Click letters on the <strong>on-screen keyboard</strong> to guess. Correct guesses appear in the word.</li>
+        <li>Click letters on the <strong>on-screen keyboard</strong> to guess.</li>
         <li>Each <strong>wrong guess</strong> adds a part to the hangman figure (6 parts total).</li>
-        <li>Win by revealing the full word before 6 wrong guesses. Click <strong>Next Word</strong> for a new challenge.</li>
+        <li>Win by revealing the full word before 6 wrong guesses.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: The definition is shown above the word — use it as a clue!</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="hm-wrong">0</div><div class="hud-l">Wrong</div></div>
@@ -728,10 +652,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>The numbered slots above represent the <strong>correct order</strong> (1 = first, last = final).</li>
-        <li>The <strong>pool of steps below</strong> is shuffled — drag each item up to the correct numbered slot.</li>
-        <li>Click <strong>Check Order</strong> — correctly placed steps turn green, wrong ones turn red.</li>
-        <li>Click <strong>Reset</strong> to reshuffle and try again.</li>
+        <li>Drag each item from the pool to the correct numbered slot (1 = first).</li>
+        <li>Click <strong>Check Order</strong> — correctly placed steps turn green.</li>
       </ol>
     </div>
     <div class="tl-slots" id="tl-slots"></div>
@@ -747,19 +669,18 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
   <!-- 14. Bingo -->
   <div class="game-panel" id="gp-bingo">
     <div class="game-title">&#127920; Vocabulary Bingo</div>
-    <div class="game-desc">Whole-class activity — teacher calls definitions, students mark words on their card.</div>
+    <div class="game-desc">A definition is called out — find and mark the matching word on your card.</div>
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>Each student (or group) has a <strong>5×5 Bingo card</strong> with vocabulary words. The center is a FREE space.</li>
-        <li>Teacher clicks <strong>Call Next</strong> — a <strong>definition</strong> is read aloud to the class.</li>
-        <li>Students find the <strong>matching vocabulary word</strong> on their card and <strong>click it</strong> to mark it.</li>
-        <li>Get a full row, column, or diagonal to shout <strong>BINGO!</strong> Click <strong>New Card</strong> for a fresh shuffle.</li>
+        <li>Click <strong>Call Next</strong> — a <strong>definition</strong> is shown.</li>
+        <li>Find the <strong>matching vocabulary word</strong> on your card and <strong>click it</strong> to mark it.</li>
+        <li>Get a full row, column, or diagonal — BINGO!</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: The teacher reads the DEFINITION aloud — students find the WORD on their card!</div>
+      <div class="how-to-tip">&#128161; Tip: The DEFINITION is shown — find the WORD on your card!</div>
     </div>
     <div class="caller-box">
-      <div style="font-size:11px;color:var(--grey);margin-bottom:4px;">TEACHER CALLS OUT THIS DEFINITION:</div>
+      <div style="font-size:11px;color:var(--grey);margin-bottom:4px;">DEFINITION CALLED:</div>
       <div class="caller-word" id="bingo-called">Press "Call Next" to start</div>
     </div>
     <div class="bingo-controls">
@@ -777,12 +698,10 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="how-to">
       <div class="how-to-title">&#9654; How to Play</div>
       <ol>
-        <li>A multiple-choice question is shown with a <strong>20-second countdown</strong> timer bar at the top.</li>
+        <li>A multiple-choice question is shown with a <strong>20-second countdown</strong>.</li>
         <li>Click one of the <strong>4 colored answer buttons</strong> before time runs out.</li>
         <li>Faster correct answers earn <strong>more points</strong> (up to 1,000 per question).</li>
-        <li>Click <strong>Next Question →</strong> to continue. Your total score is shown at the end.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Project this on a screen — students shout out answers, teacher clicks for the class.</div>
     </div>
     <div class="hud">
       <div class="hud-item"><div class="hud-v" id="kah-score">0</div><div class="hud-l">Score</div></div>
@@ -802,14 +721,11 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
     <div class="game-title">&#129365; Hot Potato</div>
     <div class="game-desc">A random name selector with countdown — whoever gets picked must answer!</div>
     <div class="how-to">
-      <div class="how-to-title">&#9654; How to Use in Class</div>
+      <div class="how-to-title">&#9654; How to Use</div>
       <ol>
-        <li>Names cycle through rapidly (like a hot potato being passed). The class watches the highlight.</li>
-        <li>Click <strong>Start</strong> — the countdown begins and names cycle. Students get ready.</li>
+        <li>Click <strong>Start</strong> — the countdown begins and names cycle.</li>
         <li>When time runs out, <strong>the highlighted student</strong> must answer the question shown below.</li>
-        <li>Click <strong>Stop</strong> early to pause on a student, or let the timer run out automatically.</li>
       </ol>
-      <div class="how-to-tip">&#128161; Tip: Swap vocabulary words for student names using the Wheel of Names editor for a full roster.</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:12px;">
       <div style="text-align:center;">
@@ -833,25 +749,8 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 </div><!-- /main -->
 </div><!-- /layout -->
 
-<div id="share-act-overlay" class="share-act-overlay" style="display:none">
-  <div class="share-act-modal">
-    <div class="share-act-hdr">
-      <h3>Share with Students</h3>
-      <button id="share-act-close">&times;</button>
-    </div>
-    <p class="share-act-sub">Anyone with this link can play — no account needed.</p>
-    <div class="share-act-url-row">
-      <input id="share-act-url" type="text" readonly>
-      <button id="share-act-copy">Copy Link</button>
-    </div>
-    <p class="share-act-note">This link is permanent and reusable.</p>
-  </div>
-</div>
-
 <script>
 (function(){
-const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
-function aurl(u){return _T?u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T):u;}
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 
 // ── State ─────────────────────────────────────────────────────
@@ -863,65 +762,36 @@ $$('.game-tab').forEach(t=>{
     $$('.game-tab').forEach(x=>x.classList.remove('active'));
     $$('.game-panel').forEach(x=>x.classList.remove('active'));
     this.classList.add('active');
-    const id='gp-'+this.dataset.game;
-    const panel=$(('#'+id));
+    const panel=$(('#gp-'+this.dataset.game));
     if(panel)panel.classList.add('active');
   });
 });
 
-// ── Load data from localStorage + API ────────────────────────
-function _showTopicBar(){
-  if(G.topic)$('#tb-topic').textContent=G.topic;
-  if(G.subject)$('#tb-subject').textContent=G.subject;
-  if(G.grade)$('#tb-grade').textContent=G.grade;
-  $('#topic-bar').style.display='flex';
-  $('#btn-share-activity').style.display='inline-flex';
-}
+// ── Load data from public API ─────────────────────────────────
+const TOKEN = "{{ token }}";
 
 function loadData(){
-  const lesson=localStorage.getItem('skooled_lesson_md')||'';
-  const quiz=localStorage.getItem('skooled_quiz_md')||'';
-  const apiKey=localStorage.getItem('skooled_api_key')||'';
-  const provider=localStorage.getItem('skooled_ai_provider')||'anthropic';
-
-  if(!lesson){
-    showError('No lesson plan found in session storage.','Generate a lesson plan first, then click Open Activities.');
-    return;
-  }
-
-  // Use background-generated cache if it matches the current lesson
-  const cachedData   = localStorage.getItem('skooled_activity_data');
-  const cachedLesson = localStorage.getItem('skooled_activity_lesson_md');
-  if(cachedData && cachedLesson === lesson){
-    try{
-      const d = JSON.parse(cachedData);
+  fetch('/api/activity-data/' + TOKEN)
+    .then(r => r.json())
+    .then(d => {
+      if(d.error){
+        $('#loader').style.display='none';
+        $('#error-state').style.display='block';
+        return;
+      }
       G = d;
       $('#loader').style.display='none';
       $('#games-wrap').style.display='block';
-      _showTopicBar();
+      if(G.topic)  $('#tb-topic').textContent   = G.topic;
+      if(G.subject)$('#tb-subject').textContent = G.subject;
+      if(G.grade)  $('#tb-grade').textContent   = G.grade;
+      $('#topic-bar').style.display='flex';
       initAllGames();
-      return;
-    }catch(e){ /* fall through to fresh generate */ }
-  }
-
-  fetch(aurl('/api/generate-activity-content'),{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({lesson_md:lesson,quiz_md:quiz,api_key:apiKey,ai_provider:provider})
-  }).then(r=>r.json()).then(d=>{
-    if(d.error){showError(d.error,'');return;}
-    G=d;
-    $('#loader').style.display='none';
-    $('#games-wrap').style.display='block';
-    _showTopicBar();
-    initAllGames();
-  }).catch(e=>showError(e.message,''));
-}
-
-function showError(msg,sub){
-  $('#loader').style.display='none';
-  $('#err-state').style.display='block';
-  $('#err-msg').textContent=msg+(sub?'\n'+sub:'');
+    })
+    .catch(() => {
+      $('#loader').style.display='none';
+      $('#error-state').style.display='block';
+    });
 }
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -991,7 +861,6 @@ function drawWheel(angle){
     const label=name.length>14?name.slice(0,13)+'…':name;
     ctx.fillText(label,r-10,5);ctx.restore();
   });
-  // Pointer
   ctx.beginPath();ctx.moveTo(cx+r-10,cy);ctx.lineTo(cx+r+20,cy-12);ctx.lineTo(cx+r+20,cy+12);
   ctx.closePath();ctx.fillStyle='#fff';ctx.fill();
 }
@@ -1012,7 +881,7 @@ $('#wheel-spin').addEventListener('click',function(){
       const n=wheelNames.length;const arc=(2*Math.PI)/n;
       const norm=((2*Math.PI)-(wheelAngle%(2*Math.PI)))%(2*Math.PI);
       const idx=Math.floor(norm/arc)%n;
-      $('#wheel-winner').textContent='&#127881; '+wheelNames[idx];
+      $('#wheel-winner').textContent='🎉 '+wheelNames[idx];
     }
   }
   requestAnimationFrame(frame);
@@ -1071,7 +940,7 @@ function onMatchClick(el,total){
   if(mgSelected.dataset.idx===el.dataset.idx&&mgSelected.dataset.side!==el.dataset.side){
     [mgSelected,el].forEach(x=>{x.classList.remove('sel');x.classList.add('matched');});
     mgMatchedCount++;$('#mg-score').textContent=mgMatchedCount;
-    if(mgMatchedCount>=total){const r=$('#mg-result');r.className='result-banner win';r.textContent='&#127881; All pairs matched!';r.style.display='block';}
+    if(mgMatchedCount>=total){const r=$('#mg-result');r.className='result-banner win';r.textContent='🎉 All pairs matched!';r.style.display='block';}
   }else{
     [mgSelected,el].forEach(x=>x.classList.add('wrong'));
     setTimeout(()=>[mgSelected,el].forEach(x=>x.classList.remove('wrong','sel')),700);
@@ -1168,8 +1037,8 @@ function showTF(){
 function answerTF(val){
   if(tfAnswered)return;tfAnswered=true;
   const correct=G._tf[tfIdx].answer===val;
-  if(correct){tfScore++;$('#tf-score').textContent=tfScore;$('#tf-feedback').style.color='var(--green)';$('#tf-feedback').textContent='&#10003; Correct!';}
-  else{$('#tf-feedback').style.color='#e74c3c';$('#tf-feedback').textContent='&#10007; Wrong — '+(G._tf[tfIdx].answer?'TRUE':'FALSE');}
+  if(correct){tfScore++;$('#tf-score').textContent=tfScore;$('#tf-feedback').style.color='var(--green)';$('#tf-feedback').textContent='✓ Correct!';}
+  else{$('#tf-feedback').style.color='#e74c3c';$('#tf-feedback').textContent='✗ Wrong — '+(G._tf[tfIdx].answer?'TRUE':'FALSE');}
   [$('#tf-yes'),$('#tf-no')].forEach(b=>b.disabled=true);
   setTimeout(()=>{tfIdx++;showTF();},1200);
 }
@@ -1237,7 +1106,7 @@ function initMemory(){
   g.style.gridTemplateColumns=`repeat(${cols},1fr)`;g.innerHTML='';
   cards.forEach((card,ci)=>{
     const d=document.createElement('div');d.className='mem-card';d.dataset.ci=ci;d.dataset.id=card.id;
-    d.innerHTML=`<div class="mem-back">&#129504;</div><div class="mem-front">${escH(card.text)}</div>`;
+    d.innerHTML=`<div class="mem-back">🧠</div><div class="mem-front">${escH(card.text)}</div>`;
     d.addEventListener('click',function(){onMemClick(this);});
     g.appendChild(d);
   });
@@ -1252,7 +1121,7 @@ function onMemClick(el){
       a.classList.add('matched');b.classList.add('matched');memMatched++;
       $('#mem-pairs').textContent=memMatched;memFlipped=[];memLock=false;
       const total=$('#mem-grid .mem-card').length/2;
-      if(memMatched>=total){const r=$('#mem-result');r.className='result-banner win';r.textContent=`&#127881; All pairs found in ${memMoves} flips!`;r.style.display='block';}
+      if(memMatched>=total){const r=$('#mem-result');r.className='result-banner win';r.textContent=`🎉 All pairs found in ${memMoves} flips!`;r.style.display='block';}
     }else{
       setTimeout(()=>{a.classList.remove('flipped');b.classList.remove('flipped');memFlipped=[];memLock=false;},900);
     }
@@ -1281,8 +1150,8 @@ function checkScramble(){
   if(scrIdx>=scrWords.length)return;
   const ans=$('#scr-input').value.trim().toLowerCase();
   const correct=scrWords[scrIdx].toLowerCase();
-  if(ans===correct){scrScore++;$('#scr-score').textContent=scrScore;$('#scr-feedback').style.color='var(--green)';$('#scr-feedback').textContent='&#10003; Correct!';}
-  else{$('#scr-feedback').style.color='#e74c3c';$('#scr-feedback').textContent=`&#10007; Answer: ${correct}`;}
+  if(ans===correct){scrScore++;$('#scr-score').textContent=scrScore;$('#scr-feedback').style.color='var(--green)';$('#scr-feedback').textContent='✓ Correct!';}
+  else{$('#scr-feedback').style.color='#e74c3c';$('#scr-feedback').textContent=`✗ Answer: ${correct}`;}
   setTimeout(()=>{scrIdx++;showScramble();},1000);
 }
 $('#scr-submit').addEventListener('click',checkScramble);
@@ -1294,31 +1163,24 @@ $('#scr-reveal-btn').addEventListener('click',()=>{
 
 // ─── 12. Hangman ──────────────────────────────────────────────
 let hmWords=[],hmIdx=0,hmWord='',hmGuessed=new Set(),hmWrong=0,hmMaxWrong=6;
-// hmParts: body parts drawn on wrong guesses (gallows is pre-drawn by drawGallows())
 const hmParts=[
-  ()=>{const s=$('#hm-svg');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',80);c.setAttribute('cy',42);c.setAttribute('r',12);c.setAttribute('stroke','#faa32b');c.setAttribute('fill','none');c.setAttribute('stroke-width','3');s.appendChild(c);}, // head
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',54);l.setAttribute('x2',80);l.setAttribute('y2',100);l.setAttribute('stroke','#faa32b');l.setAttribute('stroke-width','3');s.appendChild(l);}, // body
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',60);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // left arm
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',100);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // right arm
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',65);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // left leg
-  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',95);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);}, // right leg
+  ()=>{const s=$('#hm-svg');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',80);c.setAttribute('cy',42);c.setAttribute('r',12);c.setAttribute('stroke','#faa32b');c.setAttribute('fill','none');c.setAttribute('stroke-width','3');s.appendChild(c);},
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',54);l.setAttribute('x2',80);l.setAttribute('y2',100);l.setAttribute('stroke','#faa32b');l.setAttribute('stroke-width','3');s.appendChild(l);},
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',60);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);},
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',65);l.setAttribute('x2',100);l.setAttribute('y2',82);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);},
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',65);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);},
+  ()=>{const s=$('#hm-svg');const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',80);l.setAttribute('y1',100);l.setAttribute('x2',95);l.setAttribute('y2',130);l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','3');s.appendChild(l);},
 ];
-
 function initHangman(){
   hmWords=shuffle(G.vocabulary.map(v=>v.word)).filter(w=>w.length>=3);
   if(!hmWords.length)hmWords=['example'];
   hmIdx=0;startHangman();
 }
 function drawGallows(){
-  // Draw the static gallows structure (base, pole, crossbeam, rope) — not counted as wrong guesses
   const s=$('#hm-svg');
-  const line=(x1,y1,x2,y2,col)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);if(col)l.setAttribute('stroke',col);s.appendChild(l);};
-  line(10,150,110,150);  // base
-  line(40,150,40,10);    // pole
-  line(40,10,80,10);     // crossbeam
-  line(80,10,80,30);     // rope
+  const line=(x1,y1,x2,y2)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);s.appendChild(l);};
+  line(10,150,110,150);line(40,150,40,10);line(40,10,80,10);line(80,10,80,30);
 }
-
 function startHangman(){
   if(hmIdx>=hmWords.length)hmIdx=0;
   hmWord=hmWords[hmIdx].toLowerCase();
@@ -1349,16 +1211,15 @@ function buildHMKbd(){
 }
 function guessHM(ch){
   hmGuessed.add(ch);
-  const key=$$('#hm-kbd .hm-key');
-  key.forEach(k=>{if(k.dataset.ch===ch){k.className='hm-key '+(hmWord.includes(ch)?'used-right':'used-wrong');}});
+  $$('#hm-kbd .hm-key').forEach(k=>{if(k.dataset.ch===ch){k.className='hm-key '+(hmWord.includes(ch)?'used-right':'used-wrong');}});
   if(!hmWord.includes(ch)){
     hmWrong++;$('#hm-wrong').textContent=hmWrong;$('#hm-left').textContent=hmMaxWrong-hmWrong;
-    if(hmParts[hmWrong])hmParts[hmWrong]();
-    if(hmWrong>=hmMaxWrong){const r=$('#hm-result');r.className='result-banner lose';r.textContent='&#128128; The word was: '+hmWord.toUpperCase();r.style.display='block';$$('#hm-kbd .hm-key').forEach(k=>k.style.pointerEvents='none');}
+    if(hmParts[hmWrong-1])hmParts[hmWrong-1]();
+    if(hmWrong>=hmMaxWrong){const r=$('#hm-result');r.className='result-banner lose';r.textContent='💀 The word was: '+hmWord.toUpperCase();r.style.display='block';$$('#hm-kbd .hm-key').forEach(k=>k.style.pointerEvents='none');}
   }
   renderHMWord();
   const won=hmWord.split('').every(c=>hmGuessed.has(c));
-  if(won){const r=$('#hm-result');r.className='result-banner win';r.textContent='&#127881; You got it! '+hmWord.toUpperCase();r.style.display='block';$$('#hm-kbd .hm-key').forEach(k=>k.style.pointerEvents='none');}
+  if(won){const r=$('#hm-result');r.className='result-banner win';r.textContent='🎉 You got it! '+hmWord.toUpperCase();r.style.display='block';$$('#hm-kbd .hm-key').forEach(k=>k.style.pointerEvents='none');}
 }
 $('#hm-next').addEventListener('click',()=>{hmIdx++;startHangman();});
 
@@ -1434,12 +1295,11 @@ function renderBingoGrid(){
 }
 function checkBingo(){
   const cells=$$('#bingo-grid .bingo-cell');const marked=i=>cells[i].classList.contains('marked');
-  // Rows, cols, diags
   for(let r=0;r<5;r++){if([0,1,2,3,4].every(c=>marked(r*5+c))){showBingo();return;}}
   for(let c=0;c<5;c++){if([0,1,2,3,4].every(r=>marked(r*5+c))){showBingo();return;}}
   if([0,6,12,18,24].every(i=>marked(i))||[4,8,12,16,20].every(i=>marked(i))){showBingo();}
 }
-function showBingo(){const r=$('#bingo-result');r.className='result-banner win';r.textContent='&#127881; BINGO!';r.style.display='block';}
+function showBingo(){const r=$('#bingo-result');r.className='result-banner win';r.textContent='🎉 BINGO!';r.style.display='block';}
 $('#bingo-call').addEventListener('click',function(){
   if(!bingoQueue.length){bingoQueue=shuffle(G.vocabulary.map(v=>v.word));}
   const def=G.vocabulary.find(v=>v.word===bingoQueue[0])?.definition||bingoQueue[0];
@@ -1471,14 +1331,14 @@ function showKahoot(){
   });
   kahSecs=20;$('#kah-timer-fill').style.transition='none';$('#kah-timer-fill').style.width='100%';
   setTimeout(()=>{$('#kah-timer-fill').style.transition=`width ${kahSecs}s linear`;$('#kah-timer-fill').style.width='0%';},50);
-  kahTimer=setInterval(()=>{kahSecs--;if(kahSecs<=0){clearInterval(kahTimer);if(!kahAnswered){kahAnswered=true;$('#kah-feedback').style.color='#e74c3c';$('#kah-feedback').textContent='Time\'s up!';showKahootAnswer(q.answer);$('#kah-next').style.display='block';}}},1000);
+  kahTimer=setInterval(()=>{kahSecs--;if(kahSecs<=0){clearInterval(kahTimer);if(!kahAnswered){kahAnswered=true;$('#kah-feedback').style.color='#e74c3c';$('#kah-feedback').textContent="Time's up!";showKahootAnswer(q.answer);$('#kah-next').style.display='block';}}},1000);
 }
 function answerKahoot(i,correct){
   clearInterval(kahTimer);kahAnswered=true;
   const pts=Math.round((kahSecs/20)*1000);
   const btns=$$('#kah-opts .kah-opt');
   btns.forEach(b=>b.classList.add('answered'));
-  if(i===correct){btns[i].classList.add('correct');kahScore+=pts;$('#kah-score').textContent=kahScore;$('#kah-feedback').style.color='var(--green)';$('#kah-feedback').textContent=`+${pts} pts &#10003;`;}
+  if(i===correct){btns[i].classList.add('correct');kahScore+=pts;$('#kah-score').textContent=kahScore;$('#kah-feedback').style.color='var(--green)';$('#kah-feedback').textContent=`+${pts} pts ✓`;}
   else{btns[i].classList.add('wrong');btns[correct].classList.add('correct');$('#kah-feedback').style.color='#e74c3c';$('#kah-feedback').textContent='Wrong!';}
   $('#kah-next').style.display='block';
 }
@@ -1514,7 +1374,7 @@ $('#hot-start').addEventListener('click',function(){
     if(hotSecs<=0){
       clearInterval(hotInterval);clearInterval(hotTimerInterval);hotActive=false;
       const active=$('.hot-name.active');
-      if(active){$('#hot-selected').textContent='&#129365; '+active.textContent+' must answer!';}
+      if(active){$('#hot-selected').textContent='🥔 '+active.textContent+' must answer!';}
       const mc=G.multiple_choice;
       if(mc.length){const q=mc[Math.floor(Math.random()*mc.length)];$('#hot-question').textContent=q.question;}
     }
@@ -1523,7 +1383,7 @@ $('#hot-start').addEventListener('click',function(){
 $('#hot-stop').addEventListener('click',function(){
   clearInterval(hotInterval);clearInterval(hotTimerInterval);hotActive=false;
   const active=$('.hot-name.active');
-  if(active)$('#hot-selected').textContent='&#9646;&#9646; Stopped at: '+active.textContent;
+  if(active)$('#hot-selected').textContent='⏸ Stopped at: '+active.textContent;
 });
 
 // ─── 3. Word Search ───────────────────────────────────────────
@@ -1535,13 +1395,9 @@ function initWordSearch(){
 function generateWordSearch(){
   wsSize=14;wsGrid=Array.from({length:wsSize},()=>Array(wsSize).fill(''));
   const directions=[[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
-  const placed=[];
   wsAllWords.forEach(word=>{
-    let ok=false;
     for(let attempt=0;attempt<100;attempt++){
       const dir=directions[Math.floor(Math.random()*directions.length)];
-      const maxR=wsSize-dir[0]*(word.length-1);const maxC=wsSize-dir[1]*(word.length-1);
-      if(maxR<=0||maxC<=0)continue;
       const r=Math.floor(Math.random()*wsSize);const c=Math.floor(Math.random()*wsSize);
       let fits=true;
       for(let i=0;i<word.length;i++){
@@ -1549,11 +1405,7 @@ function generateWordSearch(){
         if(nr<0||nr>=wsSize||nc<0||nc>=wsSize){fits=false;break;}
         if(wsGrid[nr][nc]&&wsGrid[nr][nc]!==word[i]){fits=false;break;}
       }
-      if(fits){
-        placed.push({word,r,c,dir});
-        for(let i=0;i<word.length;i++)wsGrid[r+dir[0]*i][c+dir[1]*i]=word[i];
-        ok=true;break;
-      }
+      if(fits){for(let i=0;i<word.length;i++)wsGrid[r+dir[0]*i][c+dir[1]*i]=word[i];break;}
     }
   });
   const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1585,8 +1437,7 @@ function renderWordSearch(){
 function checkWSSelection(){
   const cells=$$('#ws-grid-wrap .ws-cell.selected');
   let text='';
-  const coords=[];
-  cells.forEach(c=>{text+=c.textContent;coords.push({r:parseInt(c.dataset.r),c:parseInt(c.dataset.c)});});
+  cells.forEach(c=>{text+=c.textContent;});
   const rev=text.split('').reverse().join('');
   const found=wsAllWords.find(w=>w===text||w===rev);
   if(found&&!wsFoundWords.has(found)){
@@ -1599,7 +1450,7 @@ function checkWSSelection(){
 }
 $('#ws-new').addEventListener('click',generateWordSearch);
 
-// ─── 2. Crossword ────────────────────────────────────────────
+// ─── 2. Crossword ─────────────────────────────────────────────
 let cwLayout=[],cwWords=[];
 function initCrossword(){
   cwWords=G.vocabulary.slice(0,8);
@@ -1607,49 +1458,40 @@ function initCrossword(){
   buildCrossword();
 }
 function buildCrossword(){
-  // Simple crossword: place words in a grid
   const ROWS=20,COLS=24;
   const grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
   const placed=[];
   const sorted=[...cwWords].sort((a,b)=>b.word.length-a.word.length);
-
   function placeWord(word,row,col,dir){
     for(let i=0;i<word.length;i++){
-      const r=dir==='H'?row:row+i;
-      const c=dir==='H'?col+i:col;
+      const r=dir==='H'?row:row+i;const c=dir==='H'?col+i:col;
       if(r>=ROWS||c>=COLS)return false;
       if(grid[r][c]&&grid[r][c].ch!==word[i])return false;
     }
     for(let i=0;i<word.length;i++){
-      const r=dir==='H'?row:row+i;
-      const c=dir==='H'?col+i:col;
+      const r=dir==='H'?row:row+i;const c=dir==='H'?col+i:col;
       if(!grid[r][c])grid[r][c]={ch:word[i],num:null};
     }
     return true;
   }
-
-  // Place first word horizontally in center
   const first=sorted[0].word.toUpperCase();
   const r0=Math.floor(ROWS/2),c0=Math.floor((COLS-first.length)/2);
   placeWord(first,r0,c0,'H');
   placed.push({word:sorted[0],row:r0,col:c0,dir:'H',num:1});
-
   let num=2;
   for(let wi=1;wi<sorted.length;wi++){
     const wobj=sorted[wi];const w=wobj.word.toUpperCase();
     let best=null;
-    // Try to intersect with placed words
     for(const p of placed){
       const pw=p.word.word.toUpperCase();
       for(let pi=0;pi<pw.length;pi++){
         for(let wi2=0;wi2<w.length;wi2++){
           if(pw[pi]===w[wi2]){
-            // Intersect at p's letter pi and w's letter wi2
             const newDir=p.dir==='H'?'V':'H';
             let nr,nc;
             if(p.dir==='H'){nr=p.row-wi2;nc=p.col+pi;}
             else{nr=p.row+pi;nc=p.col-wi2;}
-            if(nr>=0&&nc>=0&&nr+w.length*( newDir==='V'?1:0)<ROWS&&nc+w.length*(newDir==='H'?1:0)<COLS){
+            if(nr>=0&&nc>=0&&nr+w.length*(newDir==='V'?1:0)<ROWS&&nc+w.length*(newDir==='H'?1:0)<COLS){
               if(placeWord(w,nr,nc,newDir)){best={word:wobj,row:nr,col:nc,dir:newDir,num:num++};break;}
             }
           }
@@ -1659,21 +1501,15 @@ function buildCrossword(){
       if(best)break;
     }
     if(!best){
-      // fallback: place vertically below last
       const last=placed[placed.length-1];
       const nr=last.row+3;const nc=last.col;
       if(placeWord(w,nr,nc,'V'))best={word:wobj,row:nr,col:nc,dir:'V',num:num++};
     }
     if(best)placed.push(best);
   }
-
-  // Add cell numbers
   placed.forEach(p=>{if(p.dir==='H')grid[p.row][p.col].num=p.num;else grid[p.row][p.col].num=p.num;});
-
-  // Find bounding box
   let minR=ROWS,maxR=0,minC=COLS,maxC=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]){minR=Math.min(minR,r);maxR=Math.max(maxR,r);minC=Math.min(minC,c);maxC=Math.max(maxC,c);}
-
   cwLayout={grid,placed,minR,maxR,minC,maxC};
   renderCrossword();
 }
@@ -1688,7 +1524,7 @@ function renderCrossword(){
       if(grid[r][c]){
         cell.className='cw-cell';
         if(grid[r][c].num){const numEl=document.createElement('span');numEl.className='cw-cell-num';numEl.textContent=grid[r][c].num;cell.appendChild(numEl);}
-        const inp=document.createElement('input');inp.className='cw-input';inp.maxLength=1;inp.dataset.ch=grid[r][c].ch;inp.dataset.r=r;inp.dataset.c=c;
+        const inp=document.createElement('input');inp.className='cw-input';inp.maxLength=1;inp.dataset.ch=grid[r][c].ch;
         cell.appendChild(inp);
       }else{cell.className='cw-cell black';}
       row.appendChild(cell);
@@ -1696,8 +1532,6 @@ function renderCrossword(){
     table.appendChild(row);
   }
   wrap.appendChild(table);
-
-  // Clues
   const clues=$('#cw-clues');clues.innerHTML='';
   const across=document.createElement('div');across.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;">ACROSS</div>';
   const down=document.createElement('div');down.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;">DOWN</div>';
@@ -1723,43 +1557,6 @@ $('#cw-reveal').addEventListener('click',()=>{$$('.cw-input').forEach(inp=>{inp.
 $('#cw-reset').addEventListener('click',()=>{$$('.cw-input').forEach(inp=>{inp.value='';inp.classList.remove('correct-cell','wrong-cell');});$('#cw-result').style.display='none';});
 
 // ─────────────────────────────────────────────────────────────
-// Share with Students
-document.getElementById('btn-share-activity').addEventListener('click', async function(){
-  const btn = this;
-  btn.textContent = 'Saving…'; btn.disabled = true;
-  try{
-    const resp = await fetch(aurl('/api/save-activity'),{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        activity_json: G,
-        title:   G.topic   || 'Practice Activity',
-        subject: G.subject || '',
-        grade:   G.grade   || '',
-        lesson_md: localStorage.getItem('skooled_lesson_md') || '',
-        quiz_md:   localStorage.getItem('skooled_quiz_md')   || '',
-      })
-    });
-    const data = await resp.json();
-    if(data.share_url){
-      document.getElementById('share-act-url').value = data.share_url;
-      document.getElementById('share-act-overlay').style.display = 'flex';
-    }
-  }finally{
-    btn.textContent = 'Share with Students'; btn.disabled = false;
-  }
-});
-
-document.getElementById('share-act-copy').addEventListener('click', function(){
-  const inp = document.getElementById('share-act-url');
-  inp.select(); document.execCommand('copy');
-  this.textContent = 'Copied!';
-  setTimeout(()=>{ this.textContent='Copy Link'; }, 2000);
-});
-
-document.getElementById('share-act-close').addEventListener('click',()=>{
-  document.getElementById('share-act-overlay').style.display = 'none';
-});
-
 loadData();
 })();
 </script>

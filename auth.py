@@ -127,6 +127,23 @@ def init_db():
                     INDEX idx_rub_owner (owner_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS saved_activities (
+                    id            INT AUTO_INCREMENT PRIMARY KEY,
+                    token         VARCHAR(64) NOT NULL UNIQUE,
+                    owner_id      INT NOT NULL,
+                    owner_name    VARCHAR(255),
+                    title         VARCHAR(500),
+                    subject       VARCHAR(255),
+                    grade         VARCHAR(50),
+                    activity_json LONGTEXT NOT NULL,
+                    lesson_md     LONGTEXT,
+                    quiz_md       LONGTEXT,
+                    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_act_token (token),
+                    INDEX idx_act_owner (owner_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
             # Patch existing installs — add verification_token if missing
             try:
                 cur.execute(
@@ -135,6 +152,15 @@ def init_db():
                 )
             except Exception:
                 pass
+            # Patch existing installs — add password reset columns if missing
+            for sql in [
+                "ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN reset_token_expires DATETIME DEFAULT NULL",
+            ]:
+                try:
+                    cur.execute(sql)
+                except Exception:
+                    pass  # already exists
 
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS lesson_plans (
@@ -412,6 +438,99 @@ def verify_email(token):
         conn.close()
     flash("Email verified! Your account is pending admin approval.", "success")
     return redirect(url_for("auth.login"))
+
+
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        from datetime import datetime, timedelta
+        email = request.form.get("email", "").strip().lower()
+        if email:
+            conn = get_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT id, name FROM users WHERE email=%s AND status='approved'",
+                        (email,),
+                    )
+                    user = cur.fetchone()
+                    if user:
+                        token = secrets.token_urlsafe(32)
+                        expires = datetime.utcnow() + timedelta(hours=1)
+                        cur.execute(
+                            "UPDATE users SET reset_token=%s, reset_token_expires=%s WHERE id=%s",
+                            (token, expires, user["id"]),
+                        )
+                        reset_url = url_for("auth.reset_password", token=token, _external=True)
+                        send_email(
+                            email,
+                            "Reset your password — SKOOLED-AI",
+                            f"""
+                            <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;">
+                              <h2 style="color:#1e293b;margin-bottom:8px;">Reset your password</h2>
+                              <p style="color:#475569;">Hi {user['name']}, we received a request to reset your SKOOLED-AI password.</p>
+                              <p style="color:#475569;">Click the button below to choose a new password. This link expires in 1 hour.</p>
+                              <a href="{reset_url}"
+                                 style="display:inline-block;margin:24px 0;padding:12px 28px;
+                                        background:#4f46e5;color:#fff;text-decoration:none;
+                                        border-radius:6px;font-weight:600;">
+                                Reset My Password
+                              </a>
+                              <p style="color:#94a3b8;font-size:12px;">
+                                If you didn't request a password reset, you can safely ignore this email.<br>
+                                Your password will not change until you click the link above.
+                              </p>
+                            </div>
+                            """,
+                        )
+            finally:
+                conn.close()
+        # Always show same message to prevent email enumeration
+        flash("If that email is registered and active, we've sent a reset link. Check your inbox.", "success")
+        return redirect(url_for("auth.forgot_password"))
+    return render_template("forgot_password.html")
+
+
+@auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    from datetime import datetime
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, reset_token_expires FROM users WHERE reset_token=%s",
+                (token,),
+            )
+            user = cur.fetchone()
+    finally:
+        conn.close()
+
+    if not user or not user["reset_token_expires"] or user["reset_token_expires"] < datetime.utcnow():
+        flash("This reset link has expired or is invalid. Please request a new one.", "error")
+        return redirect(url_for("auth.forgot_password"))
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.", "error")
+            return render_template("reset_password.html", token=token)
+        if password != confirm:
+            flash("Passwords do not match.", "error")
+            return render_template("reset_password.html", token=token)
+        conn = get_db()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE users SET password_hash=%s, reset_token=NULL, reset_token_expires=NULL WHERE id=%s",
+                    (generate_password_hash(password), user["id"]),
+                )
+        finally:
+            conn.close()
+        flash("Password updated successfully. Please sign in with your new password.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("reset_password.html", token=token)
 
 
 @auth_bp.route("/logout")

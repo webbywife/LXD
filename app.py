@@ -1474,5 +1474,67 @@ def api_delete_rubric(token):
     return jsonify({"ok": True})
 
 
+@app.route("/api/save-activity", methods=["POST"])
+@login_required
+def api_save_activity():
+    """Save activity JSON to DB and return a permanent public share URL."""
+    data = request.get_json()
+    if not data or not data.get("activity_json"):
+        return jsonify({"error": "activity_json required"}), 400
+    token = uuid.uuid4().hex
+    act_json = data["activity_json"]
+    if isinstance(act_json, dict):
+        act_json = json.dumps(act_json)
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO saved_activities
+                   (token, owner_id, owner_name, title, subject, grade,
+                    activity_json, lesson_md, quiz_md)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (token, session["user_id"], session.get("user_name", ""),
+                 data.get("title", "Practice Activity"),
+                 data.get("subject", ""), data.get("grade", ""),
+                 act_json,
+                 data.get("lesson_md", ""), data.get("quiz_md", "")),
+            )
+    finally:
+        conn.close()
+    share_url = url_for("activities_play", token=token, _external=True)
+    _log_activity("activity_share", data.get("title", ""))
+    return jsonify({"token": token, "share_url": share_url})
+
+
+@app.route("/api/activity-data/<token>")
+def api_activity_data(token):
+    """Return activity JSON for the given token (public — no auth required)."""
+    from auth import get_db
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT title, subject, grade, activity_json FROM saved_activities WHERE token=%s",
+                (token,)
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    activity = json.loads(row["activity_json"])
+    activity["title"]   = row["title"]
+    activity["subject"] = row["subject"]
+    activity["grade"]   = row["grade"]
+    return jsonify(activity)
+
+
+@app.route("/activities/play/<token>")
+def activities_play(token):
+    """Public student-facing activity play page — no login required."""
+    return render_template("activities_play.html", token=token)
+
+
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=8080)

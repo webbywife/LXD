@@ -630,6 +630,24 @@ function saveGenContent(label){
   localStorage.setItem(GEN_CONTENT_KEY, JSON.stringify({rawLP,rawAS,rawQZ,label,savedAt:new Date().toISOString()}));
 }
 
+function _autoGenActivities(){
+  if(!rawLP) return;
+  const apiKey  = document.getElementById("f-aik")?.value || "";
+  const provider = document.getElementById("f-aip")?.value || "anthropic";
+  localStorage.removeItem("skooled_activity_data");
+  localStorage.removeItem("skooled_activity_lesson_md");
+  fetch(aurl("/api/generate-activity-content"),{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({lesson_md:rawLP, quiz_md:rawQZ||"", api_key:apiKey, ai_provider:provider})
+  }).then(r=>r.json()).then(d=>{
+    if(!d.error){
+      localStorage.setItem("skooled_activity_data",      JSON.stringify(d));
+      localStorage.setItem("skooled_activity_lesson_md", rawLP);
+    }
+  }).catch(()=>{});
+}
+
 function timeAgo(iso){
   const s=Math.floor((Date.now()-new Date(iso).getTime())/1000);
   if(s<60) return s+"s ago";
@@ -821,6 +839,7 @@ if(genMode==="topic"){
     let tParts=["Lesson Plan"];if(rawAS)tParts.push("Assessment");if(tHasQZ)tParts.push("Quiz");
     $("#out-t").textContent=tParts.join(" + ");
     saveGenContent(_outLabel);
+    _autoGenActivities();
     setTab("lp");go(4);},700);
     }).catch(e=>{done();setTimeout(()=>{$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${e.message}</div>`;go(4);},700);});
     return;
@@ -878,6 +897,7 @@ if(hasQZ)titleParts.push("Quiz");
 $("#out-t").textContent=titleParts.join(" + ");
 
 saveGenContent(_outLabel);
+_autoGenActivities();
 
 // Render with section tabs
 setTab("lp");
