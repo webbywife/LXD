@@ -381,12 +381,82 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
     <div class="loader-s">Extracting vocabulary, questions, and games from your lesson plan.</div>
   </div>
 
-  <!-- Error state -->
+  <!-- Topic input form (shown when no lesson plan in storage) -->
+  <div id="topic-form" style="display:none;max-width:560px;margin:0 auto;">
+    <div style="margin-bottom:28px;">
+      <div style="font-size:28px;font-weight:800;font-family:'Bricolage Grotesque',sans-serif;color:#fff;margin-bottom:8px;letter-spacing:-0.03em;">What do you want to teach?</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;">Enter any topic and we'll generate 16 interactive games instantly — no lesson plan needed.</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,95,87,0.2);border-radius:16px;padding:28px;">
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Topic *</label>
+        <input id="tf-topic" type="text" placeholder="e.g. Photosynthesis, The American Revolution, Fractions…"
+          style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .18s;"
+          onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Subject</label>
+          <select id="tf-subject"
+            style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;appearance:none;cursor:pointer;"
+            onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+            <option value="" style="background:#0a1929;">General</option>
+            <option value="Science" style="background:#0a1929;">Science</option>
+            <option value="Mathematics" style="background:#0a1929;">Mathematics</option>
+            <option value="English Language Arts" style="background:#0a1929;">English / ELA</option>
+            <option value="Social Studies" style="background:#0a1929;">Social Studies</option>
+            <option value="History" style="background:#0a1929;">History</option>
+            <option value="Geography" style="background:#0a1929;">Geography</option>
+            <option value="Art" style="background:#0a1929;">Art</option>
+            <option value="Music" style="background:#0a1929;">Music</option>
+            <option value="Physical Education" style="background:#0a1929;">Physical Education</option>
+            <option value="Health" style="background:#0a1929;">Health</option>
+            <option value="Technology" style="background:#0a1929;">Technology</option>
+            <option value="Foreign Language" style="background:#0a1929;">Foreign Language</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Grade Level</label>
+          <select id="tf-grade"
+            style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;appearance:none;cursor:pointer;"
+            onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+            <option value="" style="background:#0a1929;">Any Grade</option>
+            <option value="Kindergarten" style="background:#0a1929;">Kindergarten</option>
+            <option value="Grade 1" style="background:#0a1929;">Grade 1</option>
+            <option value="Grade 2" style="background:#0a1929;">Grade 2</option>
+            <option value="Grade 3" style="background:#0a1929;">Grade 3</option>
+            <option value="Grade 4" style="background:#0a1929;">Grade 4</option>
+            <option value="Grade 5" style="background:#0a1929;">Grade 5</option>
+            <option value="Grade 6" style="background:#0a1929;">Grade 6</option>
+            <option value="Grade 7" style="background:#0a1929;">Grade 7</option>
+            <option value="Grade 8" style="background:#0a1929;">Grade 8</option>
+            <option value="Grade 9" style="background:#0a1929;">Grade 9</option>
+            <option value="Grade 10" style="background:#0a1929;">Grade 10</option>
+            <option value="Grade 11" style="background:#0a1929;">Grade 11</option>
+            <option value="Grade 12" style="background:#0a1929;">Grade 12</option>
+            <option value="College" style="background:#0a1929;">College</option>
+          </select>
+        </div>
+      </div>
+      <button id="tf-submit" onclick="generateFromTopic()"
+        style="width:100%;padding:14px;background:#ff5f57;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:'Bricolage Grotesque',sans-serif;cursor:pointer;transition:all .18s;letter-spacing:-0.01em;"
+        onmouseover="this.style.background='#e84e46';this.style.transform='translateY(-1px)'"
+        onmouseout="this.style.background='#ff5f57';this.style.transform='translateY(0)'">
+        Generate 16 Games
+      </button>
+    </div>
+    <div id="tf-error" style="display:none;margin-top:12px;padding:11px 14px;background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);border-radius:10px;font-size:13px;color:#ff6b6b;"></div>
+    <div style="text-align:center;margin-top:18px;">
+      <span style="font-size:12px;color:rgba(255,255,255,0.3);">Have a lesson plan? </span>
+      <a href="{{ turl('generator') }}" style="font-size:12px;color:rgba(255,95,87,0.7);font-weight:700;text-decoration:underline;text-underline-offset:2px;">Go to Generator</a>
+    </div>
+  </div>
+
+  <!-- Error state (API errors only) -->
   <div id="err-state" style="display:none;" class="card">
-    <div style="color:#e74c3c;font-size:16px;font-weight:700;margin-bottom:8px;">&#9888; Could not load lesson content</div>
+    <div style="color:#e74c3c;font-size:16px;font-weight:700;margin-bottom:8px;">&#9888; Could not generate activities</div>
     <div id="err-msg" style="color:var(--grey);font-size:13px;margin-bottom:12px;"></div>
-    <div style="font-size:12px;color:var(--grey);">Go back to the Generator, generate a lesson plan, then click <strong>Open Activities</strong>.</div>
-    <a href="{{ turl('generator') }}" style="display:inline-block;margin-top:14px;padding:9px 20px;background:var(--cyan);color:#000;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;">Go to Generator</a>
+    <button onclick="resetToTopicForm()" style="display:inline-block;margin-top:14px;padding:9px 20px;background:var(--cyan);color:#000;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;">Try Again</button>
   </div>
 
   <!-- Game panels (hidden until loaded) -->
@@ -398,6 +468,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
     <div class="topic-pill"><div class="topic-pill-lbl">Subject</div><div class="topic-pill-val" id="tb-subject">—</div></div>
     <div class="topic-pill"><div class="topic-pill-lbl">Grade</div><div class="topic-pill-val" id="tb-grade">—</div></div>
     <div class="topic-pill" style="margin-left:auto;padding-left:0;border-left:none;"><div class="topic-pill-lbl">Games Ready</div><div class="topic-pill-val" style="color:var(--green);">16 &#10003;</div></div>
+    <button onclick="resetToTopicForm()" style="padding:6px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all .15s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,95,87,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.6)';this.style.borderColor='rgba(255,255,255,0.15)'">&#43; New Topic</button>
     <button id="btn-share-activity" class="btn-share-act" style="display:none;margin-left:12px;">Share with Students</button>
   </div>
 
@@ -900,7 +971,9 @@ function loadData(){
   const provider=localStorage.getItem('skooled_ai_provider')||'anthropic';
 
   if(!lesson){
-    showError('No lesson plan found in session storage.','Generate a lesson plan first, then click Open Activities.');
+    // No lesson plan — show topic input form
+    $('#loader').style.display='none';
+    $('#topic-form').style.display='block';
     return;
   }
 
@@ -933,8 +1006,60 @@ function loadData(){
   }).catch(e=>showError(e.message,''));
 }
 
+function generateFromTopic(){
+  const topic = $('#tf-topic').value.trim();
+  if(!topic){
+    $('#tf-error').style.display='block';
+    $('#tf-error').textContent='Please enter a topic to get started.';
+    $('#tf-topic').focus();
+    return;
+  }
+  $('#tf-error').style.display='none';
+  const subject = $('#tf-subject').value;
+  const grade   = $('#tf-grade').value;
+  const apiKey  = localStorage.getItem('skooled_api_key')||'';
+  const provider= localStorage.getItem('skooled_ai_provider')||'anthropic';
+
+  // Hide form, show loader
+  $('#topic-form').style.display='none';
+  $('#loader').style.display='flex';
+  $('#loader').querySelector('.loader-s').textContent='Building games from "'+topic+'" — this takes about 20 seconds.';
+
+  fetch(aurl('/api/generate-activity-content'),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({topic:topic,subject:subject,grade:grade,api_key:apiKey,ai_provider:provider})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){showError(d.error,'');return;}
+    G=d;
+    // Inject topic/subject/grade so topic bar shows them
+    if(!G.topic)   G.topic   = topic;
+    if(!G.subject) G.subject = subject||'General';
+    if(!G.grade)   G.grade   = grade||'';
+    $('#loader').style.display='none';
+    $('#games-wrap').style.display='block';
+    _showTopicBar();
+    initAllGames();
+  }).catch(e=>showError(e.message,''));
+}
+
+function resetToTopicForm(){
+  // Clear cached lesson so form shows fresh
+  localStorage.removeItem('skooled_lesson_md');
+  localStorage.removeItem('skooled_activity_data');
+  localStorage.removeItem('skooled_activity_lesson_md');
+  G={};
+  $('#games-wrap').style.display='none';
+  $('#err-state').style.display='none';
+  $('#loader').style.display='none';
+  $('#tf-topic').value='';
+  $('#tf-error').style.display='none';
+  $('#topic-form').style.display='block';
+}
+
 function showError(msg,sub){
   $('#loader').style.display='none';
+  $('#topic-form').style.display='none';
   $('#err-state').style.display='block';
   $('#err-msg').textContent=msg+(sub?'\n'+sub:'');
 }

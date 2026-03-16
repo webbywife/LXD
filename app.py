@@ -743,8 +743,22 @@ def api_generate_activity_content():
 
     lesson_md = data.get("lesson_md", "").strip()
     quiz_md = data.get("quiz_md", "").strip()
+
+    # Allow standalone topic-based generation (no lesson plan required)
     if not lesson_md:
-        return jsonify({"error": "lesson_md is required"}), 400
+        topic = data.get("topic", "").strip()
+        subject = data.get("subject", "").strip()
+        grade = data.get("grade", "").strip()
+        if topic:
+            lesson_md = (
+                f"Topic: {topic}\n"
+                f"Subject Area: {subject or 'General'}\n"
+                f"Grade Level: {grade or 'General'}\n\n"
+                f"This lesson covers {topic}. Provide vocabulary, key concepts, "
+                f"discussion questions, and learning activities appropriate for the grade level."
+            )
+        else:
+            return jsonify({"error": "lesson_md or topic is required"}), 400
 
     api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
     ai_provider = data.get("ai_provider", "anthropic")
