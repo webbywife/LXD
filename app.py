@@ -36,6 +36,9 @@ from syllabus_generator import generate_syllabus as _gen_syllabus
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
+app.config["SESSION_COOKIE_SECURE"] = True    # Only send cookie over HTTPS
+app.config["SESSION_COOKIE_HTTPONLY"] = True   # Block JS access to session cookie
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Mitigate CSRF via cross-site requests
 
 # Fix external URL generation when behind Cloudways / Nginx reverse proxy.
 # ProxyFix reads X-Forwarded-Proto/Host headers so url_for(_external=True)

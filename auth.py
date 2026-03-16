@@ -8,6 +8,7 @@ import os
 import secrets
 import functools
 import pymysql
+from urllib.parse import urlparse as _urlparse
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash, jsonify, g, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
@@ -330,7 +331,10 @@ def login():
         session["user_role"] = user["role"]
 
         token = generate_auth_token(user["id"], user["email"], user["name"], user["role"])
-        next_url = request.args.get("next") or request.form.get("next") or url_for("generator")
+        _next = request.args.get("next") or request.form.get("next") or ""
+        _p = _urlparse(_next)
+        # Only allow relative paths — block open redirects to external URLs
+        next_url = _next if (_next and not _p.scheme and not _p.netloc) else url_for("generator")
         next_url += ("&" if "?" in next_url else "?") + f"_t={token}"
         return redirect(next_url)
 
