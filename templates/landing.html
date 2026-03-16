@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>SKOOLED-AI — AI-Powered Lesson Plans for Filipino Teachers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script>
 /* Anti-flicker: apply saved theme before paint */
 (function(){var t=localStorage.getItem('sa-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
@@ -16,21 +16,21 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{
-    font-family:'Plus Jakarta Sans',sans-serif;
+    font-family:'Nunito',sans-serif;
     background:var(--bg);
     color:var(--text);
     line-height:1.65;
     overflow-x:hidden;
     transition:background .35s ease,color .35s ease;
 }
-h1,h2,h3,h4,.grotesk{font-family:'Space Grotesk',sans-serif;}
+h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
 a{text-decoration:none;color:inherit;}
 
 /* ── Variables ── */
 :root{
-    --accent:#00bbd6;
-    --accent-dim:rgba(0,187,214,0.18);
-    --accent-border:rgba(0,187,214,0.38);
+    --accent:#ff5f57;
+    --accent-dim:rgba(255,95,87,0.18);
+    --accent-border:rgba(255,95,87,0.38);
     --bg:#060b0c;
     --text:#eef2f3;
     --dim:rgba(238,242,243,0.55);
@@ -43,26 +43,26 @@ a{text-decoration:none;color:inherit;}
 
 /* ── Light mode overrides ── */
 [data-theme="light"]{
-    --bg:#f0f9fb;
-    --text:#0d1f2d;
-    --dim:rgba(13,31,45,0.62);
-    --dimmer:rgba(13,31,45,0.42);
-    --dimmest:rgba(13,31,45,0.28);
+    --bg:#f7f7f5;
+    --text:#1a1a1a;
+    --dim:rgba(26,26,26,0.62);
+    --dimmer:rgba(26,26,26,0.42);
+    --dimmest:rgba(26,26,26,0.28);
     --glass:rgba(255,255,255,0.62);
-    --glass-border:rgba(0,187,214,0.22);
-    --accent-dim:rgba(0,187,214,0.14);
+    --glass-border:rgba(255,95,87,0.22);
+    --accent-dim:rgba(255,95,87,0.14);
 }
 [data-theme="light"] body::before{
-    background:radial-gradient(ellipse 80% 55% at 50% -5%,rgba(0,187,214,0.14) 0%,transparent 68%);
+    background:radial-gradient(ellipse 80% 55% at 50% -5%,rgba(255,95,87,0.1) 0%,transparent 68%);
 }
 [data-theme="light"] .nav-pill{
     background:rgba(255,255,255,0.78);
-    border-color:rgba(0,187,214,0.2);
-    box-shadow:0 4px 24px rgba(0,187,214,0.08);
+    border-color:rgba(255,95,87,0.2);
+    box-shadow:0 4px 24px rgba(255,95,87,0.08);
 }
 [data-theme="light"] .hero-stat{
-    background:rgba(0,187,214,0.07);
-    border-color:rgba(0,187,214,0.2);
+    background:rgba(255,95,87,0.07);
+    border-color:rgba(255,95,87,0.2);
 }
 [data-theme="light"] .btn-g{
     background:rgba(13,31,45,0.05);
@@ -124,7 +124,7 @@ body::before{
 }
 .nav-logo{
     display:flex;align-items:center;gap:9px;
-    font-family:'Space Grotesk',sans-serif;
+    font-family:'Bricolage Grotesque',sans-serif;
     font-size:15px;font-weight:700;letter-spacing:-0.03em;color:var(--text);
 }
 .nav-logo-icon{
@@ -143,11 +143,11 @@ body::before{
 }
 .nav-link:hover{color:var(--text);border-color:var(--glass-border);}
 .nav-cta{
-    background:var(--accent);color:#060b0c !important;
+    background:var(--accent);color:#fff !important;
     font-weight:800;border-color:var(--accent) !important;
     box-shadow:0 4px 20px var(--accent-dim);
 }
-.nav-cta:hover{background:#00d4f0;box-shadow:0 6px 28px rgba(0,187,214,0.3);}
+.nav-cta:hover{background:#e5443c;box-shadow:0 6px 28px rgba(255,95,87,0.3);}
 
 /* ── HERO ── */
 .hero{
@@ -183,7 +183,7 @@ body::before{
     font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
     box-shadow:0 8px 28px var(--accent-dim);transition:all .25s;
 }
-.btn-p:hover{background:#00d4f0;box-shadow:0 12px 36px rgba(0,187,214,.3);transform:translateY(-2px);}
+.btn-p:hover{background:#e5443c;box-shadow:0 12px 36px rgba(255,95,87,.3);transform:translateY(-2px);}
 .btn-g{
     display:inline-flex;align-items:center;gap:8px;
     background:var(--glass);backdrop-filter:blur(20px);
@@ -274,7 +274,7 @@ body::before{
 }
 .step-card:hover{border-color:var(--accent-border);}
 .step-num{
-    font-family:'Space Grotesk',sans-serif;
+    font-family:'Bricolage Grotesque',sans-serif;
     font-size:11px;font-weight:700;letter-spacing:.3em;
     text-transform:uppercase;color:var(--accent);margin-bottom:18px;
 }
@@ -343,11 +343,11 @@ body::before{
 }
 .syl-show-card:hover{border-color:var(--accent-border);transform:translateY(-3px);}
 .syl-show-type{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
-.syl-show-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px;}
+.syl-show-title{font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px;}
 .syl-show-school{font-size:11px;color:var(--dimmer);margin-bottom:12px;min-height:14px;}
 .syl-show-meta{display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
 .syl-show-author{font-size:10px;color:var(--dimmer);}
-.syl-show-btn{padding:5px 13px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);border-radius:7px;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:.18s;text-decoration:none;white-space:nowrap;}
+.syl-show-btn{padding:5px 13px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);border-radius:7px;font-size:10px;font-weight:700;font-family:'Bricolage Grotesque',sans-serif;cursor:pointer;transition:.18s;text-decoration:none;white-space:nowrap;}
 .syl-show-btn:hover{background:rgba(0,187,214,0.28);}
 .syl-empty-note{text-align:center;color:var(--dimmer);font-size:13px;padding:40px 0;}
 
@@ -432,40 +432,40 @@ body::before{
 
         <!-- Neural network SVG -->
         <svg class="hero-art" viewBox="0 0 260 380" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
-            <path class="draw-path" d="M130 28 C80 68 36 110 36 152 C36 202 16 244 28 292 C46 340 100 364 130 360 C160 364 214 340 232 292 C244 244 224 202 224 152 C224 110 180 68 130 28 Z" stroke="#00bbd6" stroke-width="1" opacity=".32"/>
+            <path class="draw-path" d="M130 28 C80 68 36 110 36 152 C36 202 16 244 28 292 C46 340 100 364 130 360 C160 364 214 340 232 292 C244 244 224 202 224 152 C224 110 180 68 130 28 Z" stroke="#ff5f57" stroke-width="1" opacity=".32"/>
             <!-- Nodes -->
-            <circle cx="130" cy="28" r="7" stroke="#00bbd6" stroke-width="1.5" opacity=".9"/>
-            <circle cx="54" cy="118" r="5" stroke="#00bbd6" stroke-width="1.2" opacity=".7"/>
-            <circle cx="206" cy="118" r="5" stroke="#00bbd6" stroke-width="1.2" opacity=".7"/>
-            <circle cx="28" cy="228" r="4" stroke="#00bbd6" stroke-width="1" opacity=".5"/>
-            <circle cx="130" cy="196" r="10" stroke="#00bbd6" stroke-width="1.5" opacity=".85"/>
-            <circle cx="232" cy="228" r="4" stroke="#00bbd6" stroke-width="1" opacity=".5"/>
-            <circle cx="72" cy="308" r="5" stroke="#00bbd6" stroke-width="1.2" opacity=".65"/>
-            <circle cx="188" cy="308" r="5" stroke="#00bbd6" stroke-width="1.2" opacity=".65"/>
-            <circle cx="130" cy="352" r="8" stroke="#00bbd6" stroke-width="1.5" opacity=".9"/>
+            <circle cx="130" cy="28" r="7" stroke="#ff5f57" stroke-width="1.5" opacity=".9"/>
+            <circle cx="54" cy="118" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".7"/>
+            <circle cx="206" cy="118" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".7"/>
+            <circle cx="28" cy="228" r="4" stroke="#ff5f57" stroke-width="1" opacity=".5"/>
+            <circle cx="130" cy="196" r="10" stroke="#ff5f57" stroke-width="1.5" opacity=".85"/>
+            <circle cx="232" cy="228" r="4" stroke="#ff5f57" stroke-width="1" opacity=".5"/>
+            <circle cx="72" cy="308" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
+            <circle cx="188" cy="308" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
+            <circle cx="130" cy="352" r="8" stroke="#ff5f57" stroke-width="1.5" opacity=".9"/>
             <!-- Connections -->
-            <line x1="130" y1="28"  x2="54"  y2="118" stroke="#00bbd6" stroke-width=".7" opacity=".3"/>
-            <line x1="130" y1="28"  x2="206" y2="118" stroke="#00bbd6" stroke-width=".7" opacity=".3"/>
-            <line x1="54"  y1="118" x2="28"  y2="228" stroke="#00bbd6" stroke-width=".7" opacity=".22"/>
-            <line x1="54"  y1="118" x2="130" y2="196" stroke="#00bbd6" stroke-width=".7" opacity=".28"/>
-            <line x1="206" y1="118" x2="232" y2="228" stroke="#00bbd6" stroke-width=".7" opacity=".22"/>
-            <line x1="206" y1="118" x2="130" y2="196" stroke="#00bbd6" stroke-width=".7" opacity=".28"/>
-            <line x1="130" y1="196" x2="72"  y2="308" stroke="#00bbd6" stroke-width=".7" opacity=".28"/>
-            <line x1="130" y1="196" x2="188" y2="308" stroke="#00bbd6" stroke-width=".7" opacity=".28"/>
-            <line x1="72"  y1="308" x2="130" y2="352" stroke="#00bbd6" stroke-width=".7" opacity=".32"/>
-            <line x1="188" y1="308" x2="130" y2="352" stroke="#00bbd6" stroke-width=".7" opacity=".32"/>
+            <line x1="130" y1="28"  x2="54"  y2="118" stroke="#ff5f57" stroke-width=".7" opacity=".3"/>
+            <line x1="130" y1="28"  x2="206" y2="118" stroke="#ff5f57" stroke-width=".7" opacity=".3"/>
+            <line x1="54"  y1="118" x2="28"  y2="228" stroke="#ff5f57" stroke-width=".7" opacity=".22"/>
+            <line x1="54"  y1="118" x2="130" y2="196" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
+            <line x1="206" y1="118" x2="232" y2="228" stroke="#ff5f57" stroke-width=".7" opacity=".22"/>
+            <line x1="206" y1="118" x2="130" y2="196" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
+            <line x1="130" y1="196" x2="72"  y2="308" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
+            <line x1="130" y1="196" x2="188" y2="308" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
+            <line x1="72"  y1="308" x2="130" y2="352" stroke="#ff5f57" stroke-width=".7" opacity=".32"/>
+            <line x1="188" y1="308" x2="130" y2="352" stroke="#ff5f57" stroke-width=".7" opacity=".32"/>
             <!-- Book icon at center node -->
-            <rect x="100" y="172" width="60" height="48" rx="4" stroke="#00bbd6" stroke-width="1.2" opacity=".65"/>
-            <line x1="130" y1="172" x2="130" y2="220" stroke="#00bbd6" stroke-width="1" opacity=".45"/>
-            <line x1="106" y1="183" x2="126" y2="183" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
-            <line x1="106" y1="190" x2="126" y2="190" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
-            <line x1="106" y1="197" x2="126" y2="197" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="183" x2="154" y2="183" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="190" x2="154" y2="190" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="197" x2="154" y2="197" stroke="#00bbd6" stroke-width=".8" opacity=".4"/>
+            <rect x="100" y="172" width="60" height="48" rx="4" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
+            <line x1="130" y1="172" x2="130" y2="220" stroke="#ff5f57" stroke-width="1" opacity=".45"/>
+            <line x1="106" y1="183" x2="126" y2="183" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
+            <line x1="106" y1="190" x2="126" y2="190" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
+            <line x1="106" y1="197" x2="126" y2="197" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
+            <line x1="134" y1="183" x2="154" y2="183" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
+            <line x1="134" y1="190" x2="154" y2="190" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
+            <line x1="134" y1="197" x2="154" y2="197" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
             <!-- Pulse rings -->
-            <circle cx="130" cy="196" r="18" stroke="#00bbd6" stroke-width=".7" opacity=".18"/>
-            <circle cx="130" cy="196" r="28" stroke="#00bbd6" stroke-width=".5" opacity=".1"/>
+            <circle cx="130" cy="196" r="18" stroke="#ff5f57" stroke-width=".7" opacity=".18"/>
+            <circle cx="130" cy="196" r="28" stroke="#ff5f57" stroke-width=".5" opacity=".1"/>
         </svg>
     </div>
 </section>

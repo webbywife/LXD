@@ -6,30 +6,44 @@
 <meta name="auth-token" content="{{ auth_token }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>SKOOLED-AI · Interactive Activities</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ds.css') }}">
 <style>
 :root{
-  --bg:#0a1929;--nav:#0d1f2d;--card:rgba(255,255,255,0.04);
-  --cyan:#00bbd6;--cyan-d:#009bb3;--orange:#faa32b;--green:#00b894;
-  --white:#ffffff;--grey:rgba(255,255,255,0.6);--border:rgba(0,187,214,0.2);
+  --bg:#f7f7f5;--nav:#1a1a1a;--card:#ffffff;
+  --cyan:#ff5f57;--cyan-d:#e5443c;--orange:#faa32b;--green:#00b894;
+  --white:#1a1a1a;--grey:#6b7280;--border:#e2e2df;
   --rad:14px;--sidebar:260px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
-h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;margin-left:70px;}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
 
-/* Navbar */
-.nav{background:var(--nav);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-.nav-brand{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:var(--white);letter-spacing:-0.03em;}
-.nav-brand span{color:var(--cyan);}
-.nav-links{display:flex;gap:16px;align-items:center;}
-.nav-links a{color:var(--grey);text-decoration:none;font-size:13px;font-weight:500;transition:.2s;}
-.nav-links a:hover{color:var(--white);}
+/* Navbar hidden — replaced by ds-sidebar */
+.nav{display:none;}
 
 /* Layout */
-.layout{display:flex;flex:1;overflow:hidden;}
-.sidebar{width:var(--sidebar);background:rgba(0,0,0,0.25);border-right:1px solid var(--border);overflow-y:auto;padding:16px 0;flex-shrink:0;}
+.layout{display:flex;flex:1;min-height:100vh;overflow:hidden;}
+.sidebar{width:var(--sidebar);background:#f0f0ee;border-right:1px solid var(--border);overflow-y:auto;padding:16px 0;flex-shrink:0;}
 .main{flex:1;overflow-y:auto;padding:24px;}
+
+/* Override game tab colors for light theme */
+.sb-section{color:#6b7280;}
+.game-tab{color:#6b7280;}
+.game-tab:hover{background:rgba(255,95,87,0.08);color:#1a1a1a;}
+.game-tab.active{background:rgba(255,95,87,0.12);border-left-color:#ff5f57;color:#1a1a1a;}
+.loader-t{color:#ff5f57;}
+.hud-v{color:#ff5f57;}
+.card{background:#fff;border-color:var(--border);}
+.card-hd{color:#ff5f57;}
+.scr-input{color:#1a1a1a;}
+.hm-letter{border-bottom-color:#ff5f57;}
+.hm-key{background:rgba(0,0,0,0.04);border-color:var(--border);color:#1a1a1a;}
+.hm-key:hover:not(:disabled){background:rgba(255,95,87,0.1);border-color:#ff5f57;}
+.tf-stmt{background:#fff;color:#1a1a1a;}
+.jep-cell{background:rgba(255,95,87,0.06);}
+.jep-box{background:#fff;border-color:#ff5f57;}
+.jep-q{color:#1a1a1a;}
 
 /* Sidebar Game Tabs */
 .sb-section{padding:6px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;margin-top:10px;}
@@ -51,7 +65,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .card-hd{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--cyan);}
 
 /* Buttons */
-.btn{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:rgba(255,255,255,0.06);color:var(--white);cursor:pointer;transition:.2s;font-family:'Space Grotesk',sans-serif;}
+.btn{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--white);cursor:pointer;transition:.2s;font-family:'Bricolage Grotesque',sans-serif;}
 .btn:hover{border-color:var(--cyan);background:rgba(0,187,214,0.1);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 .btn-c{background:var(--cyan);color:#000;border-color:var(--cyan);}
@@ -69,7 +83,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* Score / Timer */
 .hud{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
 .hud-item{background:rgba(0,187,214,0.08);border:1px solid var(--border);border-radius:10px;padding:8px 18px;text-align:center;}
-.hud-v{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--cyan);}
+.hud-v{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:var(--cyan);}
 .hud-l{font-size:11px;color:var(--grey);}
 
 /* ─── GAME STYLES ──────────────────────────────────── */
@@ -110,7 +124,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* True/False */
 .tf-stmt{font-size:18px;font-weight:500;text-align:center;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--rad);margin-bottom:16px;min-height:80px;display:flex;align-items:center;justify-content:center;}
 .tf-btns{display:flex;gap:12px;justify-content:center;}
-.tf-btn{width:140px;padding:16px;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:.2s;font-family:'Space Grotesk',sans-serif;}
+.tf-btn{width:140px;padding:16px;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:.2s;font-family:'Bricolage Grotesque',sans-serif;}
 .tf-t{background:rgba(0,184,148,0.15);border-color:var(--green);color:var(--green);}
 .tf-t:hover{background:var(--green);color:#000;}
 .tf-f{background:rgba(231,76,60,0.12);border-color:#e74c3c;color:#e74c3c;}
@@ -119,7 +133,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* Jeopardy */
 .jep-board{display:grid;gap:4px;}
 .jep-cat{text-align:center;padding:12px 6px;background:rgba(0,187,214,0.15);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;color:var(--cyan);}
-.jep-cell{text-align:center;padding:20px 8px;background:rgba(0,187,214,0.06);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.2s;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:var(--orange);}
+.jep-cell{text-align:center;padding:20px 8px;background:rgba(0,187,214,0.06);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.2s;font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--orange);}
 .jep-cell:hover:not(.used){background:rgba(0,187,214,0.14);}
 .jep-cell.used{opacity:.3;cursor:default;}
 .jep-modal{position:fixed;inset:0;background:rgba(10,25,41,0.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px;}
@@ -156,16 +170,16 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .mem-card.flipped .mem-front,.mem-card.matched .mem-front{display:flex;align-items:center;justify-content:center;text-align:center;}
 
 /* Word Scramble */
-.scr-word{font-size:36px;font-weight:800;letter-spacing:6px;color:var(--orange);margin:14px 0;text-align:center;font-family:'Space Grotesk',sans-serif;}
-.scr-input{background:transparent;border:none;border-bottom:2px solid var(--cyan);color:var(--white);font-size:22px;padding:6px 12px;text-align:center;outline:none;font-family:'Space Grotesk',sans-serif;width:220px;display:block;margin:10px auto;}
+.scr-word{font-size:36px;font-weight:800;letter-spacing:6px;color:var(--orange);margin:14px 0;text-align:center;font-family:'Bricolage Grotesque',sans-serif;}
+.scr-input{background:transparent;border:none;border-bottom:2px solid var(--cyan);color:var(--white);font-size:22px;padding:6px 12px;text-align:center;outline:none;font-family:'Bricolage Grotesque',sans-serif;width:220px;display:block;margin:10px auto;}
 
 /* Hangman */
 .hm-wrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;}
 .hm-svg-wrap{flex-shrink:0;}
 .hm-word-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;}
-.hm-letter{font-size:22px;font-weight:800;border-bottom:3px solid var(--cyan);width:28px;text-align:center;line-height:1.6;font-family:'Space Grotesk',sans-serif;}
+.hm-letter{font-size:22px;font-weight:800;border-bottom:3px solid var(--cyan);width:28px;text-align:center;line-height:1.6;font-family:'Bricolage Grotesque',sans-serif;}
 .hm-kbd{display:flex;flex-wrap:wrap;gap:4px;max-width:320px;}
-.hm-key{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;font-family:'Space Grotesk',sans-serif;}
+.hm-key{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;font-family:'Bricolage Grotesque',sans-serif;}
 .hm-key:hover:not(:disabled){background:rgba(0,187,214,0.12);border-color:var(--cyan);}
 .hm-key.used-right{background:rgba(0,184,148,0.15);border-color:var(--green);color:var(--green);}
 .hm-key.used-wrong{background:rgba(231,76,60,0.1);border-color:#e74c3c;color:#e74c3c;cursor:default;}
@@ -178,7 +192,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .bingo-cell.free{background:rgba(250,163,43,0.18);border-color:var(--orange);}
 .bingo-cell.bingo{background:rgba(0,184,148,0.2);border-color:var(--green);}
 .caller-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;margin-bottom:14px;}
-.caller-word{font-size:20px;font-weight:800;color:var(--orange);font-family:'Space Grotesk',sans-serif;}
+.caller-word{font-size:20px;font-weight:800;color:var(--orange);font-family:'Bricolage Grotesque',sans-serif;}
 
 /* Kahoot */
 .kah-q{font-size:20px;font-weight:700;text-align:center;padding:24px;min-height:90px;display:flex;align-items:center;justify-content:center;}
@@ -195,14 +209,14 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 .hot-names{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
 .hot-name{padding:8px 16px;border-radius:20px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);font-size:14px;font-weight:600;transition:.3s;}
 .hot-name.active{background:rgba(250,163,43,0.25);border-color:var(--orange);color:var(--orange);transform:scale(1.1);}
-.hot-timer{font-size:60px;font-weight:900;text-align:center;font-family:'Space Grotesk',sans-serif;color:var(--orange);}
+.hot-timer{font-size:60px;font-weight:900;text-align:center;font-family:'Bricolage Grotesque',sans-serif;color:var(--orange);}
 
 /* Crossword */
 .cw-grid{display:inline-block;border-collapse:collapse;}
 .cw-cell{width:36px;height:36px;border:1px solid var(--border);background:rgba(0,187,214,0.05);position:relative;display:inline-block;vertical-align:top;}
 .cw-cell.black{background:#000;border-color:#000;}
 .cw-cell-num{position:absolute;top:1px;left:2px;font-size:8px;color:var(--grey);line-height:1;}
-.cw-input{width:100%;height:100%;background:transparent;border:none;text-align:center;color:var(--white);font-size:16px;font-weight:700;outline:none;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;}
+.cw-input{width:100%;height:100%;background:transparent;border:none;text-align:center;color:var(--white);font-size:16px;font-weight:700;outline:none;font-family:'Bricolage Grotesque',sans-serif;text-transform:uppercase;}
 .cw-input:focus{background:rgba(0,187,214,0.1);}
 .cw-input.correct-cell{background:rgba(0,184,148,0.15);color:var(--green);}
 .cw-input.wrong-cell{background:rgba(231,76,60,0.1);color:#e74c3c;}
@@ -213,7 +227,7 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 /* Word Search */
 .ws-grid{display:inline-flex;flex-direction:column;gap:2px;user-select:none;}
 .ws-row{display:flex;gap:2px;}
-.ws-cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid transparent;font-family:'Space Grotesk',sans-serif;transition:.1s;}
+.ws-cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid transparent;font-family:'Bricolage Grotesque',sans-serif;transition:.1s;}
 .ws-cell.selected{background:rgba(0,187,214,0.2);border-color:var(--cyan);}
 .ws-cell.found{background:rgba(0,184,148,0.15);border-color:var(--green);color:var(--green);}
 .ws-words{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
@@ -321,18 +335,37 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
 </head>
 <body>
 
-<div class="nav">
-  <div class="nav-brand">SKOOLED<span>-AI</span></div>
-  <div class="nav-links">
-    <a href="{{ turl('generator') }}">Lesson Generator</a>
-    <a href="{{ turl('activities') }}" style="color:var(--white)">Activities</a>
-    <a href="{{ turl('syllabus') }}">Syllabus</a>
+<!-- ── BLACK SIDEBAR ── -->
+<nav class="ds-sidebar">
+  <a href="{{ url_for('landing') }}" class="ds-sidebar-logo" title="SKOOLED-AI">S</a>
+  <div class="ds-sidebar-nav">
+    <a href="{{ url_for('landing') }}" class="ds-nav-link" title="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="{{ turl('generator') }}" class="ds-nav-link" title="Lesson Plans">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </a>
+    <a href="{{ turl('activities') }}" class="ds-nav-link active" title="Activities">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </a>
+    <a href="{{ turl('syllabus') }}" class="ds-nav-link" title="Syllabus">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </a>
+    <a href="{{ turl('syllabi_dashboard') }}" class="ds-nav-link" title="My Syllabi">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    </a>
     {% if session.get('user_role') == 'admin' %}
-    <a href="{{ turl('auth.admin_panel') }}">Admin</a>
+    <a href="{{ turl('auth.admin_panel') }}" class="ds-nav-link" title="Admin">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
     {% endif %}
-    <a href="{{ url_for('auth.logout') }}">Logout</a>
   </div>
-</div>
+  <div class="ds-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="ds-nav-link" title="Logout" style="color:rgba(255,255,255,.35);">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </a>
+  </div>
+</nav>
 
 <div class="layout">
 <!-- SIDEBAR -->
@@ -986,7 +1019,7 @@ function drawWheel(angle){
     ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();
     ctx.strokeStyle='#0d1f2d';ctx.lineWidth=2;ctx.stroke();
     ctx.save();ctx.translate(cx,cy);ctx.rotate(angle+(i+0.5)*arc);
-    ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 13px Space Grotesk,sans-serif';
+    ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 13px Bricolage Grotesque,sans-serif';
     ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
     const label=name.length>14?name.slice(0,13)+'…':name;
     ctx.fillText(label,r-10,5);ctx.restore();
