@@ -9,7 +9,8 @@ import os
 from curriculum_loader import (
     get_competency_by_id, get_competencies,
     get_pedagogical_approaches, get_21st_century_skills,
-    get_crosscutting_concepts, SUBJECT_DISPLAY
+    get_crosscutting_concepts, SUBJECT_DISPLAY,
+    QUARTER_TO_TERM, TERM_DATES
 )
 
 # All available template sections with defaults
@@ -169,12 +170,18 @@ def _gather_curriculum_context(subject_id, competency_ids):
     # Build a summary of all competency texts for context
     all_lc_texts = [c.get("learning_competency", "") for c in competencies if c.get("learning_competency", "")]
 
+    raw_quarter = competencies[0].get("quarter", "")
+    term = QUARTER_TO_TERM.get(raw_quarter, raw_quarter)
+    term_dates = TERM_DATES.get(term, "")
+
     return {
         "subject": SUBJECT_DISPLAY.get(subject_id, subject_id),
         "subject_id": subject_id,
         "competencies": competencies,
         "grade": competencies[0].get("grade", ""),
-        "quarter": competencies[0].get("quarter", ""),
+        "quarter": raw_quarter,
+        "term": term,
+        "term_dates": term_dates,
         "key_stage": competencies[0].get("key_stage", ""),
         "domain": competencies[0].get("domain", ""),
         "content_topic": content_topic,
@@ -194,7 +201,8 @@ def build_ai_prompt(context, template_config):
     """Build the AI prompt for lesson plan generation."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     domain = context["domain"]
     topic = context["content_topic"]
 
@@ -252,6 +260,7 @@ def build_ai_prompt(context, template_config):
     model_key = proc_fields.get("model", "5e")
     model_info = PROCEDURE_MODELS.get(model_key, PROCEDURE_MODELS["5e"])
 
+    term_line = f"Term {term}" + (f" ({term_dates})" if term_dates else "")
     prompt = f"""You are an expert Philippine DepEd curriculum specialist and instructional designer.
 Generate a detailed, classroom-ready lesson plan based on the MATATAG curriculum data below.
 The lesson plan MUST directly teach the specific learning competencies listed. Every activity, question, and assessment must relate to these competencies.
@@ -259,7 +268,8 @@ The lesson plan MUST directly teach the specific learning competencies listed. E
 === CURRICULUM DATA ===
 Subject: {subject}
 Grade Level: Grade {grade}
-Quarter: {quarter}
+Grading Term: {term_line}
+School Year: SY 2026-2027 (DepEd DO 009, s. 2026 — Three-Term Calendar)
 Key Stage: {context.get('key_stage', '')}
 Domain: {domain}
 Content Topic: {topic}
@@ -302,7 +312,7 @@ Generate a COMPLETE lesson plan with the following sections (generate ONLY the s
             f"3. Then output a 2-column markdown table (no header row, just |---|---| separator then data rows):\n"
             f"   | **Subject** | {subject} |\n"
             f"   | **Grade Level** | Grade {grade} |\n"
-            f"   | **Quarter** | {quarter} |\n"
+            f"   | **Term** | Term {term}{' — ' + term_dates if term_dates else ''} |\n"
             f"   | **Time Allotment** | {time} |\n"
             f"   | **Content Topic** | {topic} |"
         )
@@ -361,7 +371,7 @@ Generate a COMPLETE lesson plan with the following sections (generate ONLY the s
         section_instructions.append(
             f"## 5. PRIOR KNOWLEDGE / PREREQUISITES\n"
             f"List what students should already know or be able to do before this lesson.{prereq_note}\n"
-            f"Reference previous quarter/grade competencies where applicable."
+            f"Reference previous term/grade competencies where applicable."
         )
 
     if "lesson_procedure" in enabled_sections:
@@ -451,7 +461,8 @@ def generate_lesson_plan_local(context, template_config):
     """Generate a lesson plan using template-based approach (no AI API needed)."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     domain = context["domain"]
     topic = context["content_topic"]
 
@@ -485,7 +496,7 @@ def generate_lesson_plan_local(context, template_config):
 |---|---|
 | **Subject** | {subject} |
 | **Grade Level** | Grade {grade} |
-| **Quarter** | {quarter} |
+| **Term** | Term {term}{' — ' + term_dates if term_dates else ''} |
 | **Key Stage** | {context.get('key_stage', '')} |
 | **Domain** | {domain} |
 | **Content Topic** | {topic} |
@@ -721,7 +732,8 @@ def generate_authentic_assessment_local(context, assessment_config):
     """Generate authentic assessment using template approach."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     domain = context["domain"]
     topic = context["content_topic"]
     perf_std = context.get("performance_standard", "")
@@ -746,7 +758,7 @@ def generate_authentic_assessment_local(context, assessment_config):
 |---|---|
 | **Subject** | {subject} |
 | **Grade Level** | Grade {grade} |
-| **Quarter** | {quarter} |
+| **Term** | Term {term}{' — ' + term_dates if term_dates else ''} |
 | **Domain** | {domain} |
 | **Content Topic** | {topic} |
 | **Content Standard** | {content_std} |
@@ -820,7 +832,7 @@ Students will:
 
 ### Portfolio Requirements for {topic}
 
-**Purpose:** Document student growth and learning throughout the quarter.
+**Purpose:** Document student growth and learning throughout the term.
 
 ### Required Entries
 
@@ -985,7 +997,8 @@ def build_assessment_ai_prompt(context, assessment_config):
     """Build AI prompt for authentic assessment generation."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     domain = context["domain"]
     topic = context["content_topic"]
     perf_std = context.get("performance_standard", "")
@@ -1000,12 +1013,14 @@ def build_assessment_ai_prompt(context, assessment_config):
     custom_context = assessment_config.get("custom_context", "")
     type_labels = [ASSESSMENT_TYPES[t]["label"] for t in selected_types if t in ASSESSMENT_TYPES]
 
+    term_line = f"Term {term}" + (f" ({term_dates})" if term_dates else "")
     prompt = f"""You are an expert Philippine DepEd assessment specialist. Generate a DETAILED authentic assessment package for the following curriculum data.
 
 === CURRICULUM DATA ===
 Subject: {subject}
 Grade Level: Grade {grade}
-Quarter: {quarter}
+Grading Term: {term_line}
+School Year: SY 2026-2027 (DepEd DO 009, s. 2026 — Three-Term Calendar)
 Domain: {domain}
 Content Topic: {topic}
 Content Standard: {content_std}
@@ -1115,7 +1130,8 @@ def generate_quiz_local(context, quiz_config):
     """Generate a quiz using template approach (no AI)."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     topic = context["content_topic"]
     domain = context["domain"]
     content_std = context.get("content_standard", "")
@@ -1139,7 +1155,7 @@ def generate_quiz_local(context, quiz_config):
 |---|---|
 | **Subject** | {subject} |
 | **Grade Level** | Grade {grade} |
-| **Quarter** | {quarter} |
+| **Term** | Term {term}{' — ' + term_dates if term_dates else ''} |
 | **Domain** | {domain} |
 | **Content Topic** | {topic} |
 | **Content Standard** | {content_std} |
@@ -1216,7 +1232,8 @@ def build_quiz_ai_prompt(context, quiz_config):
     """Build AI prompt for quiz generation."""
     subject = context["subject"]
     grade = context["grade"]
-    quarter = context["quarter"]
+    term = context.get("term", context.get("quarter", ""))
+    term_dates = context.get("term_dates", "")
     domain = context["domain"]
     topic = context["content_topic"]
     content_std = context.get("content_standard", "")
@@ -1264,12 +1281,14 @@ def build_quiz_ai_prompt(context, quiz_config):
             )
             item_num += num_questions
 
+    term_line = f"Term {term}" + (f" ({term_dates})" if term_dates else "")
     prompt = f"""You are an expert Philippine DepEd quiz maker. Generate a READY-TO-USE quiz based on the MATATAG curriculum data below.
 
 === CURRICULUM DATA ===
 Subject: {subject}
 Grade Level: Grade {grade}
-Quarter: {quarter}
+Grading Term: {term_line}
+School Year: SY 2026-2027 (DepEd DO 009, s. 2026 — Three-Term Calendar)
 Domain: {domain}
 Content Topic: {topic}
 Content Standard: {content_std}
@@ -1284,7 +1303,7 @@ Generate a quiz with the following sections:
 {chr(10).join(type_instructions)}
 
 IMPORTANT:
-- Start with a header table showing Subject, Grade, Quarter, Topic
+- Start with a header table showing Subject, Grade, Term, Topic
 - Number items continuously across all sections
 - All questions must directly assess the learning competencies listed above
 - Match the Bloom's taxonomy level (if Remember, ask recall questions; if Analyze, ask analysis questions)

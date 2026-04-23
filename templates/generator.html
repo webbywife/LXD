@@ -392,11 +392,11 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- Curriculum Mode -->
     <div id="mode-curriculum">
-        <div class="tip"><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and quarters will automatically load based on available MATATAG curriculum data.</span></div>
+        <div class="tip"><span class="tt"><strong>Tip:</strong> Start by selecting the subject area. The grade levels and terms will automatically load based on available MATATAG curriculum data. SY 2026-2027 uses a three-term calendar (DepEd DO 009, s. 2026).</span></div>
         <div class="fg"><label>Subject / Learning Area</label><select id="sel-s"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.id }}">{{ s.display_name }}</option>{% endfor %}</select></div>
         <div class="fr">
             <div class="fg"><label>Grade Level</label><select id="sel-g" disabled><option value="">-- Choose Grade --</option></select></div>
-            <div class="fg"><label>Quarter</label><select id="sel-q" disabled><option value="">-- Choose Quarter --</option></select></div>
+            <div class="fg"><label>Term</label><select id="sel-q" disabled><option value="">-- Choose Term --</option></select></div>
         </div>
     </div>
 
@@ -435,7 +435,7 @@ textarea{resize:vertical;min-height:60px;}
 
     <div id="ttoggles">
     <div class="tc on" data-s="title_info"><span class="tc-n">Lesson Plan Header</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="title_info">&#9660;</button></div>
-    <div class="to" id="o-title_info"><div class="fg"><label>Custom Title</label><input type="text" id="f-title" placeholder="Leave blank for auto-generated title"></div><div class="fg"><label>Time Allotment</label><select id="f-time"><option value="30 minutes">30 min</option><option value="45 minutes">45 min</option><option value="60 minutes" selected>60 min</option><option value="90 minutes">90 min</option><option value="120 minutes">120 min</option></select></div><div class="tip"><span class="tt">The header includes subject, grade, quarter, domain, and standards automatically from the curriculum data.</span></div></div>
+    <div class="to" id="o-title_info"><div class="fg"><label>Custom Title</label><input type="text" id="f-title" placeholder="Leave blank for auto-generated title"></div><div class="fg"><label>Time Allotment</label><select id="f-time"><option value="30 minutes">30 min</option><option value="45 minutes">45 min</option><option value="60 minutes" selected>60 min</option><option value="90 minutes">90 min</option><option value="120 minutes">120 min</option></select></div><div class="tip"><span class="tt">The header includes subject, grade, term, domain, and standards automatically from the curriculum data.</span></div></div>
 
     <div class="tc on" data-s="twenty_first_century_skills"><span class="tc-n">21st Century Skills</span><span class="tc-ck">&#10003;</span><button class="tc-x" data-s="twenty_first_century_skills">&#9660;</button></div>
     <div class="to" id="o-twenty_first_century_skills"><div class="fg"><label>Focus Skills</label><div id="sk-cb"></div></div><div class="tip"><span class="tt">Skills are loaded from the MATATAG curriculum data for your selected subject. Check the most relevant ones for this lesson.</span></div></div>
@@ -733,9 +733,9 @@ const TS=$("#sel-ts");if(TS)TS.addEventListener("change",()=>{if(genMode==="topi
 
 const S=$("#sel-s"),G=$("#sel-g"),Q=$("#sel-q");
 
-S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose Grade --</option>';G.disabled=true;Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/grades/${this.value}`)).then(r=>r.json()).then(g=>{g.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.match(/^[0-9]/)?`Grade ${v}`:v;G.appendChild(o);});G.disabled=false;});fetch(aurl(`/api/curriculum-context/${this.value}`)).then(r=>r.json()).then(c=>{skData=c.skills||[];const b=$("#sk-cb");b.innerHTML="";skData.forEach(s=>{const l=document.createElement("label");l.style.cssText="font-size:12px;display:flex;gap:6px;margin-bottom:3px;cursor:pointer;";l.innerHTML=`<input type="checkbox" class="skc" value="${s.skill_name}"> ${s.skill_name}`;b.appendChild(l);});});});
+S.addEventListener("change",function(){G.innerHTML='<option value="">-- Choose Grade --</option>';G.disabled=true;Q.innerHTML='<option value="">-- Choose Term --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/grades/${this.value}`)).then(r=>r.json()).then(g=>{g.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v.match(/^[0-9]/)?`Grade ${v}`:v;G.appendChild(o);});G.disabled=false;});fetch(aurl(`/api/curriculum-context/${this.value}`)).then(r=>r.json()).then(c=>{skData=c.skills||[];const b=$("#sk-cb");b.innerHTML="";skData.forEach(s=>{const l=document.createElement("label");l.style.cssText="font-size:12px;display:flex;gap:6px;margin-bottom:3px;cursor:pointer;";l.innerHTML=`<input type="checkbox" class="skc" value="${s.skill_name}"> ${s.skill_name}`;b.appendChild(l);});});});
 
-G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Quarter --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/quarters/${S.value}/${this.value}`)).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Quarter ${v}`;Q.appendChild(o);});Q.disabled=false;});});
+G.addEventListener("change",function(){Q.innerHTML='<option value="">-- Choose Term --</option>';Q.disabled=true;$("#bn1").disabled=true;if(!this.value)return;fetch(aurl(`/api/quarters/${S.value}/${this.value}`)).then(r=>r.json()).then(q=>{if(!q.length){$("#bn1").disabled=false;return;}q.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=`Term ${v}`;Q.appendChild(o);});Q.disabled=false;});});
 
 Q.addEventListener("change",function(){$("#bn1").disabled=!this.value; scheduleGenDraft();});
 if($("#t-comps")) $("#t-comps").addEventListener("input", scheduleGenDraft);
@@ -752,7 +752,7 @@ $("#bn1").addEventListener("click",function(){
         go(3);
         return;
     }
-    const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(aurl(u)).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Quarter ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});
+    const s=S.value,g=G.value,q=Q.value;if(!s||!g)return;let u=`/api/competencies/${s}?grade=${encodeURIComponent(g)}`;if(q)u+=`&quarter=${encodeURIComponent(q)}`;this.disabled=true;this.textContent="Loading...";fetch(aurl(u)).then(r=>r.json()).then(c=>{cData=c;selC.clear();renderC();const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text,qn=q?` - Term ${q}`:"";$("#s2sub").textContent=`${sn} - ${gn}${qn} (${c.length} competencies)`;go(2);this.disabled=false;this.textContent="Next: Choose Competencies \u2192";});
 });
 
 function renderC(){const l=$("#cl");l.innerHTML="";if(!cData.length){l.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-s)">No competencies found.</div>';return;}cData.forEach(c=>{const d=document.createElement("div");d.className="cc";d.dataset.id=c.id;const cb=document.createElement("input");cb.type="checkbox";const info=document.createElement("div");info.innerHTML=`<div class="cc-c">${c.lc_id||"LC-"+c.id}</div><div class="cc-d">${c.learning_competency}</div><div class="cc-m">${[c.domain,c.blooms_level?"Bloom's: "+c.blooms_level:""].filter(Boolean).join(" | ")}</div>`;d.appendChild(cb);d.appendChild(info);d.addEventListener("click",e=>{if(e.target!==cb)cb.checked=!cb.checked;if(cb.checked){selC.add(c.id);d.classList.add("sel");}else{selC.delete(c.id);d.classList.remove("sel");}upC();});l.appendChild(d);});upC();}
@@ -1292,7 +1292,7 @@ $("#b-save-lp").addEventListener("click", async function(){
     grade   = G2?.value || "";
     quarter = Q2?.value || "";
   }
-  const title = [subject, grade ? "Grade "+grade : "", quarter ? "Q"+quarter : ""].filter(Boolean).join(" · ") || "Lesson Plan";
+  const title = [subject, grade ? "Grade "+grade : "", quarter ? "T"+quarter : ""].filter(Boolean).join(" · ") || "Lesson Plan";
 
   try {
     const resp = await fetch(aurl("/api/save-lesson-plan"), {
@@ -1354,7 +1354,7 @@ async function openMyLPs(){
     body.innerHTML = list.map(lp => {
       const dt   = lp.updated_at || lp.created_at || "";
       const dtFmt = dt ? new Date(dt).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}) : "—";
-      const meta = [lp.subject, lp.grade?"Gr. "+lp.grade:"", lp.quarter?"Q"+lp.quarter:""].filter(Boolean).join(" · ");
+      const meta = [lp.subject, lp.grade?"Gr. "+lp.grade:"", lp.quarter?"T"+lp.quarter:""].filter(Boolean).join(" · ");
       return `<div class="lp-list-item" id="lp-row-${esc(lp.token)}">
         <div>
           <div class="lp-list-title">${esc(lp.title)}</div>
@@ -1398,7 +1398,7 @@ window.loadLP = async function loadLP(token){
     $("#t-qz").style.display = hasQZ ? "" : "none";
     $("#t-ppst").style.display = "none";
     // Set subtitle
-    const parts = [data.subject, data.grade?"Grade "+data.grade:"", data.quarter?"Q"+data.quarter:""].filter(Boolean);
+    const parts = [data.subject, data.grade?"Grade "+data.grade:"", data.quarter?"T"+data.quarter:""].filter(Boolean);
     const outSub = $("#out-s");
     if(outSub) outSub.textContent = parts.join(" · ");
     // Render and navigate

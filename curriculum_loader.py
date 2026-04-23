@@ -69,6 +69,16 @@ SHS_DISPLAY = {
     "SHS_Kasaysayan_at_Lipunan":   "SHS \u2013 Kasaysayan at Lipunan ng Pilipinas",
 }
 
+# DepEd SY 2026-2027 three-term calendar (DO 009, s. 2026)
+# Q3 and Q4 competencies are both covered under Term 3.
+QUARTER_TO_TERM = {"1": "1", "2": "2", "3": "3", "4": "3"}
+TERM_TO_QUARTERS = {"1": ["1"], "2": ["2"], "3": ["3", "4"]}
+TERM_DATES = {
+    "1": "June 8 \u2013 September 15, 2026 (69 class days)",
+    "2": "September 16 \u2013 December 18, 2026 (65 class days)",
+    "3": "January 4 \u2013 April 8, 2027 (67 class days)",
+}
+
 
 def init_database():
     """Create all tables in the SQLite database."""
@@ -730,18 +740,26 @@ def get_grades_for_subject(subject_id):
 
 
 def get_quarters_for_subject_grade(subject_id, grade):
-    """Get all available quarters for a given subject and grade."""
+    """Get available terms (mapped from quarters) for a given subject and grade."""
     conn = get_db()
     rows = conn.execute(
         "SELECT DISTINCT quarter FROM learning_competencies WHERE subject_id = ? AND grade = ? AND quarter != '' ORDER BY quarter",
         (subject_id, grade)
     ).fetchall()
     conn.close()
-    return [r["quarter"] for r in rows]
+    raw_quarters = [r["quarter"] for r in rows]
+    seen = set()
+    terms = []
+    for q in raw_quarters:
+        t = QUARTER_TO_TERM.get(q, q)
+        if t not in seen:
+            seen.add(t)
+            terms.append(t)
+    return sorted(terms, key=lambda x: int(x) if x.isdigit() else 999)
 
 
 def get_competencies(subject_id, grade=None, quarter=None):
-    """Get learning competencies filtered by subject, grade, and quarter."""
+    """Get learning competencies filtered by subject, grade, and term (quarter param is now a term number)."""
     conn = get_db()
     query = "SELECT * FROM learning_competencies WHERE subject_id = ?"
     params = [subject_id]
@@ -750,8 +768,11 @@ def get_competencies(subject_id, grade=None, quarter=None):
         query += " AND grade = ?"
         params.append(grade)
     if quarter:
-        query += " AND quarter = ?"
-        params.append(quarter)
+        # Treat the incoming value as a term number and expand to DB quarter values
+        db_quarters = TERM_TO_QUARTERS.get(str(quarter), [str(quarter)])
+        placeholders = ",".join("?" * len(db_quarters))
+        query += f" AND quarter IN ({placeholders})"
+        params.extend(db_quarters)
 
     query += " ORDER BY lc_id"
     rows = conn.execute(query, params).fetchall()
