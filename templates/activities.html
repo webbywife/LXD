@@ -390,9 +390,10 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
     <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,95,87,0.2);border-radius:16px;padding:28px;">
       <div style="margin-bottom:18px;">
         <label style="display:block;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Topic *</label>
-        <input id="tf-topic" type="text" placeholder="e.g. Photosynthesis, The American Revolution, Fractions…"
+        <input id="tf-topic" type="text" placeholder="e.g. Photosynthesis, Pamilyang Pilipino, Fractions…"
           style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .18s;"
-          onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"
+          oninput="autoDetectSubject(this.value)">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
         <div>
@@ -400,19 +401,26 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
           <select id="tf-subject"
             style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;appearance:none;cursor:pointer;"
             onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-            <option value="" style="background:#0a1929;">General</option>
-            <option value="Science" style="background:#0a1929;">Science</option>
+            <option value="" style="background:#0a1929;">General / Any Subject</option>
             <option value="Mathematics" style="background:#0a1929;">Mathematics</option>
-            <option value="English Language Arts" style="background:#0a1929;">English / ELA</option>
-            <option value="Social Studies" style="background:#0a1929;">Social Studies</option>
-            <option value="History" style="background:#0a1929;">History</option>
-            <option value="Geography" style="background:#0a1929;">Geography</option>
-            <option value="Art" style="background:#0a1929;">Art</option>
-            <option value="Music" style="background:#0a1929;">Music</option>
-            <option value="Physical Education" style="background:#0a1929;">Physical Education</option>
-            <option value="Health" style="background:#0a1929;">Health</option>
-            <option value="Technology" style="background:#0a1929;">Technology</option>
-            <option value="Foreign Language" style="background:#0a1929;">Foreign Language</option>
+            <option value="Science" style="background:#0a1929;">Science</option>
+            <option value="English" style="background:#0a1929;">English</option>
+            <option value="Filipino" style="background:#0a1929;">Filipino</option>
+            <option value="Araling Panlipunan" style="background:#0a1929;">Araling Panlipunan (Social Studies)</option>
+            <option value="GMRC / Values Education" style="background:#0a1929;">GMRC / Values Education</option>
+            <option value="Music and Arts (MAPEH)" style="background:#0a1929;">Music and Arts (MAPEH)</option>
+            <option value="PE and Health (MAPEH)" style="background:#0a1929;">PE and Health (MAPEH)</option>
+            <option value="EPP / TLE" style="background:#0a1929;">EPP / TLE (Technology &amp; Livelihood)</option>
+            <option value="Makabansa" style="background:#0a1929;">Makabansa (Civics/History/Geography)</option>
+            <option value="Language (Mother Tongue)" style="background:#0a1929;">Language (Mother Tongue)</option>
+            <option value="Reading and Literacy" style="background:#0a1929;">Reading &amp; Literacy</option>
+            <option value="Kindergarten" style="background:#0a1929;">Kindergarten (All Areas)</option>
+            <option value="SHS Effective Communication" style="background:#0a1929;">SHS – Effective Communication</option>
+            <option value="SHS Mabisang Komunikasyon" style="background:#0a1929;">SHS – Mabisang Komunikasyon</option>
+            <option value="SHS General Mathematics" style="background:#0a1929;">SHS – General Mathematics</option>
+            <option value="SHS General Science" style="background:#0a1929;">SHS – General Science</option>
+            <option value="SHS Life and Career Skills" style="background:#0a1929;">SHS – Life and Career Skills</option>
+            <option value="SHS Kasaysayan at Lipunan" style="background:#0a1929;">SHS – Kasaysayan at Lipunan</option>
           </select>
         </div>
         <div>
@@ -1004,6 +1012,32 @@ function loadData(){
     _showTopicBar();
     initAllGames();
   }).catch(e=>showError(e.message,''));
+}
+
+const _SUBJECT_HINTS=[
+  [/fraction|decimal|percent|algebra|geometry|calculus|arithmetic|number|equation|polygon|triangle|measurement|ratio|integer|probability|statistics|graph|set|pattern|symmetry|place.?value/i,'Mathematics'],
+  [/photosynthesis|biology|ecosystem|cell|atom|molecule|evolution|gravity|energy|force|plant|animal|bacteria|virus|genetics|chemical|reaction|magnet|weather|climate|matter|living|organism|electricity|sound|light|motion|habitat|adaptation/i,'Science'],
+  [/grammar|essay|reading comprehension|literature|vocabulary|writing|poetry|narrative|fiction|verb|noun|adjective|punctuation|paragraph|sentence|synonym|antonym|phonics|fluency|comprehension/i,'English'],
+  [/salita|pangungusap|talata|kwento|tula|gramatika|pandiwa|pangngalan|pang-uri|akdang|panitikan|wika|Filipino/i,'Filipino'],
+  [/kasaysayan|araling panlipunan|heograpiya|lipunan|kultura|pamahalaan|ekonomiya|rehiyon|pilipinas|bayani|konstitusyon|karapatang pantao/i,'Araling Panlipunan'],
+  [/music|melody|rhythm|arts|drawing|painting|visual art|dance|choreograph/i,'Music and Arts (MAPEH)'],
+  [/physical education|sports|fitness|exercise|health|hygiene|nutrition|wellness|body/i,'PE and Health (MAPEH)'],
+  [/values|ethics|citizenship|character|morality|virtue|pakikipagkapwa|paggalang|kabutihan|pagmamahal|katapatan/i,'GMRC / Values Education'],
+  [/livelihood|technology|computer|agriculture|home economics|cooking|sewing|gardening|epp|tle/i,'EPP / TLE'],
+  [/makabansa|pagkamakabayan|pakikiisa|pamayanan|komunidad|kasaysayan ng pamayanan/i,'Makabansa'],
+];
+
+function autoDetectSubject(topic){
+  if(!topic.trim()) return;
+  for(const [re,subj] of _SUBJECT_HINTS){
+    if(re.test(topic)){
+      const sel=$('#tf-subject');
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].value===subj){sel.selectedIndex=i;break;}
+      }
+      return;
+    }
+  }
 }
 
 function generateFromTopic(){
