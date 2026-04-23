@@ -393,7 +393,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
         <input id="tf-topic" type="text" placeholder="e.g. Photosynthesis, Pamilyang Pilipino, Fractions…"
           style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .18s;"
           onfocus="this.style.borderColor='#ff5f57'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"
-          oninput="autoDetectSubject(this.value)">
+          oninput="autoDetectSubject(this.value)" onblur="autoDetectSubject(this.value)">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
         <div>
@@ -1015,8 +1015,8 @@ function loadData(){
 }
 
 const _SUBJECT_HINTS=[
-  [/fraction|decimal|percent|algebra|geometry|calculus|arithmetic|number|equation|polygon|triangle|measurement|ratio|integer|probability|statistics|graph|set|pattern|symmetry|place.?value/i,'Mathematics'],
-  [/photosynthesis|biology|ecosystem|cell|atom|molecule|evolution|gravity|energy|force|plant|animal|bacteria|virus|genetics|chemical|reaction|magnet|weather|climate|matter|living|organism|electricity|sound|light|motion|habitat|adaptation/i,'Science'],
+  [/fraction|decimal|percent|algebra|geometry|calculus|arithmetic|number|equation|polygon|triangle|measurement|ratio|integer|probability|statistics|graph|set|pattern|symmetry|place.?value|addition|subtraction|multiplication|division|counting|shape|angle|perimeter|area|volume|mode|median|mean|average|data set|prime|factor|multiple|exponent|square root/i,'Mathematics'],
+  [/photosynthesis|biology|ecosystem|cell|atom|molecule|evolution|gravity|energy|force|plant|animal|bacteria|virus|genetics|chemical|reaction|magnet|weather|climate|matter|living|organism|electricity|sound|light|motion|habitat|adaptation|volcano|earthquake|rock|soil|water cycle|solar system|planet|moon|star|cloud|rain|river|ocean|mountain|island|temperature|fossil|dinosaur|eruption|lava|magnet|tectonic|sediment|mineral|crystal|typhoon|storm|flood|drought|erosion|landslide|biodiversity|food chain|food web|insect|reptile|mammal|amphibian|fish|bird|flower|seed|leaf|root|stem|nucleus|chromosome|dna|atom|element|compound|mixture|solution|acid|base|ph|density|pressure|buoyancy|friction|inertia|speed|velocity|acceleration/i,'Science'],
   [/grammar|essay|reading comprehension|literature|vocabulary|writing|poetry|narrative|fiction|verb|noun|adjective|punctuation|paragraph|sentence|synonym|antonym|phonics|fluency|comprehension/i,'English'],
   [/salita|pangungusap|talata|kwento|tula|gramatika|pandiwa|pangngalan|pang-uri|akdang|panitikan|wika|Filipino/i,'Filipino'],
   [/kasaysayan|araling panlipunan|heograpiya|lipunan|kultura|pamahalaan|ekonomiya|rehiyon|pilipinas|bayani|konstitusyon|karapatang pantao/i,'Araling Panlipunan'],
@@ -1042,6 +1042,7 @@ function autoDetectSubject(topic){
 
 function generateFromTopic(){
   const topic = $('#tf-topic').value.trim();
+  autoDetectSubject(topic);
   if(!topic){
     $('#tf-error').style.display='block';
     $('#tf-error').textContent='Please enter a topic to get started.';
