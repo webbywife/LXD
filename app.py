@@ -1594,13 +1594,13 @@ def api_parse_course_guide():
 @app.route("/api/generate-module-content", methods=["POST"])
 @login_required
 def api_generate_module_content():
-    """Generate full HTML content for a single submodule."""
+    """Generate all 5 instructional sections for a single submodule."""
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    content, err = generate_submodule_content(
+    sections, err = generate_submodule_content(
         course_title=data.get("course_title", ""),
         module_title=data.get("module_title", ""),
         submodule=data.get("submodule", {}),
@@ -1610,7 +1610,33 @@ def api_generate_module_content():
     if err:
         return jsonify({"error": err}), 500
 
-    return jsonify({"content": content})
+    _log_activity("module_generate", data.get("submodule", {}).get("title", ""))
+    return jsonify({"sections": sections})
+
+
+@app.route("/api/export-module-pptx", methods=["POST"])
+@login_required
+def api_export_module_pptx():
+    """Generate a PPTX from the Teach & Learn markdown of a submodule."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    pptx_md = data.get("pptx_md", "").strip()
+    if not pptx_md:
+        return jsonify({"error": "pptx_md is required"}), 400
+
+    title = data.get("title", "Lesson")
+    safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:40]
+
+    buf = build_pptx(pptx_md)
+    _log_activity("module_pptx", title)
+    return send_file(
+        buf,
+        mimetype="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        as_attachment=True,
+        download_name=f"{safe_title}.pptx",
+    )
 
 
 @app.route("/api/export-course", methods=["POST"])
@@ -1625,6 +1651,13 @@ def api_export_course():
     course_data = data.get("course_data")
     if not course_data:
         return jsonify({"error": "course_data is required"}), 400
+
+    # Attach sections dict to each submodule for the exporter
+    gen_results = data.get("gen_results", {})
+    for mod in course_data.get("modules", []):
+        for sub in mod.get("submodules", []):
+            if sub["id"] in gen_results:
+                sub["sections"] = gen_results[sub["id"]]
 
     course_title = course_data.get("course_title", "Course")
     safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", course_title)[:40]

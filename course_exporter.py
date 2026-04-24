@@ -1,6 +1,13 @@
 """
 LMS Course Package Exporters
-Generates Moodle .mbz, Canvas .imscc, and Brightspace .zip from module content.
+Builds Moodle .mbz, Canvas .imscc, and Brightspace .zip from 5-section module content.
+
+Each submodule contains 5 instructional sections:
+  a. Overview       — objectives + resources
+  b. Teach & Learn  — lesson content
+  c. Practice       — reinforcement activities
+  d. Assessment     — formative quiz + authentic assessment
+  e. Rubric         — scoring rubric
 """
 import html as html_lib
 import io
@@ -9,53 +16,156 @@ import uuid
 import zipfile
 from datetime import datetime
 
+SECTION_LABELS = [
+    ('overview',       'a. Overview'),
+    ('teach_and_learn','b. Teach & Learn'),
+    ('practice',       'c. Practice'),
+    ('assessment',     'd. Assessment'),
+    ('rubric',         'e. Rubric'),
+]
+
+SECTION_COLORS = {
+    'overview':       ('#1e3a5f', '#e8f0fe'),
+    'teach_and_learn':('#155724', '#d4edda'),
+    'practice':       ('#7b2d00', '#fce8d5'),
+    'assessment':     ('#4a235a', '#f3e8fd'),
+    'rubric':         ('#0c3547', '#d1ecf1'),
+}
+
 
 def _safe_id(s: str) -> str:
     return re.sub(r'[^a-zA-Z0-9]', '_', s)[:32]
 
 
-def _html_page(title: str, content: str) -> str:
+def _section_html(section_key: str, sub_title: str, sections: dict) -> str:
+    """Build a full styled HTML page for one of the 5 instructional sections."""
+    label  = dict(SECTION_LABELS)[section_key]
+    header_color, bg_color = SECTION_COLORS.get(section_key, ('#1a1a2e', '#f8f9fa'))
+    s      = sections.get(section_key, {})
+
+    body_html = ''
+
+    if section_key == 'overview':
+        objs = s.get('objectives', [])
+        res  = s.get('resources', [])
+        body_html += s.get('html', '')
+        if objs:
+            items = ''.join(f'<li>{html_lib.escape(o)}</li>' for o in objs)
+            body_html += f'<h2>Learning Objectives</h2><ul class="obj-list">{items}</ul>'
+        if res:
+            items = ''.join(f'<li>{html_lib.escape(r)}</li>' for r in res)
+            body_html += f'<h2>Resources</h2><ul class="res-list">{items}</ul>'
+
+    elif section_key == 'teach_and_learn':
+        body_html = s.get('html', '')
+
+    elif section_key == 'practice':
+        body_html = s.get('html', '')
+
+    elif section_key == 'assessment':
+        quiz_html     = s.get('quiz_html', '')
+        authentic_html = s.get('authentic_html', '')
+        body_html = (
+            '<div class="section-block">' + quiz_html + '</div>'
+            '<hr/>'
+            '<div class="section-block">' + authentic_html + '</div>'
+        )
+
+    elif section_key == 'rubric':
+        body_html = _rubric_html(s)
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{html_lib.escape(title)}</title>
+<title>{html_lib.escape(label)}: {html_lib.escape(sub_title)}</title>
 <style>
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:820px;margin:40px auto;padding:0 24px;color:#1a1a2e;line-height:1.75;}}
-h1{{color:#1e3a5f;border-bottom:3px solid #4a90d9;padding-bottom:12px;margin-bottom:24px;}}
-h2{{color:#2d5a8e;margin-top:2em;padding-top:0.5em;border-top:1px solid #e2e8f0;}}
-h3{{color:#3a7ab8;margin-top:1.5em;}}
-blockquote{{background:#f0f7ff;border-left:4px solid #4a90d9;margin:16px 0;padding:14px 20px;border-radius:0 8px 8px 0;font-style:italic;}}
-table{{width:100%;border-collapse:collapse;margin:16px 0;}}
-th{{background:#1e3a5f;color:#fff;padding:10px 14px;text-align:left;}}
-td{{padding:10px 14px;border-bottom:1px solid #e2e8f0;}}
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#f5f5f5;color:#1a1a2e;line-height:1.75;}}
+.page-header{{background:{header_color};color:#fff;padding:28px 40px;}}
+.page-header .section-badge{{font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;opacity:.75;margin-bottom:6px;}}
+.page-header h1{{font-size:22px;font-weight:700;}}
+.page-header .sub{{font-size:13px;opacity:.7;margin-top:4px;}}
+.content{{max-width:840px;margin:32px auto;padding:0 24px 60px;}}
+.content h2{{color:{header_color};font-size:17px;font-weight:700;
+  margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid {bg_color.replace('#','').join(['#',''])};
+  border-bottom-color:{header_color}33;}}
+.content h3{{color:{header_color};font-size:14px;font-weight:700;margin:18px 0 8px;}}
+.content p{{margin-bottom:12px;font-size:14px;}}
+.content ul,.content ol{{padding-left:1.5em;margin-bottom:14px;font-size:14px;}}
+.content li{{margin-bottom:6px;}}
+blockquote{{background:{bg_color};border-left:4px solid {header_color};
+  padding:12px 18px;margin:14px 0;border-radius:0 8px 8px 0;font-style:italic;font-size:14px;}}
+.obj-list li{{background:#f0fdf4;border-left:3px solid #22c55e;
+  padding:8px 12px;border-radius:0 6px 6px 0;list-style:none;margin-bottom:8px;}}
+.res-list li{{background:{bg_color};padding:8px 12px;border-radius:6px;
+  list-style:none;margin-bottom:6px;font-size:13px;}}
+table{{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;}}
+th{{background:{header_color};color:#fff;padding:10px 14px;text-align:left;}}
+td{{padding:10px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;}}
 tr:nth-child(even) td{{background:#f8fafc;}}
-ul,ol{{padding-left:1.5em;}}
-li{{margin-bottom:6px;}}
-strong{{color:#1e3a5f;}}
-.objectives li{{background:#f0fdf4;border-left:3px solid #22c55e;padding:8px 12px;border-radius:0 6px 6px 0;list-style:none;margin-bottom:8px;}}
-.objectives{{padding-left:0;}}
-.check-q li{{background:#fefce8;border-left:3px solid #eab308;padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:10px;}}
-.check-q{{padding-left:0;}}
-.activity{{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:16px 20px;margin-bottom:16px;}}
-.activity h4{{color:#6d28d9;margin:0 0 8px;}}
+.section-block{{margin-bottom:24px;}}
+hr{{border:none;border-top:2px solid {bg_color};margin:28px 0;}}
+em{{color:{header_color};font-weight:600;}}
+strong{{font-weight:700;}}
 </style>
 </head>
 <body>
-<h1>{html_lib.escape(title)}</h1>
-{content}
+<div class="page-header">
+  <div class="section-badge">{html_lib.escape(label)}</div>
+  <h1>{html_lib.escape(sub_title)}</h1>
+</div>
+<div class="content">
+{body_html}
+</div>
 </body>
 </html>"""
+
+
+def _rubric_html(rubric: dict) -> str:
+    """Build the rubric table HTML."""
+    if rubric.get('html'):
+        return rubric['html']
+    criteria = rubric.get('criteria', [])
+    if not criteria:
+        return '<p>No rubric data available.</p>'
+    rows = ''
+    for c in criteria:
+        rows += (
+            f"<tr>"
+            f"<td><strong>{html_lib.escape(c.get('criterion',''))}</strong></td>"
+            f"<td>{html_lib.escape(c.get('excellent',''))}</td>"
+            f"<td>{html_lib.escape(c.get('proficient',''))}</td>"
+            f"<td>{html_lib.escape(c.get('developing',''))}</td>"
+            f"<td>{html_lib.escape(c.get('beginning',''))}</td>"
+            f"</tr>"
+        )
+    return (
+        f"<h2>{html_lib.escape(rubric.get('title','Assessment Rubric'))}</h2>"
+        "<table><thead><tr>"
+        "<th>Criterion</th><th>Excellent (4)</th><th>Proficient (3)</th>"
+        "<th>Developing (2)</th><th>Beginning (1)</th>"
+        f"</tr></thead><tbody>{rows}</tbody></table>"
+    )
+
+
+def _get_sections(sub: dict) -> dict:
+    """Return the 5-section dict regardless of old/new format."""
+    if 'sections' in sub:
+        return sub['sections']
+    # Legacy: single content_html → put in teach_and_learn
+    if sub.get('content_html'):
+        return {'teach_and_learn': {'html': sub['content_html']}}
+    return {}
 
 
 # ── IMS Common Cartridge 1.1 — Canvas & Brightspace ──────────────────────────
 
 def build_imscc(course_data: dict, platform: str = 'canvas') -> io.BytesIO:
-    """
-    Build an IMS Common Cartridge 1.1 (.imscc) package.
-    platform: 'canvas' | 'brightspace'
-    """
+    """Build an IMS Common Cartridge 1.1 (.imscc) for Canvas or Brightspace."""
     course_title = course_data.get('course_title', 'Untitled Course')
     course_desc  = course_data.get('course_description', '')
     modules      = course_data.get('modules', [])
@@ -65,23 +175,38 @@ def build_imscc(course_data: dict, platform: str = 'canvas') -> io.BytesIO:
     files         = {}
 
     for mod in modules:
-        mod_id   = _safe_id(mod['id'])
+        mod_id    = _safe_id(mod['id'])
         mod_items = ''
+
         for sub in mod.get('submodules', []):
-            sub_id    = _safe_id(sub['id'])
-            res_id    = f'RES_{sub_id}'
-            file_path = f'{mod_id}/{sub_id}.html'
+            sub_id   = _safe_id(sub['id'])
+            sections = _get_sections(sub)
+            sub_items = ''
+
+            for sec_key, sec_label in SECTION_LABELS:
+                file_path = f'{mod_id}/{sub_id}_{sec_key}.html'
+                item_id   = f'{sub_id}_{sec_key}'
+                res_id    = f'RES_{item_id}'
+                page_html = _section_html(sec_key, sub['title'], sections)
+
+                sub_items += (
+                    f'<item identifier="{item_id}" identifierref="{res_id}">'
+                    f'<title>{html_lib.escape(sec_label)}: {html_lib.escape(sub["title"])}</title>'
+                    f'</item>\n'
+                )
+                resources_xml += (
+                    f'<resource identifier="{res_id}" type="webcontent" href="{file_path}">'
+                    f'<file href="{file_path}"/>'
+                    f'</resource>\n'
+                )
+                files[file_path] = page_html
+
             mod_items += (
-                f'<item identifier="{sub_id}" identifierref="{res_id}">'
+                f'<item identifier="{sub_id}">'
                 f'<title>{html_lib.escape(sub["title"])}</title>'
+                f'{sub_items}'
                 f'</item>\n'
             )
-            resources_xml += (
-                f'<resource identifier="{res_id}" type="webcontent" href="{file_path}">'
-                f'<file href="{file_path}"/>'
-                f'</resource>\n'
-            )
-            files[file_path] = _html_page(sub['title'], sub.get('content_html', ''))
 
         items_xml += (
             f'<item identifier="{mod_id}">'
@@ -130,13 +255,13 @@ def build_imscc(course_data: dict, platform: str = 'canvas') -> io.BytesIO:
         if platform == 'canvas':
             zf.writestr('course_settings/canvas_export.txt', b'true')
         elif platform == 'brightspace':
-            d2l_meta = (
+            d2l = (
                 '<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<Properties Version="1.0">\n'
                 f'  <Property Name="Title" Value="{html_lib.escape(course_title)}"/>\n'
                 '</Properties>'
             )
-            zf.writestr('d2l_content.xml', d2l_meta.encode('utf-8'))
+            zf.writestr('d2l_content.xml', d2l.encode('utf-8'))
     buf.seek(0)
     return buf
 
@@ -144,7 +269,7 @@ def build_imscc(course_data: dict, platform: str = 'canvas') -> io.BytesIO:
 # ── Moodle Backup .mbz ────────────────────────────────────────────────────────
 
 def build_moodle_mbz(course_data: dict) -> io.BytesIO:
-    """Build a Moodle 4.x-compatible backup (.mbz) package."""
+    """Build a Moodle 4.x-compatible backup (.mbz). Each submodule → 5 page activities."""
     course_title = course_data.get('course_title', 'Untitled Course')
     course_desc  = course_data.get('course_description', '')
     modules      = course_data.get('modules', [])
@@ -165,73 +290,77 @@ def build_moodle_mbz(course_data: dict) -> io.BytesIO:
         page_ids_in_section = []
 
         for sub in mod.get('submodules', []):
-            pid = page_id
-            page_id += 1
-            page_ids_in_section.append(str(pid))
-            p_title   = html_lib.escape(sub['title'])
-            p_content = sub.get('content_html', '')
+            sections = _get_sections(sub)
 
-            activity_files[f'activities/page_{pid}/page.xml'] = (
-                f'<?xml version="1.0" encoding="UTF-8"?>\n'
-                f'<activity id="{pid}" moduleid="{pid}" modulename="page" contextid="{pid}">\n'
-                f'  <page id="{pid}">\n'
-                f'    <name>{p_title}</name>\n'
-                f'    <intro></intro>\n'
-                f'    <introformat>1</introformat>\n'
-                f'    <content><![CDATA[{p_content}]]></content>\n'
-                f'    <contentformat>1</contentformat>\n'
-                f'    <legacyfiles>0</legacyfiles>\n'
-                f'    <legacyfileslast>$@NULL@$</legacyfileslast>\n'
-                f'    <display>5</display>\n'
-                f'    <displayoptions>a:0:{{}}</displayoptions>\n'
-                f'    <revision>1</revision>\n'
-                f'    <timemodified>{now}</timemodified>\n'
-                f'  </page>\n'
-                f'</activity>'
-            )
-            activity_files[f'activities/page_{pid}/module.xml'] = (
-                f'<?xml version="1.0" encoding="UTF-8"?>\n'
-                f'<module id="{pid}" version="2022041900">\n'
-                f'  <modulename>page</modulename>\n'
-                f'  <sectionid>{sid}</sectionid>\n'
-                f'  <sectionnumber>{sid}</sectionnumber>\n'
-                f'  <idnumber></idnumber>\n'
-                f'  <added>{now}</added>\n'
-                f'  <score>0</score>\n'
-                f'  <indent>0</indent>\n'
-                f'  <visible>1</visible>\n'
-                f'  <visibleoncoursepage>1</visibleoncoursepage>\n'
-                f'  <visibleold>1</visibleold>\n'
-                f'  <groupmode>0</groupmode>\n'
-                f'  <groupingid>0</groupingid>\n'
-                f'  <completion>0</completion>\n'
-                f'  <completiongradeitemnumber>$@NULL@$</completiongradeitemnumber>\n'
-                f'  <completionview>0</completionview>\n'
-                f'  <completionexpected>0</completionexpected>\n'
-                f'  <availability>$@NULL@$</availability>\n'
-                f'  <showdescription>0</showdescription>\n'
-                f'  <tags></tags>\n'
-                f'</module>'
-            )
-            for stub_name in ('inforef.xml', 'grades.xml', 'roles.xml',
-                              'filters.xml', 'comments.xml', 'competencies.xml'):
-                activity_files[f'activities/page_{pid}/{stub_name}'] = _mbz_stub(stub_name)
+            for sec_key, sec_label in SECTION_LABELS:
+                pid       = page_id
+                page_id  += 1
+                page_ids_in_section.append(str(pid))
 
-            activity_entries.append(
-                f'<activity>'
-                f'<modulename>page</modulename>'
-                f'<sectionid>{sid}</sectionid>'
-                f'<sectionnumber>{sid}</sectionnumber>'
-                f'<title>{p_title}</title>'
-                f'<directory>activities/page_{pid}</directory>'
-                f'</activity>'
-            )
-            settings_extra += (
-                f'<setting><level>activity</level><activity>page_{pid}</activity>'
-                f'<name>page_{pid}_included</name><value>1</value></setting>'
-                f'<setting><level>activity</level><activity>page_{pid}</activity>'
-                f'<name>page_{pid}_userinfo</name><value>0</value></setting>'
-            )
+                p_title   = f'{sec_label}: {sub["title"]}'
+                p_content = _section_html(sec_key, sub['title'], sections)
+
+                activity_files[f'activities/page_{pid}/page.xml'] = (
+                    f'<?xml version="1.0" encoding="UTF-8"?>\n'
+                    f'<activity id="{pid}" moduleid="{pid}" modulename="page" contextid="{pid}">\n'
+                    f'  <page id="{pid}">\n'
+                    f'    <name>{html_lib.escape(p_title)}</name>\n'
+                    f'    <intro></intro>\n'
+                    f'    <introformat>1</introformat>\n'
+                    f'    <content><![CDATA[{p_content}]]></content>\n'
+                    f'    <contentformat>1</contentformat>\n'
+                    f'    <legacyfiles>0</legacyfiles>\n'
+                    f'    <legacyfileslast>$@NULL@$</legacyfileslast>\n'
+                    f'    <display>5</display>\n'
+                    f'    <displayoptions>a:0:{{}}</displayoptions>\n'
+                    f'    <revision>1</revision>\n'
+                    f'    <timemodified>{now}</timemodified>\n'
+                    f'  </page>\n'
+                    f'</activity>'
+                )
+                activity_files[f'activities/page_{pid}/module.xml'] = (
+                    f'<?xml version="1.0" encoding="UTF-8"?>\n'
+                    f'<module id="{pid}" version="2022041900">\n'
+                    f'  <modulename>page</modulename>\n'
+                    f'  <sectionid>{sid}</sectionid>\n'
+                    f'  <sectionnumber>{sid}</sectionnumber>\n'
+                    f'  <idnumber></idnumber>\n'
+                    f'  <added>{now}</added>\n'
+                    f'  <score>0</score>\n'
+                    f'  <indent>0</indent>\n'
+                    f'  <visible>1</visible>\n'
+                    f'  <visibleoncoursepage>1</visibleoncoursepage>\n'
+                    f'  <visibleold>1</visibleold>\n'
+                    f'  <groupmode>0</groupmode>\n'
+                    f'  <groupingid>0</groupingid>\n'
+                    f'  <completion>0</completion>\n'
+                    f'  <completiongradeitemnumber>$@NULL@$</completiongradeitemnumber>\n'
+                    f'  <completionview>0</completionview>\n'
+                    f'  <completionexpected>0</completionexpected>\n'
+                    f'  <availability>$@NULL@$</availability>\n'
+                    f'  <showdescription>0</showdescription>\n'
+                    f'  <tags></tags>\n'
+                    f'</module>'
+                )
+                for stub_name in ('inforef.xml', 'grades.xml', 'roles.xml',
+                                  'filters.xml', 'comments.xml', 'competencies.xml'):
+                    activity_files[f'activities/page_{pid}/{stub_name}'] = _mbz_stub(stub_name)
+
+                activity_entries.append(
+                    f'<activity>'
+                    f'<modulename>page</modulename>'
+                    f'<sectionid>{sid}</sectionid>'
+                    f'<sectionnumber>{sid}</sectionnumber>'
+                    f'<title>{html_lib.escape(p_title)}</title>'
+                    f'<directory>activities/page_{pid}</directory>'
+                    f'</activity>'
+                )
+                settings_extra += (
+                    f'<setting><level>activity</level><activity>page_{pid}</activity>'
+                    f'<name>page_{pid}_included</name><value>1</value></setting>'
+                    f'<setting><level>activity</level><activity>page_{pid}</activity>'
+                    f'<name>page_{pid}_userinfo</name><value>0</value></setting>'
+                )
 
         seq = ','.join(page_ids_in_section)
         section_files[f'sections/section_{sid}/section.xml'] = (
@@ -262,7 +391,7 @@ def build_moodle_mbz(course_data: dict) -> io.BytesIO:
             f'<name>section_{sid}_userinfo</name><value>0</value></setting>'
         )
 
-    # Section 0 is always required (general/intro section)
+    # Section 0 is always required
     section_files['sections/section_0/section.xml'] = (
         f'<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<section id="0">\n'

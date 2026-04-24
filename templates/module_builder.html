@@ -203,6 +203,21 @@ h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
 .toast.success{background:#16a34a;}
 .toast.error{background:var(--danger);}
 
+/* Section tabs */
+.sec-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--border);padding-bottom:0;margin-bottom:0;}
+.sec-tab{background:transparent;border:none;padding:9px 14px;font-size:12px;font-weight:700;
+  color:var(--text-s);cursor:pointer;border-radius:8px 8px 0 0;transition:.15s;font-family:'Nunito',sans-serif;
+  border:1px solid transparent;border-bottom:none;margin-bottom:-2px;}
+.sec-tab:hover{color:var(--c1);background:var(--c1-light);}
+.sec-tab.active{color:var(--c1);background:var(--surface);border-color:var(--border);
+  border-bottom-color:var(--surface);}
+
+/* Rubric table */
+.rubric-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.rubric-tbl th,.rubric-tbl td{border:1px solid var(--border);padding:8px 12px;text-align:left;vertical-align:top;}
+.rubric-tbl th{background:#faf9ff;font-weight:800;color:var(--c1);font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.rubric-tbl td:first-child{font-weight:700;white-space:nowrap;background:#fafaf9;}
+
 /* Spinner */
 .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
   border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
@@ -680,6 +695,16 @@ function syncStructure() {
 }
 
 // ── Step 3: Generate ─────────────────────────────────────────────────────────
+const SECTION_TABS = [
+  { key: 'overview',        label: 'a. Overview',      icon: '📋' },
+  { key: 'teach_and_learn', label: 'b. Teach & Learn', icon: '🎓' },
+  { key: 'practice',        label: 'c. Practice',      icon: '✏️'  },
+  { key: 'assessment',      label: 'd. Assessment',    icon: '📝' },
+  { key: 'rubric',          label: 'e. Rubric',        icon: '📊' },
+];
+
+let activeTab = 'overview';
+
 function buildSidebar() {
   syncStructure();
   const sidebar = document.getElementById('genSidebar');
@@ -718,11 +743,17 @@ function selectSubmodule(item) {
   item.classList.add('active');
   activeSubId = item.dataset.subId;
 
+  const selBtn = document.getElementById('genSelBtn');
+  if (selBtn) selBtn.style.display = 'inline-flex';
+
+  renderPreview();
+}
+
+function renderPreview() {
   const preview = document.getElementById('genPreview');
-  const html = genResults[activeSubId];
-  if (html) {
-    preview.innerHTML = `<div class="gen-preview-content">${html}</div>`;
-  } else {
+  const sections = genResults[activeSubId];
+
+  if (!sections) {
     preview.innerHTML = `
       <div class="gen-preview-placeholder">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -733,10 +764,104 @@ function selectSubmodule(item) {
           <button class="btn btn-primary btn-sm" onclick="generateSelected()">⚡ Generate This Submodule</button>
         </div>
       </div>`;
+    return;
   }
 
-  const selBtn = document.getElementById('genSelBtn');
-  if (selBtn) selBtn.style.display = 'inline-flex';
+  // Tab bar
+  const tabsHtml = SECTION_TABS.map(t => `
+    <button class="sec-tab${activeTab === t.key ? ' active' : ''}"
+      onclick="switchTab('${t.key}')">${t.icon} ${t.label}</button>
+  `).join('');
+
+  // Content for active tab
+  const s = sections[activeTab] || {};
+  let contentHtml = '';
+
+  if (activeTab === 'overview') {
+    const objs = (s.objectives || []).map(o => `<li>${esc(o)}</li>`).join('');
+    const res  = (s.resources  || []).map(r => `<li>${esc(r)}</li>`).join('');
+    contentHtml = (s.html || '') +
+      (objs ? `<h3 style="margin-top:16px;">Learning Objectives</h3><ul>${objs}</ul>` : '') +
+      (res  ? `<h3 style="margin-top:12px;">Resources</h3><ul>${res}</ul>` : '');
+
+  } else if (activeTab === 'teach_and_learn') {
+    const sub = activeSubId ? courseData.modules.flatMap(m=>m.submodules).find(s=>s.id===activeSubId) : null;
+    const pptxMd = s.pptx_md || '';
+    contentHtml = (s.html || '') + (pptxMd ? `
+      <div style="margin-top:20px;padding:16px;background:#f5f3ff;border-radius:10px;border:1px solid #ddd6fe;">
+        <div style="font-weight:700;color:#6d28d9;margin-bottom:8px;">📊 PowerPoint Presentation</div>
+        <p style="font-size:13px;color:#555;margin-bottom:12px;">Download a branded PPTX presentation generated from this lesson content.</p>
+        <button class="btn btn-sm" style="background:#6d28d9;color:#fff;"
+          onclick="downloadPptx('${esc(activeSubId)}', '${esc(sub ? sub.title : '')}')">
+          ⬇ Download PPTX
+        </button>
+      </div>` : '');
+
+  } else if (activeTab === 'practice') {
+    contentHtml = s.html || '';
+
+  } else if (activeTab === 'assessment') {
+    contentHtml =
+      '<h3 style="color:#4a235a;margin-bottom:12px;">Formative Quiz</h3>' +
+      (s.quiz_html || '') +
+      '<hr style="margin:24px 0;border-color:#e2e8f0;"/>' +
+      '<h3 style="color:#4a235a;margin-bottom:12px;">Authentic Assessment</h3>' +
+      (s.authentic_html || '');
+
+  } else if (activeTab === 'rubric') {
+    const criteria = s.criteria || [];
+    if (criteria.length) {
+      const rows = criteria.map(c => `
+        <tr>
+          <td><strong>${esc(c.criterion)}</strong></td>
+          <td>${esc(c.excellent)}</td>
+          <td>${esc(c.proficient)}</td>
+          <td>${esc(c.developing)}</td>
+          <td>${esc(c.beginning)}</td>
+        </tr>`).join('');
+      contentHtml = `<h3 style="margin-bottom:12px;">${esc(s.title||'Assessment Rubric')}</h3>
+        <div style="overflow-x:auto;"><table class="rubric-tbl">
+          <thead><tr>
+            <th>Criterion</th><th>Excellent (4)</th><th>Proficient (3)</th>
+            <th>Developing (2)</th><th>Beginning (1)</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>`;
+    } else {
+      contentHtml = s.html || '';
+    }
+  }
+
+  preview.innerHTML = `
+    <div class="sec-tabs">${tabsHtml}</div>
+    <div class="gen-preview-content" style="padding-top:16px;">${contentHtml}</div>`;
+}
+
+function switchTab(key) {
+  activeTab = key;
+  renderPreview();
+}
+
+async function downloadPptx(subId, subTitle) {
+  const sections = genResults[subId];
+  if (!sections || !sections.teach_and_learn) return;
+  const pptxMd = sections.teach_and_learn.pptx_md || '';
+  if (!pptxMd) { toast('No PPTX outline available.', 'error'); return; }
+
+  const res = await fetch('/api/export-module-pptx' + (AUTH ? `?_t=${AUTH}` : ''), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pptx_md: pptxMd, title: subTitle }),
+  });
+  if (!res.ok) { toast('PPTX generation failed.', 'error'); return; }
+
+  const blob = await res.blob();
+  const safe = subTitle.replace(/[^a-zA-Z0-9]/g,'_').slice(0,40);
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `${safe}.pptx`; a.click();
+  URL.revokeObjectURL(url);
+  toast('PPTX downloaded!', 'success');
 }
 
 let generatingAll = false;
@@ -793,22 +918,19 @@ async function generateItem(mi, si, itemEl) {
 
   try {
     const res = await apiFetch('/api/generate-module-content', {
-      course_title:  courseData.course_title,
-      module_title:  mod.title,
-      submodule:     sub,
+      course_title:   courseData.course_title,
+      module_title:   mod.title,
+      submodule:      sub,
       course_context: courseContext,
     });
     if (res.error) throw new Error(res.error);
 
-    genResults[sub.id] = res.content;
+    genResults[sub.id] = res.sections;
     itemEl.classList.remove('generating');
     itemEl.classList.add('done');
     document.getElementById(badgeId).textContent = '✅';
 
-    if (activeSubId === sub.id) {
-      document.getElementById('genPreview').innerHTML =
-        `<div class="gen-preview-content">${res.content}</div>`;
-    }
+    if (activeSubId === sub.id) renderPreview();
   } catch(e) {
     itemEl.classList.remove('generating');
     itemEl.classList.add('error');
@@ -856,13 +978,6 @@ async function downloadExport() {
   const lms = document.querySelector('input[name=lms]:checked').value;
   const btn = document.getElementById('downloadBtn');
 
-  // Attach generated content to courseData
-  courseData.modules.forEach(mod => {
-    mod.submodules.forEach(sub => {
-      sub.content_html = genResults[sub.id] || '';
-    });
-  });
-
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Building package…';
 
@@ -870,7 +985,7 @@ async function downloadExport() {
     const res = await fetch('/api/export-course' + (AUTH ? `?_t=${AUTH}` : ''), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lms, course_data: courseData }),
+      body: JSON.stringify({ lms, course_data: courseData, gen_results: genResults }),
     });
     if (!res.ok) {
       const d = await res.json();
