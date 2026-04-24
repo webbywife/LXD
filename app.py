@@ -33,6 +33,8 @@ from auth import auth_bp, login_required, init_db, verify_auth_token, generate_a
 from activities_generator import generate_activity_content as _gen_activity_content
 from pptx_builder import build_pptx
 from syllabus_generator import generate_syllabus as _gen_syllabus
+from module_generator import extract_text_from_file, parse_course_guide, generate_submodule_content
+from course_exporter import build_moodle_mbz, build_imscc
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -1551,6 +1553,99 @@ def api_activity_data(token):
 def activities_play(token):
     """Public student-facing activity play page — no login required."""
     return render_template("activities_play.html", token=token)
+
+
+# ── Module Builder ───────────────────────────────────────────────────────────
+
+@app.route("/modules")
+@login_required
+def module_builder():
+    """Module & submodule builder page."""
+    return render_template("module_builder.html")
+
+
+@app.route("/api/parse-course-guide", methods=["POST"])
+@login_required
+def api_parse_course_guide():
+    """Upload a course guide file (or receive pasted text) and extract a module structure."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+
+    context_text = ""
+    if "file" in request.files and request.files["file"].filename:
+        f = request.files["file"]
+        content = f.read()
+        context_text, err = extract_text_from_file(content, f.filename)
+        if err:
+            return jsonify({"error": err}), 400
+    elif request.form.get("text"):
+        context_text = request.form["text"].strip()
+
+    if not context_text:
+        return jsonify({"error": "No content provided. Upload a file or paste text."}), 400
+
+    structure, err = parse_course_guide(context_text, api_key)
+    if err:
+        return jsonify({"error": err}), 500
+
+    _log_activity("module_parse", structure.get("course_title", ""))
+    return jsonify({"structure": structure, "context_text": context_text[:8000]})
+
+
+@app.route("/api/generate-module-content", methods=["POST"])
+@login_required
+def api_generate_module_content():
+    """Generate full HTML content for a single submodule."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    content, err = generate_submodule_content(
+        course_title=data.get("course_title", ""),
+        module_title=data.get("module_title", ""),
+        submodule=data.get("submodule", {}),
+        course_context=data.get("course_context", ""),
+        api_key=api_key,
+    )
+    if err:
+        return jsonify({"error": err}), 500
+
+    return jsonify({"content": content})
+
+
+@app.route("/api/export-course", methods=["POST"])
+@login_required
+def api_export_course():
+    """Build and download a Moodle .mbz, Canvas .imscc, or Brightspace .zip package."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    lms = data.get("lms", "moodle")
+    course_data = data.get("course_data")
+    if not course_data:
+        return jsonify({"error": "course_data is required"}), 400
+
+    course_title = course_data.get("course_title", "Course")
+    safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", course_title)[:40]
+
+    if lms == "moodle":
+        buf = build_moodle_mbz(course_data)
+        _log_activity("module_export", f"Moodle: {course_title}")
+        return send_file(buf, mimetype="application/zip", as_attachment=True,
+                         download_name=f"{safe_title}.mbz")
+    elif lms == "canvas":
+        buf = build_imscc(course_data, platform="canvas")
+        _log_activity("module_export", f"Canvas: {course_title}")
+        return send_file(buf, mimetype="application/zip", as_attachment=True,
+                         download_name=f"{safe_title}.imscc")
+    elif lms == "brightspace":
+        buf = build_imscc(course_data, platform="brightspace")
+        _log_activity("module_export", f"Brightspace: {course_title}")
+        return send_file(buf, mimetype="application/zip", as_attachment=True,
+                         download_name=f"{safe_title}.zip")
+    else:
+        return jsonify({"error": f"Unknown LMS: {lms}"}), 400
 
 
 if __name__ == "__main__":

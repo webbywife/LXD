@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="auth-token" content="{{ auth_token }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<title>Module Builder — SKOOLED-AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ds.css') }}">
+<style>
+:root{
+  --bg:#f7f7f5;--surface:#fff;--c1:#6d28d9;--c1d:#5b21b6;--c1-light:#f5f3ff;
+  --c2:#1a1a1a;--text:#1a1a1a;--text-s:#6b6b68;--border:#e4e4e1;
+  --success:#22c55e;--danger:#ef4444;--warn:#f59e0b;
+  --rad:14px;--shadow:0 1px 4px rgba(0,0,0,.05),0 2px 10px rgba(0,0,0,.04);
+  --shadow-md:0 4px 20px rgba(0,0,0,.08);
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);margin-left:70px;line-height:1.65;}
+h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
+
+/* Top bar */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;
+  display:flex;align-items:center;gap:16px;min-height:58px;position:sticky;top:0;z-index:50;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-brand svg{width:28px;height:28px;}
+.hdr-brand span{font-size:16px;font-weight:800;color:var(--c1);}
+.hdr-sep{flex:1;}
+.badge-new{background:var(--c1-light);color:var(--c1);font-size:10px;font-weight:800;
+  padding:3px 8px;border-radius:20px;letter-spacing:.04em;}
+
+/* Steps nav */
+.steps-nav{display:flex;justify-content:center;gap:0;padding:28px 20px 0;max-width:700px;margin:0 auto;}
+.sn{flex:1;text-align:center;position:relative;padding-bottom:12px;}
+.sn-dot{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:13px;background:var(--border);
+  color:var(--text-s);margin-bottom:6px;transition:.3s;position:relative;z-index:1;}
+.sn.active .sn-dot{background:var(--c1);color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.35);}
+.sn.done .sn-dot{background:var(--success);color:#fff;}
+.sn-label{font-size:11px;font-weight:700;color:var(--text-s);letter-spacing:.01em;}
+.sn.active .sn-label{color:var(--c2);font-weight:800;}
+.sn.done .sn-label{color:var(--success);}
+.sn-line{position:absolute;top:17px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.sn:last-child .sn-line{display:none;}
+.sn.done .sn-line{background:var(--success);}
+
+/* Layout */
+.cnt{max-width:900px;margin:0 auto;padding:28px 20px 60px;}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rad);
+  padding:28px;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-title{font-size:18px;font-weight:800;color:var(--c2);margin:0 0 6px;}
+.card-sub{font-size:13px;color:var(--text-s);margin:0 0 24px;}
+
+/* Step panels */
+.step-panel{display:none;}
+.step-panel.active{display:block;}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:48px 32px;
+  text-align:center;cursor:pointer;transition:.2s;position:relative;background:#fafaf9;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--c1);background:var(--c1-light);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:40px;margin-bottom:12px;}
+.upload-zone h3{font-size:16px;font-weight:800;margin:0 0 6px;color:var(--c2);}
+.upload-zone p{font-size:13px;color:var(--text-s);margin:0;}
+.upload-zone .file-types{display:inline-flex;gap:6px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+.file-types span{background:var(--c1-light);color:var(--c1);font-size:11px;font-weight:700;
+  padding:3px 9px;border-radius:20px;}
+.file-selected{background:#f0fdf4;border-color:var(--success);color:var(--success);}
+.file-selected .upload-icon::before{content:'✓';}
+
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-s);font-size:13px;font-weight:600;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:14px;
+  font-family:'Nunito',sans-serif;font-size:13px;resize:vertical;min-height:140px;
+  outline:none;transition:.2s;box-sizing:border-box;}
+.textarea:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(109,40,217,.1);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:10px;
+  font-size:14px;font-weight:700;cursor:pointer;border:none;transition:.2s;font-family:'Nunito',sans-serif;}
+.btn-primary{background:var(--c1);color:#fff;}
+.btn-primary:hover{background:var(--c1d);}
+.btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--c1);color:var(--c1);}
+.btn-sm{padding:7px 16px;font-size:12px;}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-success{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
+.btn-success:hover{background:#16a34a;color:#fff;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-group{display:flex;gap:10px;align-items:center;margin-top:24px;flex-wrap:wrap;}
+
+/* Structure editor */
+.module-list{display:flex;flex-direction:column;gap:14px;}
+.module-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.module-head{display:flex;align-items:center;gap:12px;padding:14px 18px;
+  background:#faf9ff;border-bottom:1px solid var(--border);cursor:pointer;}
+.module-head:hover{background:var(--c1-light);}
+.module-idx{width:28px;height:28px;border-radius:50%;background:var(--c1);color:#fff;
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.module-title-input{flex:1;border:none;background:transparent;font-family:'Bricolage Grotesque',sans-serif;
+  font-size:15px;font-weight:700;color:var(--c2);outline:none;min-width:0;}
+.module-actions{display:flex;gap:6px;margin-left:auto;flex-shrink:0;}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;transition:.15s;background:transparent;}
+.icon-btn:hover{background:rgba(0,0,0,.06);}
+.icon-btn.del:hover{background:#fef2f2;}
+.module-body{padding:14px 18px;}
+.module-desc-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+  font-family:'Nunito',sans-serif;font-size:13px;color:var(--text-s);outline:none;
+  transition:.2s;margin-bottom:12px;box-sizing:border-box;}
+.module-desc-input:focus{border-color:var(--c1);}
+
+/* Submodule list */
+.sub-list{display:flex;flex-direction:column;gap:8px;}
+.sub-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--bg);border:1px solid var(--border);border-radius:9px;}
+.sub-num{font-size:11px;font-weight:800;color:var(--text-s);min-width:32px;}
+.sub-inputs{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0;}
+.sub-title-input{border:none;background:transparent;font-family:'Nunito',sans-serif;
+  font-size:13px;font-weight:700;color:var(--c2);outline:none;width:100%;}
+.sub-desc-input{border:none;background:transparent;font-family:'Nunito',sans-serif;
+  font-size:12px;color:var(--text-s);outline:none;width:100%;}
+.sub-title-input:focus,.sub-desc-input:focus{border-bottom:1px solid var(--c1);}
+.add-sub-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;
+  border:1px dashed var(--border);background:transparent;font-size:12px;font-weight:700;
+  color:var(--text-s);cursor:pointer;width:100%;justify-content:center;margin-top:8px;transition:.2s;}
+.add-sub-btn:hover{border-color:var(--c1);color:var(--c1);background:var(--c1-light);}
+.add-mod-btn{display:flex;align-items:center;gap:8px;padding:14px 18px;border-radius:12px;
+  border:2px dashed var(--border);background:transparent;font-size:14px;font-weight:700;
+  color:var(--text-s);cursor:pointer;width:100%;justify-content:center;transition:.2s;}
+.add-mod-btn:hover{border-color:var(--c1);color:var(--c1);background:var(--c1-light);}
+
+/* Generate step */
+.gen-grid{display:grid;grid-template-columns:280px 1fr;gap:20px;}
+.gen-sidebar{display:flex;flex-direction:column;gap:6px;}
+.gen-item{padding:10px 14px;border-radius:9px;border:1px solid var(--border);
+  cursor:pointer;transition:.15s;position:relative;}
+.gen-item:hover{border-color:var(--c1);background:var(--c1-light);}
+.gen-item.active{border-color:var(--c1);background:var(--c1-light);}
+.gen-item.done{border-color:var(--success);background:#f0fdf4;}
+.gen-item.error{border-color:var(--danger);background:#fef2f2;}
+.gen-item.generating{border-color:var(--warn);background:#fffbeb;}
+.gen-item-title{font-size:12px;font-weight:700;color:var(--c2);margin-bottom:2px;}
+.gen-item-sub{font-size:11px;color:var(--text-s);}
+.gen-item-badge{position:absolute;top:10px;right:10px;font-size:11px;}
+.gen-module-label{font-size:10px;font-weight:800;color:var(--c1);letter-spacing:.05em;
+  text-transform:uppercase;padding:10px 0 4px;margin:0;}
+.gen-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:28px;min-height:400px;overflow-y:auto;max-height:620px;}
+.gen-preview-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:360px;color:var(--text-s);text-align:center;gap:12px;}
+.gen-preview-placeholder svg{opacity:.3;}
+.gen-preview-content{font-size:14px;line-height:1.75;}
+.gen-preview-content h2{color:#2d5a8e;font-size:16px;margin-top:1.5em;padding-top:.75em;
+  border-top:1px solid var(--border);}
+.gen-preview-content h2:first-child{margin-top:0;padding-top:0;border-top:none;}
+.gen-preview-content h3{color:#3a7ab8;font-size:14px;}
+.gen-preview-content blockquote{background:#f0f7ff;border-left:4px solid #4a90d9;
+  margin:12px 0;padding:10px 16px;border-radius:0 6px 6px 0;font-style:italic;}
+
+.progress-bar-wrap{height:6px;background:var(--border);border-radius:3px;margin:16px 0 8px;overflow:hidden;}
+.progress-bar{height:100%;background:var(--c1);border-radius:3px;transition:width .4s;}
+.progress-label{font-size:12px;color:var(--text-s);text-align:center;}
+
+.gen-controls{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+.gen-status{font-size:13px;color:var(--text-s);margin-left:auto;}
+
+/* Export step */
+.export-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.export-card{border:2px solid var(--border);border-radius:12px;padding:24px 20px;
+  text-align:center;cursor:pointer;transition:.2s;position:relative;}
+.export-card:hover{border-color:var(--c1);background:var(--c1-light);}
+.export-card.selected{border-color:var(--c1);background:var(--c1-light);}
+.export-card input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+.export-logo{font-size:36px;margin-bottom:10px;}
+.export-name{font-size:15px;font-weight:800;color:var(--c2);margin-bottom:4px;}
+.export-ext{font-size:11px;font-weight:700;color:var(--text-s);background:var(--bg);
+  padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+.export-desc{font-size:12px;color:var(--text-s);line-height:1.5;}
+.export-check{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;
+  background:var(--c1);color:#fff;display:none;align-items:center;justify-content:center;font-size:11px;}
+.export-card.selected .export-check{display:flex;}
+
+.summary-box{background:#faf9ff;border:1px solid #ddd6fe;border-radius:10px;padding:18px 20px;
+  margin-bottom:20px;}
+.summary-row{display:flex;gap:8px;font-size:13px;margin-bottom:6px;}
+.summary-row:last-child{margin-bottom:0;}
+.summary-label{font-weight:700;color:var(--c2);min-width:130px;}
+.summary-val{color:var(--text-s);}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--c2);color:#fff;
+  padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;
+  box-shadow:var(--shadow-md);z-index:9999;transform:translateY(80px);opacity:0;
+  transition:.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{background:#16a34a;}
+.toast.error{background:var(--danger);}
+
+/* Spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-dark{border-color:rgba(109,40,217,.2);border-top-color:var(--c1);}
+
+/* Alert */
+.alert{padding:12px 16px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;}
+.alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+
+@media(max-width:700px){
+  body{margin-left:0;}
+  .gen-grid{grid-template-columns:1fr;}
+  .export-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="ds-sidebar">
+  <a href="{{ url_for('landing') }}" class="ds-sidebar-logo" title="SKOOLED-AI">S</a>
+  <div class="ds-sidebar-nav">
+    <a href="{{ url_for('landing') }}" class="ds-nav-link" title="Home">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="{{ turl('generator') }}" class="ds-nav-link" title="Lesson Plans">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </a>
+    <a href="{{ turl('activities') }}" class="ds-nav-link" title="Activities">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </a>
+    <a href="{{ turl('syllabus') }}" class="ds-nav-link" title="Syllabus">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </a>
+    <a href="{{ turl('module_builder') }}" class="ds-nav-link active" title="Module Builder">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    </a>
+    {% if session.get('user_role') == 'admin' %}
+    <a href="{{ turl('auth.admin_panel') }}" class="ds-nav-link" title="Admin">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </a>
+    {% endif %}
+  </div>
+  <div class="ds-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="ds-nav-link" title="Logout" style="color:rgba(255,255,255,.35);">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </a>
+  </div>
+</nav>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="8" fill="#6d28d9"/><path d="M7 9h14M7 14h10M7 19h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Module Builder</span>
+  </div>
+  <span class="badge-new">NEW</span>
+  <div class="hdr-sep"></div>
+  <a href="{{ turl('generator') }}" class="btn btn-secondary btn-sm">← Lesson Generator</a>
+</div>
+
+<div class="cnt">
+
+  <!-- Steps nav -->
+  <div class="steps-nav">
+    <div class="sn active" id="sn1">
+      <div class="sn-dot">1</div>
+      <div class="sn-label">Upload Guide</div>
+      <div class="sn-line"></div>
+    </div>
+    <div class="sn" id="sn2">
+      <div class="sn-dot">2</div>
+      <div class="sn-label">Build Structure</div>
+      <div class="sn-line"></div>
+    </div>
+    <div class="sn" id="sn3">
+      <div class="sn-dot">3</div>
+      <div class="sn-label">Generate Content</div>
+      <div class="sn-line"></div>
+    </div>
+    <div class="sn" id="sn4">
+      <div class="sn-dot">4</div>
+      <div class="sn-label">Export</div>
+      <div class="sn-line"></div>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: Upload ── -->
+  <div class="step-panel active" id="step1">
+    <div class="card" style="margin-top:24px;">
+      <p class="card-title">Upload your Course Guide</p>
+      <p class="card-sub">Upload a PDF, Word, Excel, or text file — or paste the content directly. The AI will extract a suggested module structure for you to review and edit.</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".pdf,.docx,.xlsx,.xls,.txt">
+        <div class="upload-icon">📄</div>
+        <h3 id="uploadLabel">Drop your course guide here</h3>
+        <p id="uploadSub">or click to browse</p>
+        <div class="file-types">
+          <span>PDF</span><span>DOCX</span><span>XLSX</span><span>TXT</span>
+        </div>
+      </div>
+
+      <div class="divider">or paste text</div>
+
+      <textarea class="textarea" id="pasteText" rows="6"
+        placeholder="Paste your course guide, syllabus, or curriculum content here…"></textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="parseBtn" onclick="parseGuide()">
+          <span>✨ Parse Course Guide</span>
+        </button>
+        <span id="parseStatus" style="font-size:13px;color:var(--text-s);"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Structure Editor ── -->
+  <div class="step-panel" id="step2">
+    <div class="card" style="margin-top:24px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <p class="card-title" style="margin-bottom:4px;">Course Structure</p>
+          <p class="card-sub" style="margin:0;">Review and edit the AI-suggested modules and submodules. Add, remove, or rename as needed.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-sm" style="background:#f5f3ff;color:var(--c1);border:1px solid #ddd6fe;" onclick="addModule()">+ Add Module</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:12px;font-weight:700;color:var(--text-s);display:block;margin-bottom:6px;">COURSE TITLE</label>
+        <input type="text" id="courseTitleInput" class="textarea" style="min-height:auto;padding:10px 14px;font-size:15px;font-weight:700;"
+          placeholder="Course title…">
+      </div>
+      <div style="margin-bottom:24px;">
+        <label style="font-size:12px;font-weight:700;color:var(--text-s);display:block;margin-bottom:6px;">COURSE DESCRIPTION</label>
+        <textarea id="courseDescInput" class="textarea" rows="2" placeholder="Brief course description…"></textarea>
+      </div>
+
+      <div class="module-list" id="moduleList"></div>
+
+      <button class="add-mod-btn" onclick="addModule()" style="margin-top:14px;">
+        + Add Module
+      </button>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="goStep(3)">
+          Generate Content →
+        </button>
+        <span style="font-size:12px;color:var(--text-s);" id="structCount"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Generate ── -->
+  <div class="step-panel" id="step3">
+    <div class="card" style="margin-top:24px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <p class="card-title" style="margin-bottom:4px;">Generate Submodule Content</p>
+          <p class="card-sub" style="margin:0;">AI generates full content for each submodule based on your course guide.</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="goStep(2)">← Back</button>
+      </div>
+
+      <div class="gen-controls">
+        <button class="btn btn-primary btn-sm" id="genAllBtn" onclick="generateAll()">
+          ⚡ Generate All
+        </button>
+        <button class="btn btn-secondary btn-sm" id="genSelBtn" onclick="generateSelected()" style="display:none;">
+          ↻ Regenerate Selected
+        </button>
+        <div class="progress-bar-wrap" style="flex:1;min-width:120px;margin:0;">
+          <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+        <span class="gen-status" id="genStatus">0 / 0 generated</span>
+      </div>
+
+      <div class="gen-grid">
+        <div class="gen-sidebar" id="genSidebar"></div>
+        <div class="gen-preview" id="genPreview">
+          <div class="gen-preview-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <div>
+              <div style="font-weight:700;color:var(--c2);margin-bottom:4px;">Select a submodule to preview</div>
+              <div style="font-size:12px;">or click "Generate All" to create content for every submodule</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="toExportBtn" onclick="goStep(4)" disabled>
+          Continue to Export →
+        </button>
+        <span style="font-size:12px;color:var(--text-s);" id="genReadyMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Export ── -->
+  <div class="step-panel" id="step4">
+    <div class="card" style="margin-top:24px;">
+      <p class="card-title" style="margin-bottom:4px;">Export Course Package</p>
+      <p class="card-sub">Choose your LMS and download the course package.</p>
+
+      <div class="summary-box">
+        <div class="summary-row"><span class="summary-label">Course</span><span class="summary-val" id="expCourseTitle">—</span></div>
+        <div class="summary-row"><span class="summary-label">Modules</span><span class="summary-val" id="expModCount">—</span></div>
+        <div class="summary-row"><span class="summary-label">Submodules</span><span class="summary-val" id="expSubCount">—</span></div>
+      </div>
+
+      <label style="font-size:12px;font-weight:800;color:var(--text-s);letter-spacing:.05em;display:block;margin-bottom:12px;">SELECT TARGET LMS</label>
+
+      <div class="export-grid">
+        <label class="export-card selected" id="expMoodle">
+          <input type="radio" name="lms" value="moodle" checked>
+          <div class="export-check">✓</div>
+          <div class="export-logo">🟠</div>
+          <div class="export-name">Moodle</div>
+          <div class="export-ext">.mbz</div>
+          <div class="export-desc">Restore directly via Moodle's Course Restore. Compatible with Moodle 4.x.</div>
+        </label>
+        <label class="export-card" id="expCanvas">
+          <input type="radio" name="lms" value="canvas">
+          <div class="export-check">✓</div>
+          <div class="export-logo">🔴</div>
+          <div class="export-name">Canvas</div>
+          <div class="export-ext">.imscc</div>
+          <div class="export-desc">IMS Common Cartridge 1.1. Import via Canvas → Settings → Import Content.</div>
+        </label>
+        <label class="export-card" id="expBrightspace">
+          <input type="radio" name="lms" value="brightspace">
+          <div class="export-check">✓</div>
+          <div class="export-logo">🔵</div>
+          <div class="export-name">Brightspace</div>
+          <div class="export-ext">.zip</div>
+          <div class="export-desc">IMS Common Cartridge for D2L Brightspace. Import via Course Admin → Import/Export.</div>
+        </label>
+      </div>
+
+      <div id="importInstructions" class="alert alert-info" style="margin-top:0;"></div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="downloadExport()" id="downloadBtn">
+          ⬇ Download Course Package
+        </button>
+        <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+        <button class="btn btn-secondary btn-sm" onclick="goStep(1)" style="margin-left:auto;">
+          ↺ Start Over
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const AUTH = document.querySelector('meta[name="auth-token"]')?.content || '';
+
+// ── State ──
+let courseData = {
+  course_title: '',
+  course_description: '',
+  modules: []
+};
+let courseContext = ''; // raw text for AI context
+let activeSubId = null;
+let genResults = {}; // subId → html content
+let currentStep = 1;
+
+// ── Step Navigation ──────────────────────────────────────────────────────────
+function goStep(n) {
+  if (n === 3) buildSidebar();
+  if (n === 4) updateExportSummary();
+
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+
+  document.querySelectorAll('.sn').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i + 1 < n) el.classList.add('done');
+    if (i + 1 === n) el.classList.add('active');
+  });
+  currentStep = n;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── Step 1: Upload / Parse ───────────────────────────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+let selectedFile = null;
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+function setFile(f) {
+  selectedFile = f;
+  document.getElementById('uploadLabel').textContent = f.name;
+  document.getElementById('uploadSub').textContent = `${(f.size / 1024).toFixed(1)} KB — click to change`;
+  uploadZone.classList.add('file-selected');
+}
+
+async function parseGuide() {
+  const btn = document.getElementById('parseBtn');
+  const status = document.getElementById('parseStatus');
+  const pasteText = document.getElementById('pasteText').value.trim();
+
+  if (!selectedFile && !pasteText) {
+    toast('Upload a file or paste text first.', 'error'); return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Parsing…';
+  status.textContent = 'Analyzing your course guide…';
+
+  try {
+    const fd = new FormData();
+    if (selectedFile) fd.append('file', selectedFile);
+    if (pasteText)    fd.append('text', pasteText);
+
+    const headers = {};
+    if (AUTH) headers['X-Auth-Token'] = AUTH;
+
+    const res = await fetch('/api/parse-course-guide' + (AUTH ? `?_t=${AUTH}` : ''), {
+      method: 'POST', body: fd, headers
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Parse failed');
+
+    courseData = data.structure;
+    courseContext = data.context_text || '';
+    renderStructure();
+    goStep(2);
+    toast('Structure extracted! Review and edit before generating.', 'success');
+  } catch(e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>✨ Parse Course Guide</span>';
+    status.textContent = '';
+  }
+}
+
+// ── Step 2: Structure Editor ─────────────────────────────────────────────────
+function renderStructure() {
+  document.getElementById('courseTitleInput').value = courseData.course_title || '';
+  document.getElementById('courseDescInput').value  = courseData.course_description || '';
+
+  const list = document.getElementById('moduleList');
+  list.innerHTML = '';
+  (courseData.modules || []).forEach((m, mi) => renderModule(m, mi));
+  updateStructCount();
+}
+
+function renderModule(mod, mi) {
+  const list = document.getElementById('moduleList');
+  const div = document.createElement('div');
+  div.className = 'module-card';
+  div.dataset.modIdx = mi;
+
+  const subsHtml = (mod.submodules || []).map((s, si) => renderSubHtml(s, si)).join('');
+
+  div.innerHTML = `
+    <div class="module-head" onclick="toggleModule(${mi})">
+      <div class="module-idx">${mi + 1}</div>
+      <input class="module-title-input" value="${esc(mod.title)}" placeholder="Module title…"
+        onclick="event.stopPropagation()"
+        onchange="courseData.modules[${mi}].title=this.value">
+      <div class="module-actions">
+        <button class="icon-btn" title="Move up" onclick="event.stopPropagation();moveModule(${mi},-1)">↑</button>
+        <button class="icon-btn" title="Move down" onclick="event.stopPropagation();moveModule(${mi},1)">↓</button>
+        <button class="icon-btn del" title="Delete module" onclick="event.stopPropagation();deleteModule(${mi})">🗑</button>
+      </div>
+    </div>
+    <div class="module-body" id="modBody${mi}">
+      <input class="module-desc-input" value="${esc(mod.description||'')}" placeholder="Module description…"
+        onchange="courseData.modules[${mi}].description=this.value">
+      <div class="sub-list" id="subList${mi}">
+        ${subsHtml}
+      </div>
+      <button class="add-sub-btn" onclick="addSubmodule(${mi})">+ Add Submodule</button>
+    </div>`;
+  list.appendChild(div);
+}
+
+function renderSubHtml(sub, si) {
+  return `
+    <div class="sub-item" data-sub-id="${esc(sub.id)}">
+      <span class="sub-num">${sub.id}</span>
+      <div class="sub-inputs">
+        <input class="sub-title-input" value="${esc(sub.title)}" placeholder="Submodule title…">
+        <input class="sub-desc-input" value="${esc(sub.description||'')}" placeholder="Description…">
+      </div>
+      <button class="icon-btn del" title="Delete" onclick="deleteSubmodule(this)">✕</button>
+    </div>`;
+}
+
+function toggleModule(mi) {
+  const body = document.getElementById(`modBody${mi}`);
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+function addModule() {
+  const mi = courseData.modules.length;
+  const mod = { id: `M${mi+1}`, title: `Module ${mi+1}: New Module`, description: '', submodules: [] };
+  courseData.modules.push(mod);
+  renderModule(mod, mi);
+  updateStructCount();
+}
+
+function deleteModule(mi) {
+  courseData.modules.splice(mi, 1);
+  renderStructure();
+}
+
+function moveModule(mi, dir) {
+  const arr = courseData.modules;
+  const ni = mi + dir;
+  if (ni < 0 || ni >= arr.length) return;
+  [arr[mi], arr[ni]] = [arr[ni], arr[mi]];
+  renderStructure();
+}
+
+function addSubmodule(mi) {
+  const mod = courseData.modules[mi];
+  const si = mod.submodules.length;
+  const sub = { id: `M${mi+1}.${si+1}`, title: `Submodule ${mi+1}.${si+1}: New Topic`, description: '', topics: [] };
+  mod.submodules.push(sub);
+  const list = document.getElementById(`subList${mi}`);
+  list.insertAdjacentHTML('beforeend', renderSubHtml(sub, si));
+  updateStructCount();
+}
+
+function deleteSubmodule(btn) {
+  btn.closest('.sub-item').remove();
+  updateStructCount();
+}
+
+function updateStructCount() {
+  let total = 0;
+  document.querySelectorAll('.sub-item').forEach(() => total++);
+  document.getElementById('structCount').textContent =
+    `${courseData.modules.length} modules · ${total} submodules`;
+}
+
+// Sync DOM → courseData before moving to step 3
+function syncStructure() {
+  courseData.course_title = document.getElementById('courseTitleInput').value.trim();
+  courseData.course_description = document.getElementById('courseDescInput').value.trim();
+
+  courseData.modules = [];
+  document.querySelectorAll('#moduleList .module-card').forEach((card, mi) => {
+    const title = card.querySelector('.module-title-input').value.trim();
+    const desc  = card.querySelector('.module-desc-input').value.trim();
+    const subs  = [];
+    card.querySelectorAll('.sub-item').forEach((si, sii) => {
+      const sid    = si.dataset.subId || `M${mi+1}.${sii+1}`;
+      const stitle = si.querySelector('.sub-title-input').value.trim();
+      const sdesc  = si.querySelector('.sub-desc-input').value.trim();
+      subs.push({ id: sid, title: stitle, description: sdesc, topics: [] });
+    });
+    courseData.modules.push({ id: `M${mi+1}`, title, description: desc, submodules: subs });
+  });
+}
+
+// ── Step 3: Generate ─────────────────────────────────────────────────────────
+function buildSidebar() {
+  syncStructure();
+  const sidebar = document.getElementById('genSidebar');
+  sidebar.innerHTML = '';
+  genResults = {};
+
+  let totalSubs = 0;
+  courseData.modules.forEach((mod, mi) => {
+    if (!mod.submodules.length) return;
+    const label = document.createElement('p');
+    label.className = 'gen-module-label';
+    label.textContent = mod.title;
+    sidebar.appendChild(label);
+
+    mod.submodules.forEach((sub, si) => {
+      totalSubs++;
+      const item = document.createElement('div');
+      item.className = 'gen-item';
+      item.id = `gi_${mod.id}_${si}`;
+      item.dataset.modIdx = mi;
+      item.dataset.subIdx = si;
+      item.dataset.subId  = sub.id;
+      item.innerHTML = `
+        <div class="gen-item-title">${esc(sub.title)}</div>
+        <div class="gen-item-badge" id="gb_${mod.id}_${si}">⬜</div>`;
+      item.onclick = () => selectSubmodule(item);
+      sidebar.appendChild(item);
+    });
+  });
+
+  updateGenProgress(0, totalSubs);
+}
+
+function selectSubmodule(item) {
+  document.querySelectorAll('.gen-item').forEach(i => i.classList.remove('active'));
+  item.classList.add('active');
+  activeSubId = item.dataset.subId;
+
+  const preview = document.getElementById('genPreview');
+  const html = genResults[activeSubId];
+  if (html) {
+    preview.innerHTML = `<div class="gen-preview-content">${html}</div>`;
+  } else {
+    preview.innerHTML = `
+      <div class="gen-preview-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <div>
+          <div style="font-weight:700;color:var(--c2);margin-bottom:6px;">Not yet generated</div>
+          <button class="btn btn-primary btn-sm" onclick="generateSelected()">⚡ Generate This Submodule</button>
+        </div>
+      </div>`;
+  }
+
+  const selBtn = document.getElementById('genSelBtn');
+  if (selBtn) selBtn.style.display = 'inline-flex';
+}
+
+let generatingAll = false;
+
+async function generateAll() {
+  if (generatingAll) return;
+  generatingAll = true;
+
+  const items = document.querySelectorAll('.gen-item');
+  const total = items.length;
+  let done = 0;
+
+  document.getElementById('genAllBtn').disabled = true;
+  document.getElementById('genAllBtn').innerHTML = '<span class="spin"></span> Generating…';
+
+  for (const item of items) {
+    const mi = parseInt(item.dataset.modIdx);
+    const si = parseInt(item.dataset.subIdx);
+    await generateItem(mi, si, item);
+    done++;
+    updateGenProgress(done, total);
+  }
+
+  generatingAll = false;
+  document.getElementById('genAllBtn').disabled = false;
+  document.getElementById('genAllBtn').innerHTML = '✓ Regenerate All';
+  document.getElementById('toExportBtn').disabled = false;
+  document.getElementById('genReadyMsg').textContent = `${total} submodules ready for export.`;
+  toast('All content generated!', 'success');
+}
+
+async function generateSelected() {
+  if (!activeSubId) { toast('Select a submodule first.', 'error'); return; }
+  const item = document.querySelector(`[data-sub-id="${activeSubId}"]`);
+  if (!item) return;
+  await generateItem(parseInt(item.dataset.modIdx), parseInt(item.dataset.subIdx), item);
+
+  const doneCount = Object.keys(genResults).length;
+  const total = document.querySelectorAll('.gen-item').length;
+  updateGenProgress(doneCount, total);
+  if (doneCount >= total) {
+    document.getElementById('toExportBtn').disabled = false;
+    document.getElementById('genReadyMsg').textContent = `${total} submodules ready for export.`;
+  }
+}
+
+async function generateItem(mi, si, itemEl) {
+  const mod = courseData.modules[mi];
+  const sub = mod.submodules[si];
+  const badgeId = `gb_${mod.id}_${si}`;
+
+  itemEl.classList.add('generating');
+  document.getElementById(badgeId).textContent = '⏳';
+
+  try {
+    const res = await apiFetch('/api/generate-module-content', {
+      course_title:  courseData.course_title,
+      module_title:  mod.title,
+      submodule:     sub,
+      course_context: courseContext,
+    });
+    if (res.error) throw new Error(res.error);
+
+    genResults[sub.id] = res.content;
+    itemEl.classList.remove('generating');
+    itemEl.classList.add('done');
+    document.getElementById(badgeId).textContent = '✅';
+
+    if (activeSubId === sub.id) {
+      document.getElementById('genPreview').innerHTML =
+        `<div class="gen-preview-content">${res.content}</div>`;
+    }
+  } catch(e) {
+    itemEl.classList.remove('generating');
+    itemEl.classList.add('error');
+    document.getElementById(badgeId).textContent = '❌';
+    toast(`Error: ${e.message}`, 'error');
+  }
+}
+
+function updateGenProgress(done, total) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('genStatus').textContent = `${done} / ${total} generated`;
+}
+
+// ── Step 4: Export ───────────────────────────────────────────────────────────
+const importMsgs = {
+  moodle: 'In Moodle: <strong>Course Administration → Restore</strong> — drag and drop the .mbz file or browse to upload.',
+  canvas: 'In Canvas: <strong>Settings → Import Course Content → Common Cartridge 1.x Package</strong> — upload the .imscc file.',
+  brightspace: 'In Brightspace: <strong>Course Admin → Import / Export / Copy Components</strong> — import the .zip file as an IMS Common Cartridge.',
+};
+
+document.querySelectorAll('input[name=lms]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('.export-card').forEach(c => c.classList.remove('selected'));
+    this.closest('.export-card').classList.add('selected');
+    document.getElementById('importInstructions').innerHTML =
+      '📌 Import guide: ' + importMsgs[this.value];
+  });
+});
+
+// Set initial import message
+document.getElementById('importInstructions').innerHTML =
+  '📌 Import guide: ' + importMsgs['moodle'];
+
+function updateExportSummary() {
+  syncStructure();
+  let totalSubs = 0;
+  courseData.modules.forEach(m => totalSubs += m.submodules.length);
+  document.getElementById('expCourseTitle').textContent = courseData.course_title || '—';
+  document.getElementById('expModCount').textContent = courseData.modules.length;
+  document.getElementById('expSubCount').textContent = totalSubs;
+}
+
+async function downloadExport() {
+  const lms = document.querySelector('input[name=lms]:checked').value;
+  const btn = document.getElementById('downloadBtn');
+
+  // Attach generated content to courseData
+  courseData.modules.forEach(mod => {
+    mod.submodules.forEach(sub => {
+      sub.content_html = genResults[sub.id] || '';
+    });
+  });
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Building package…';
+
+  try {
+    const res = await fetch('/api/export-course' + (AUTH ? `?_t=${AUTH}` : ''), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lms, course_data: courseData }),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.error || 'Export failed');
+    }
+
+    const blob = await res.blob();
+    const ext  = { moodle: 'mbz', canvas: 'imscc', brightspace: 'zip' }[lms];
+    const name = courseData.course_title.replace(/[^a-zA-Z0-9]/g,'_').slice(0,40) || 'course';
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `${name}.${ext}`; a.click();
+    URL.revokeObjectURL(url);
+    toast('Package downloaded!', 'success');
+  } catch(e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⬇ Download Course Package';
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+async function apiFetch(url, body) {
+  const sep = url.includes('?') ? '&' : '?';
+  const r = await fetch(url + (AUTH ? `${sep}_t=${AUTH}` : ''), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ` ${type}` : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+
+</body>
+</html>
