@@ -198,6 +198,46 @@ def init_db():
                     INDEX idx_al_created (created_at)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS signup_attempts (
+                    id          INT AUTO_INCREMENT PRIMARY KEY,
+                    ip          VARCHAR(45) NOT NULL,
+                    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_sa_ip_time (ip, created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+    finally:
+        conn.close()
+
+
+SIGNUP_RATE_LIMIT = 5        # max attempts...
+SIGNUP_RATE_WINDOW_MIN = 15  # ...per this many minutes, per IP
+
+
+def _client_ip():
+    return request.remote_addr or "unknown"
+
+
+def _signup_rate_limited(ip):
+    """True if this IP has hit the signup attempt cap in the recent window."""
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT COUNT(*) AS cnt FROM signup_attempts "
+                "WHERE ip = %s AND created_at > NOW() - INTERVAL %s MINUTE",
+                (ip, SIGNUP_RATE_WINDOW_MIN),
+            )
+            return cur.fetchone()["cnt"] >= SIGNUP_RATE_LIMIT
+    finally:
+        conn.close()
+
+
+def _record_signup_attempt(ip):
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO signup_attempts (ip) VALUES (%s)", (ip,))
     finally:
         conn.close()
 
@@ -347,6 +387,19 @@ def signup():
         return redirect(url_for("generator"))
 
     if request.method == "POST":
+        # Honeypot — hidden field real users never fill in. Bots that
+        # auto-fill every input trip this. Respond as if it succeeded
+        # so the bot doesn't learn to skip the field.
+        if request.form.get("website", "").strip():
+            flash("Account created! Please check your email to verify your address.", "success")
+            return redirect(url_for("auth.login"))
+
+        ip = _client_ip()
+        if _signup_rate_limited(ip):
+            flash("Too many signup attempts from your network. Please try again later.", "error")
+            return render_template("signup.html"), 429
+        _record_signup_attempt(ip)
+
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -659,6 +712,20 @@ def admin_reject(user_id):
     finally:
         conn.close()
     flash("User rejected.", "success")
+    return _token_redirect("auth.admin_panel")
+
+
+@auth_bp.route("/admin/reject-all-pending", methods=["POST"])
+@admin_required
+def admin_reject_all_pending():
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET status = 'rejected' WHERE status = 'pending'")
+            count = cur.rowcount
+    finally:
+        conn.close()
+    flash(f"Rejected {count} pending signup(s).", "success")
     return _token_redirect("auth.admin_panel")
 
 

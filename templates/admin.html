@@ -242,7 +242,15 @@ tr:hover td{background:rgba(0,187,214,0.04);}
     <!-- Users Table -->
     <span class="sec-label">User Management</span>
     <div class="crd">
-        <div class="crd-t">Registered Users</div>
+        <div class="crd-t" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <span>Registered Users</span>
+            {% if stats.pending > 0 %}
+            <form method="POST" action="{{ turl('auth.admin_reject_all_pending') }}"
+                  onsubmit="return confirm('Reject all {{ stats.pending }} pending signup(s)? This does not delete them — you can still review rejected users.');">
+                <button type="submit" class="act-btn act-btn-reject">Reject All Pending ({{ stats.pending }})</button>
+            </form>
+            {% endif %}
+        </div>
         <div style="overflow-x:auto;">
         <table>
             <thead>
