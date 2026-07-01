@@ -5,150 +5,121 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>Sign In — SKOOLED-AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{
-    --accent:#00bbd6;--accent-d:#009bb3;
-    --accent-dim:rgba(0,187,214,0.14);--accent-border:rgba(0,187,214,0.35);
-    --navy:#0d1f2d;--navy-d:#081520;
-    --bg:#f0f9fb;--text:#0d1f2d;--text-s:rgba(13,31,45,0.56);
-    --glass:rgba(255,255,255,0.78);--glass-b:rgba(0,187,214,0.2);
-    --border:#c8e8ee;--success:#00b894;--danger:#e74c3c;--warning:#fdcb6e;
-    --rad:20px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-    font-family:'Plus Jakarta Sans',sans-serif;
-    background:var(--bg);color:var(--text);
-    min-height:100vh;display:flex;flex-direction:column;
-    background-image:radial-gradient(ellipse 90% 55% at 50% -5%,rgba(0,187,214,0.12) 0%,transparent 65%);
-    background-attachment:fixed;
-}
-h1,h2,h3,.grotesk{font-family:'Space Grotesk',sans-serif;}
-a{text-decoration:none;color:inherit;}
-
-.topbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 28px;
-    background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-    border-bottom:1px solid var(--glass-b);
-}
-.topbar-logo{
-    display:flex;align-items:center;gap:9px;
-    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
-    letter-spacing:-0.03em;color:var(--navy);
-}
-.topbar-logo-icon{
-    width:30px;height:30px;border-radius:9px;background:var(--accent);
-    display:flex;align-items:center;justify-content:center;font-size:15px;
-}
-.topbar-logo .ac{color:var(--accent);}
-.topbar-back{
-    font-size:12px;font-weight:600;color:var(--text-s);
-    padding:7px 16px;border-radius:30px;
-    border:1px solid var(--glass-b);background:var(--glass);transition:.2s;
-}
-.topbar-back:hover{border-color:var(--accent-border);color:var(--accent);}
-
-.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;}
-
-.card{
-    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-    border:1px solid var(--glass-b);border-radius:var(--rad);
-    padding:44px 40px;width:100%;max-width:420px;
-    box-shadow:0 4px 40px rgba(0,187,214,0.09),0 1px 6px rgba(0,0,0,0.04);
-}
-.card-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;}
-.card-logo-icon{
-    width:44px;height:44px;border-radius:14px;background:var(--accent);
-    display:flex;align-items:center;justify-content:center;font-size:22px;
-    box-shadow:0 4px 18px rgba(0,187,214,0.3);
-}
-.card-logo-name{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.04em;color:var(--navy);}
-.card-logo-name em{font-style:normal;color:var(--accent);}
-.card-t{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--navy);letter-spacing:-0.03em;}
-.card-s{font-size:13px;color:var(--text-s);text-align:center;margin-bottom:28px;font-weight:400;}
-
-.flash{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;}
-.flash-error{background:rgba(231,76,60,0.09);color:var(--danger);border:1px solid rgba(231,76,60,0.25);}
-.flash-success{background:rgba(0,184,148,0.09);color:var(--success);border:1px solid rgba(0,184,148,0.25);}
-.flash-warning{background:rgba(253,203,110,0.15);color:#7a5a00;border:1px solid rgba(253,203,110,0.4);}
-
-.fg{margin-bottom:16px;}
-.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;font-family:'Space Grotesk',sans-serif;color:var(--navy);}
-.fg input{
-    width:100%;padding:11px 14px;font-size:14px;font-family:inherit;
-    border:1.5px solid var(--border);border-radius:10px;
-    background:rgba(255,255,255,0.8);color:var(--text);transition:border-color .2s;
-}
-.fg input:focus{outline:none;border-color:var(--accent);background:#fff;}
-
-.btn{
-    width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:800;
-    border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;
-    background:var(--accent);color:var(--navy);letter-spacing:-0.02em;
-    box-shadow:0 6px 22px rgba(0,187,214,0.28);transition:.22s;
-}
-.btn:hover{background:#00d4f0;box-shadow:0 10px 30px rgba(0,187,214,.36);transform:translateY(-1px);}
-
-.links{text-align:center;margin-top:20px;font-size:13px;color:var(--text-s);}
-.links a{color:var(--accent);font-weight:600;}
-.links a:hover{text-decoration:underline;}
-
-.ft{text-align:center;padding:18px;font-size:11px;color:var(--text-s);border-top:1px solid var(--glass-b);letter-spacing:.04em;font-weight:500;}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ds.css') }}">
 </head>
 <body>
 
-<div class="topbar">
-    <a href="{{ url_for('landing') }}" class="topbar-logo">
-        
-        <span>SKOOLED<span class="ac">-AI</span></span>
-    </a>
-    <a href="{{ url_for('landing') }}" class="topbar-back">&#8592; Back to Home</a>
-</div>
+<div class="ds-auth-wrap">
 
-<div class="wrap">
-<div class="card">
-    <div class="card-logo">
-        
-        <div class="card-logo-name">SKOOLED<em>-AI</em></div>
+  <!-- LEFT: brand + illustration -->
+  <div class="ds-auth-left">
+    <div class="ds-auth-brand">
+      <div class="ds-auth-brand-mark">S</div>
+      <div class="ds-auth-brand-name">SKOOLED<span>-AI</span></div>
     </div>
-    <div class="card-t">Welcome Back</div>
-    <div class="card-s">Sign in to access the lesson plan generator</div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+    <div class="ds-auth-illo">
+      <svg viewBox="0 0 240 280" fill="none" xmlns="http://www.w3.org/2000/svg" width="210" height="245">
+        <!-- Background circle -->
+        <circle cx="120" cy="135" r="100" fill="rgba(255,95,87,0.08)" stroke="rgba(255,95,87,0.12)" stroke-width="1.5"/>
+        <!-- Head -->
+        <circle cx="120" cy="78" r="34" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5"/>
+        <!-- Hair -->
+        <path d="M88 70 C90 50 150 50 152 70" fill="rgba(255,255,255,.8)" stroke="none"/>
+        <!-- Glasses left -->
+        <rect x="97" y="72" width="15" height="11" rx="4" stroke="rgba(255,255,255,.65)" stroke-width="2" fill="none"/>
+        <!-- Glasses right -->
+        <rect x="117" y="72" width="15" height="11" rx="4" stroke="rgba(255,255,255,.65)" stroke-width="2" fill="none"/>
+        <line x1="112" y1="77.5" x2="117" y2="77.5" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>
+        <line x1="97" y1="77.5" x2="92" y2="77.5" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>
+        <line x1="132" y1="77.5" x2="138" y2="77.5" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>
+        <!-- Eyes -->
+        <circle cx="104.5" cy="77.5" r="2.5" fill="rgba(26,26,26,.75)"/>
+        <circle cx="124.5" cy="77.5" r="2.5" fill="rgba(26,26,26,.75)"/>
+        <!-- Smile -->
+        <path d="M111 90 Q120 97 129 90" stroke="rgba(255,255,255,.7)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Neck -->
+        <line x1="113" y1="112" x2="111" y2="120" stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="127" y1="112" x2="129" y2="120" stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Body -->
+        <path d="M76 160 C76 138 164 138 164 160 L162 200 L78 200 Z" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.5"/>
+        <!-- Collar detail -->
+        <path d="M111 138 L120 150 L129 138" stroke="rgba(255,95,87,.85)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Left arm holding book -->
+        <path d="M76 165 L46 180" stroke="rgba(255,255,255,.65)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Book -->
+        <rect x="28" y="176" width="38" height="26" rx="3" fill="rgba(255,95,87,.9)"/>
+        <rect x="28" y="176" width="38" height="26" rx="3" stroke="rgba(255,255,255,.25)" stroke-width="1" fill="none"/>
+        <line x1="47" y1="176" x2="47" y2="202" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+        <line x1="33" y1="186" x2="43" y2="186" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <line x1="33" y1="191" x2="43" y2="191" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <!-- Right arm waving -->
+        <path d="M164 165 L192 148" stroke="rgba(255,255,255,.65)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Hand fingers -->
+        <path d="M192 148 L197 141 M192 148 L198 146 M192 148 L196 151" stroke="rgba(255,255,255,.65)" stroke-width="2" stroke-linecap="round"/>
+        <!-- Legs -->
+        <path d="M98 198 L95 238" stroke="rgba(255,255,255,.65)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M142 198 L145 238" stroke="rgba(255,255,255,.65)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Sparkles -->
+        <circle cx="38" cy="95"  r="4" fill="rgba(255,95,87,.6)"/>
+        <circle cx="196" cy="195" r="5" fill="rgba(255,95,87,.4)"/>
+        <path d="M200 90 L203 82 L206 90 L200 90Z" fill="rgba(255,95,87,.8)"/>
+        <path d="M203 82 L206 90 L212 87 L203 82Z" fill="rgba(255,95,87,.5)"/>
+        <circle cx="35" cy="220" r="3" fill="rgba(255,255,255,.2)"/>
+        <circle cx="205" cy="130" r="2.5" fill="rgba(255,255,255,.25)"/>
+      </svg>
+    </div>
 
-    <form method="POST" action="{{ url_for('auth.login') }}">
+    <div class="ds-auth-tagline">
+      <h2>Create lesson plans in minutes.</h2>
+      <p>AI-powered, DepEd MATATAG-aligned content for Filipino K-12 teachers. Free to use, ready to print.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: form -->
+  <div class="ds-auth-right">
+    <div class="ds-auth-box">
+      <h1>Welcome back!</h1>
+      <p class="ds-auth-sub">Sign in to access the lesson plan generator</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="ds-flash ds-flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}">
         {% if request.args.get('next') %}
         <input type="hidden" name="next" value="{{ request.args.get('next') }}">
         {% endif %}
-        <div class="fg">
-            <label>Email Address</label>
-            <input type="email" name="email" required placeholder="you@school.edu.ph" autofocus>
-        </div>
-        <div class="fg">
-            <label>Password</label>
-            <input type="password" name="password" required placeholder="Enter your password">
-        </div>
-        <button type="submit" class="btn">Sign In &#8594;</button>
-    </form>
 
-    <div class="links">
+        <div class="ds-fg">
+          <label class="ds-label">Email Address</label>
+          <input class="ds-input" type="email" name="email" required placeholder="you@school.edu.ph" autofocus>
+        </div>
+        <div class="ds-fg">
+          <label class="ds-label">Password</label>
+          <input class="ds-input" type="password" name="password" required placeholder="Enter your password">
+        </div>
+
+        <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-w" style="margin-top:8px;">
+          Sign In &rarr;
+        </button>
+      </form>
+
+      <div class="ds-auth-links" style="margin-top:14px;">
         <a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a>
+      </div>
+      <hr class="ds-divider">
+      <div class="ds-auth-links">
+        Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up free</a>
+      </div>
     </div>
-    <div class="links" style="margin-top:8px;">
-        Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up</a>
-    </div>
-</div>
-</div>
+  </div>
 
-<div class="ft">SKOOLED-AI &bull; DepEd MATATAG Curriculum &bull; Philippine Teachers</div>
+</div>
 </body>
 </html>
