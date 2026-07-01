@@ -35,6 +35,8 @@ from pptx_builder import build_pptx
 from syllabus_generator import generate_syllabus as _gen_syllabus
 from module_generator import extract_text_from_file, parse_course_guide, generate_submodule_content
 from course_exporter import build_moodle_mbz, build_imscc
+from dlsl_generator import generate_dlsl_lesson_content, generate_dlsl_module_extras
+from dlsl_exporter import build_dlsl_imscc
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -1679,6 +1681,87 @@ def api_export_course():
                          download_name=f"{safe_title}.zip")
     else:
         return jsonify({"error": f"Unknown LMS: {lms}"}), 400
+
+
+# ── DLSL Content ─────────────────────────────────────────────────────────────
+
+@app.route("/dlsl-content")
+@login_required
+def dlsl_content():
+    """DLSL-branded syllabus-to-Canvas course builder."""
+    return render_template("dlsl_content.html")
+
+
+@app.route("/api/generate-dlsl-content", methods=["POST"])
+@login_required
+def api_generate_dlsl_content():
+    """Generate the 6-tab DLSL lesson page content for a single submodule."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    sections, err = generate_dlsl_lesson_content(
+        course_title=data.get("course_title", ""),
+        module_title=data.get("module_title", ""),
+        submodule=data.get("submodule", {}),
+        course_context=data.get("course_context", ""),
+        grade_level=data.get("grade_level", "shs"),
+        api_key=api_key,
+    )
+    if err:
+        return jsonify({"error": err}), 500
+
+    _log_activity("dlsl_generate_lesson", data.get("submodule", {}).get("title", ""))
+    return jsonify({"sections": sections})
+
+
+@app.route("/api/generate-dlsl-module-extras", methods=["POST"])
+@login_required
+def api_generate_dlsl_module_extras():
+    """Generate the per-module Discussion Prompt and Graded Task content."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    extras, err = generate_dlsl_module_extras(
+        course_title=data.get("course_title", ""),
+        module_title=data.get("module_title", ""),
+        submodules=data.get("submodules", []),
+        course_context=data.get("course_context", ""),
+        grade_level=data.get("grade_level", "shs"),
+        api_key=api_key,
+    )
+    if err:
+        return jsonify({"error": err}), 500
+
+    _log_activity("dlsl_generate_extras", data.get("module_title", ""))
+    return jsonify({"extras": extras})
+
+
+@app.route("/api/export-dlsl-course", methods=["POST"])
+@login_required
+def api_export_dlsl_course():
+    """Build and download a DLSL-branded Canvas Common Cartridge (.imscc)."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    course_data = data.get("course_data")
+    if not course_data:
+        return jsonify({"error": "course_data is required"}), 400
+
+    course_title = course_data.get("course_title", "Course")
+    safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", course_title)[:40]
+    grade_level = data.get("grade_level", "shs")
+    gen_results = data.get("gen_results", {})
+    module_extras = data.get("module_extras", {})
+
+    buf = build_dlsl_imscc(course_data, gen_results, module_extras, grade_level)
+    _log_activity("dlsl_export", f"Canvas: {course_title}")
+    return send_file(buf, mimetype="application/zip", as_attachment=True,
+                      download_name=f"{safe_title}_dlsl.imscc")
 
 
 if __name__ == "__main__":
