@@ -145,14 +145,20 @@ def init_db():
                     INDEX idx_act_owner (owner_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
-            # Patch existing installs — add verification_token if missing
+            # Patch existing installs — add verification_token if missing.
+            # NOTE: "ADD COLUMN IF NOT EXISTS" is MariaDB-only syntax and
+            # raises a syntax error on real MySQL — this previously relied
+            # on the blanket except below to silently mask that, which
+            # meant every signup after the first admin would 500 on real
+            # MySQL (INSERT referencing a column that was never created).
+            # Plain ADD COLUMN + catch "already exists" works on both.
             try:
                 cur.execute(
-                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
+                    "ALTER TABLE users ADD COLUMN "
                     "verification_token VARCHAR(64) DEFAULT NULL"
                 )
             except Exception:
-                pass
+                pass  # already exists
             # Patch existing installs — add password reset columns if missing
             for sql in [
                 "ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) DEFAULT NULL",
@@ -322,8 +328,15 @@ def admin_required(f):
     return wrapped
 
 
+import logging
+_email_logger = logging.getLogger("skooled_ai.email")
+
+
 def send_email(to_email, subject, html_body):
-    """Send a transactional email via SMTP. Silently skips if SMTP not configured."""
+    """Send a transactional email via SMTP. Returns True on success, False
+    otherwise — callers MUST check this and degrade gracefully (e.g. don't
+    tell someone "check your email" if it never sent). Never raises.
+    """
     import smtplib, ssl
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
@@ -333,8 +346,8 @@ def send_email(to_email, subject, html_body):
     password = os.environ.get("MAIL_PASSWORD", "")
     frm      = os.environ.get("MAIL_FROM", f"SKOOLED-AI <{username}>")
     if not username or not password:
-        print(f"[email] SMTP not configured — skipping to {to_email}")
-        return
+        _email_logger.warning("SMTP not configured (MAIL_USERNAME/MAIL_PASSWORD unset) — skipped send to %s", to_email)
+        return False
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = frm
@@ -342,11 +355,23 @@ def send_email(to_email, subject, html_body):
     msg.attach(MIMEText(html_body, "html"))
     try:
         ctx = ssl.create_default_context()
-        with smtplib.SMTP(server, port) as s:
+        with smtplib.SMTP(server, port, timeout=15) as s:
             s.ehlo(); s.starttls(context=ctx); s.login(username, password)
             s.sendmail(username, to_email, msg.as_string())
+        return True
+    except smtplib.SMTPAuthenticationError as e:
+        _email_logger.error(
+            "SMTP AUTH FAILED sending to %s via %s:%s as %s — %s. "
+            "If this is Gmail, MAIL_PASSWORD must be a 16-character App "
+            "Password (Google Account > Security > App Passwords), not "
+            "the regular account password, and 2-Step Verification must "
+            "be on for that account.",
+            to_email, server, port, username, e,
+        )
+        return False
     except Exception as e:
-        print(f"[email] Failed to send to {to_email}: {e}")
+        _email_logger.error("Failed to send to %s via %s:%s — %s: %s", to_email, server, port, type(e).__name__, e)
+        return False
 
 
 # ── Routes ──────────────────────────────────────────────────
@@ -465,6 +490,7 @@ def signup():
                     "VALUES (%s, %s, %s, %s, %s, %s)",
                     (email, name, generate_password_hash(password), role, status, vtok),
                 )
+                new_user_id = cur.lastrowid
         finally:
             conn.close()
 
@@ -473,7 +499,7 @@ def signup():
         else:
             # Send verification email
             verify_url = url_for("auth.verify_email", token=vtok, _external=True)
-            send_email(
+            sent = send_email(
                 email,
                 "Verify your email — SKOOLED-AI",
                 f"""
@@ -494,7 +520,27 @@ def signup():
                 </div>
                 """,
             )
-            flash("Account created! Please check your email to verify your address.", "success")
+            if sent:
+                flash("Account created! Please check your email to verify your address.", "success")
+            else:
+                # Email delivery is unreliable right now — don't leave this
+                # person permanently locked out behind a verification link
+                # that will never arrive. Admin approval (already required
+                # for every new account regardless) becomes the real gate.
+                conn = get_db()
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "UPDATE users SET verification_token = NULL WHERE id = %s",
+                            (new_user_id,),
+                        )
+                finally:
+                    conn.close()
+                flash(
+                    "Account created! We couldn't send a verification email right now, "
+                    "but your account is on its way — an admin will review and approve it shortly.",
+                    "warning",
+                )
         return redirect(url_for("auth.login"))
 
     return render_template("signup.html")
