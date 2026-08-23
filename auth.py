@@ -223,6 +223,17 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS email_nudges (
+                    id          INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id     INT NOT NULL,
+                    nudge_type  VARCHAR(30) NOT NULL,
+                    period_key  VARCHAR(20) NOT NULL,
+                    sent_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uq_nudge (user_id, nudge_type, period_key),
+                    INDEX idx_nudge_user (user_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS lex_inquiries (
                     id             INT AUTO_INCREMENT PRIMARY KEY,
                     email          VARCHAR(255) NOT NULL,
@@ -523,6 +534,25 @@ def signup():
                 </div>
                 """,
             )
+            # Notify the admin a new signup is waiting for approval — best
+            # effort, never affects the signup flow itself either way.
+            send_email(
+                os.environ.get("ADMIN_NOTIFY_EMAIL", os.environ.get("SUPPORT_EMAIL", "support@skooled.online")),
+                f"New SKOOLED-AI signup pending approval: {name}",
+                f"""
+                <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;">
+                  <h2 style="color:#1e293b;margin-bottom:8px;">New signup waiting for you</h2>
+                  <p style="color:#475569;"><strong>{name}</strong> ({email}) just signed up and is pending approval.</p>
+                  <a href="{url_for('auth.admin_panel', _external=True)}"
+                     style="display:inline-block;margin:24px 0;padding:12px 28px;
+                            background:#4f46e5;color:#fff;text-decoration:none;
+                            border-radius:6px;font-weight:600;">
+                    Review in Admin Panel
+                  </a>
+                </div>
+                """,
+            )
+
             if sent:
                 flash("Account created! Please check your email to verify your address.", "success")
             else:
