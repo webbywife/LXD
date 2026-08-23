@@ -9,3 +9,4 @@ deploy.py
 gunicorn.pid
 venv/
 .venv/
+.claude/settings.local.json
