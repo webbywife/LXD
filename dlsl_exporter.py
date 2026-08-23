@@ -186,7 +186,7 @@ def build_dlsl_imscc(course_data: dict, gen_results: dict, module_extras: dict, 
 
         for sub in mod.get('submodules', []):
             sub_id = _safe_id(sub['id'])
-            sections = gen_results.get(sub['id'], {})
+            sections = gen_results.get(sub['id']) or {}
             file_path = f'{mod_id}/{sub_id}_lesson.html'
             res_id = f'RES_{sub_id}_lesson'
             files[file_path] = _lesson_page_html(course_title, sub['title'], sections)
@@ -199,7 +199,7 @@ def build_dlsl_imscc(course_data: dict, gen_results: dict, module_extras: dict, 
                 f'<title>{html_lib.escape(sub["title"])}</title></item>\n'
             )
 
-        extras = module_extras.get(mod['id'], {})
+        extras = module_extras.get(mod['id']) or {}
 
         disc_path = f'{mod_id}/{mod_id}_discussion.xml'
         disc_res_id = f'RES_{mod_id}_discussion'

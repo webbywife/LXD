@@ -163,6 +163,16 @@ def init_db():
                 except Exception:
                     pass  # already exists
 
+            # Patch existing installs — add billing/plan columns if missing
+            for sql in [
+                "ALTER TABLE users ADD COLUMN plan ENUM('free','pro') NOT NULL DEFAULT 'free'",
+                "ALTER TABLE users ADD COLUMN plan_expires_at DATETIME DEFAULT NULL",
+            ]:
+                try:
+                    cur.execute(sql)
+                except Exception:
+                    pass  # already exists
+
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS lesson_plans (
                     id            INT AUTO_INCREMENT PRIMARY KEY,

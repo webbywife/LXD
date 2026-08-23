@@ -342,6 +342,9 @@ textarea{resize:vertical;min-height:60px;}
     <a href="#" id="nav-my-lps" class="ds-nav-link" title="My Plans">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     </a>
+    <a href="{{ turl('account_upgrade') }}" class="ds-nav-link" title="Upgrade to Pro">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21 7.5 13.5 2 9h7z"/></svg>
+    </a>
     {% if session.get('user_role') == 'admin' %}
     <a href="{{ turl('auth.admin_panel') }}" class="ds-nav-link" title="Admin">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -417,13 +420,14 @@ textarea{resize:vertical;min-height:60px;}
 
     <!-- Topic Mode -->
     <div id="mode-topic" style="display:none;">
-        <div class="tip"><span class="tt"><strong>Tip:</strong> Enter any topic and subject to generate a lesson plan without selecting from the curriculum. Great for custom or supplementary lessons.</span></div>
+        <div class="tip"><span class="tt"><strong>Tip:</strong> Enter any topic and subject to generate a lesson plan without selecting from the curriculum. Choose a curriculum standard below to match your country/framework. Great for custom or supplementary lessons.</span></div>
         <div class="fg"><label>Topic / Lesson Title *</label><input type="text" id="t-topic" placeholder="e.g., The Water Cycle, Fractions, Philippine Independence"></div>
         <div class="fr">
             <div class="fg"><label>Subject / Learning Area *</label><select id="sel-ts"><option value="">-- Choose a Subject --</option>{% for s in subjects %}<option value="{{ s.display_name }}">{{ s.display_name }}</option>{% endfor %}</select></div>
             <div class="fg"><label>Grade Level *</label><input type="text" id="t-grade" placeholder="e.g., Grade 5, Grade 8"></div>
         </div>
         <div class="fg"><label>Learning Competencies / Objectives (optional)</label><textarea id="t-comps" rows="3" placeholder="e.g., Students will identify the stages of the water cycle&#10;Students will explain how evaporation works"></textarea></div>
+        <div class="fg"><label>Curriculum Standard</label><select id="t-curr">{% for key, std in curriculum_standards.items() %}<option value="{{ key }}"{% if key=="ph_matatag" %} selected{% endif %}>{{ std.label }}</option>{% endfor %}</select></div>
     </div>
 
     <div class="br"><div></div><button class="btn btn-p" id="bn1" disabled>Next: Choose Competencies &#8594;</button></div>
@@ -638,6 +642,16 @@ document.addEventListener("DOMContentLoaded",function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const _T=document.querySelector('meta[name="auth-token"]')?.content||'';
 function aurl(u){if(!_T)return u;return u+(u.includes('?')?'&':'?')+'_t='+encodeURIComponent(_T);}
+function renderResultIssue(r){
+    if(r.upgrade_required){
+        return `<div style="text-align:center;padding:40px 24px;">
+            <div style="font-size:15px;color:var(--text);font-weight:700;margin-bottom:10px;">You're on a roll! &#127881;</div>
+            <p style="color:var(--dim);font-size:13px;line-height:1.7;max-width:420px;margin:0 auto 22px;">${r.message}</p>
+            <a href="${aurl('/account/upgrade')}" class="btn-p" style="display:inline-flex;">Upgrade to Pro &rarr;</a>
+        </div>`;
+    }
+    return `<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${r.error}</div>`;
+}
 let step=1,selC=new Set(),cData=[],skData=[],rawLP="",rawAS="",rawQZ="",rawPPST="",activeTab="lp",genMode="curriculum";
 
 // ── Local Storage Keys ──────────────────────────────────────────────────
@@ -656,6 +670,7 @@ function saveGenDraft(){
     topicGrade:   $("#t-grade")?.value||"",
     topicSubject: $("#sel-ts")?.value||"",
     competencies: $("#t-comps")?.value||"",
+    curriculumStandard: $("#t-curr")?.value||"",
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem(GEN_DRAFT_KEY, JSON.stringify(state));
@@ -670,6 +685,7 @@ function restoreFormInputs(state){
     if($("#t-grade")) $("#t-grade").value=state.topicGrade||"";
     if($("#sel-ts")){ $("#sel-ts").value=state.topicSubject||""; }
     if($("#t-comps")) $("#t-comps").value=state.competencies||"";
+    if($("#t-curr") && state.curriculumStandard) $("#t-curr").value=state.curriculumStandard;
     updateTopicNextBtn();
     return;
   }
@@ -761,8 +777,9 @@ $("#bn1").addEventListener("click",function(){
         const tsubj=($("#sel-ts")?.value||"");
         const tgrade=($("#t-grade")?.value||"").trim();
         const tcomps=($("#t-comps")?.value||"").trim();
+        const tcurr=($("#t-curr")?.value||"general");
         if(!topic||!tsubj)return;
-        window._topicCtx={topic,subject_name:tsubj,grade:tgrade,competencies_text:tcomps};
+        window._topicCtx={topic,subject_name:tsubj,grade:tgrade,competencies_text:tcomps,curriculum_standard:tcurr};
         updateStep3ForMode();
         go(3);
         return;
@@ -927,16 +944,16 @@ if(genMode==="topic"){
     const ctx=window._topicCtx||{};
     if(!ctx.topic||!ctx.subject_name)return;
     const done=showP(true);
-    const tps=[fetch(aurl("/api/generate-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
+    const tps=[fetch(aurl("/api/generate-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",curriculum_standard:ctx.curriculum_standard||"general",template_config:cfg,use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json())];
     const tNeedA=am!=="none"&&at.length>0;
-    if(tNeedA)tps.push(fetch(aurl("/api/generate-assessment-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
-    if(wantQuiz&&quizTypes.length>0)tps.push(fetch(aurl("/api/generate-quiz-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",quiz_config:{types:quizTypes,num_questions:parseInt($("#f-qnum")?.value||"5")},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+    if(tNeedA)tps.push(fetch(aurl("/api/generate-assessment-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",curriculum_standard:ctx.curriculum_standard||"general",assessment_config:{types:at,custom_context:$("#a-ctx")?.value||""},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
+    if(wantQuiz&&quizTypes.length>0)tps.push(fetch(aurl("/api/generate-quiz-topic"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:ctx.topic,subject_name:ctx.subject_name,grade:ctx.grade||"",competencies_text:ctx.competencies_text||"",curriculum_standard:ctx.curriculum_standard||"general",quiz_config:{types:quizTypes,num_questions:parseInt($("#f-qnum")?.value||"5")},use_ai:ai,api_key:ak,ai_provider:ap})}).then(r=>r.json()));
     Promise.all(tps).then(trs=>{done();
     const tlp=trs[0];const tas=tNeedA?trs[1]:null;const tqzIdx=tNeedA?2:1;const tqz=(wantQuiz&&quizTypes.length>0)?trs[tqzIdx]:null;
     setTimeout(()=>{rawLP=tlp.content||"";rawAS=tas?.content||"";rawQZ=tqz?.content||"";
     const _outLabel=`Topic: ${ctx.topic} | ${ctx.subject_name}${ctx.grade?" Grade "+ctx.grade:""}`;
     $("#out-s").textContent=_outLabel+" | "+new Date().toLocaleString();
-    if(tlp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${tlp.error}</div>`;go(4);return;}
+    if(tlp.error||tlp.upgrade_required){$("#out-b").innerHTML=renderResultIssue(tlp);go(4);return;}
     const tHasAS=!!rawAS;const tHasQZ=!!rawQZ;
     if(am==="incorporate"&&tHasAS){rawLP+="\n\n---\n\n# AUTHENTIC ASSESSMENT PACKAGE\n\n"+rawAS;rawAS="";}
     if(tHasAS||tHasQZ){$("#out-tabs").classList.add("on");$("#t-as").style.display=tHasAS?"inline-flex":"none";$("#t-qz").style.display=tHasQZ?"inline-flex":"none";}else{$("#out-tabs").classList.remove("on");}
@@ -969,7 +986,7 @@ setTimeout(()=>{rawLP=lp.content||"";rawAS=as?.content||"";rawQZ=qz?.content||""
 const sn=S.options[S.selectedIndex].text,gn=G.options[G.selectedIndex].text;
 const _outLabel=`${sn} - ${gn} | ${selC.size} competencies`;
 $("#out-s").textContent=_outLabel+" | "+new Date().toLocaleString();
-if(lp.error){$("#out-b").innerHTML=`<div style="color:var(--danger);padding:20px"><strong>Error:</strong> ${lp.error}</div>`;go(4);return;}
+if(lp.error||lp.upgrade_required){$("#out-b").innerHTML=renderResultIssue(lp);go(4);return;}
 
 // Determine tabs visibility
 const hasAS=!!rawAS;

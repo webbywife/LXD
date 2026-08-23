@@ -126,6 +126,45 @@ PROCEDURE_MODELS = {
 }
 
 
+CURRICULUM_STANDARDS = {
+    "ph_matatag": {
+        "label": "Philippines — DepEd MATATAG",
+        "guidance": "Align objectives and terminology with the Philippines DepEd MATATAG curriculum, using Filipino classroom context and materials where relevant.",
+    },
+    "us_common_core": {
+        "label": "United States — Common Core",
+        "guidance": "Align objectives and terminology with U.S. Common Core State Standards, using American classroom context and grade-band language.",
+    },
+    "uk_national": {
+        "label": "United Kingdom — National Curriculum",
+        "guidance": "Align objectives and terminology with the UK National Curriculum, using British English spelling, Key Stage terminology, and UK classroom context.",
+    },
+    "au_acara": {
+        "label": "Australia — ACARA",
+        "guidance": "Align objectives and terminology with the Australian Curriculum (ACARA), using Australian English spelling and Year Level terminology.",
+    },
+    "ib": {
+        "label": "International — IB / Cambridge",
+        "guidance": "Align objectives and terminology with international frameworks such as IB or Cambridge International, using inquiry-based, globally-minded language suitable for international schools.",
+    },
+    "general": {
+        "label": "General — No specific national standard",
+        "guidance": "Do not tie objectives to any single country's curriculum; use general, internationally-neutral educational language suitable for homeschool, tutoring, or independent use.",
+    },
+}
+
+
+def get_curriculum_standards():
+    """Return the available curriculum standard options for topic mode."""
+    return CURRICULUM_STANDARDS.copy()
+
+
+def _curriculum_guidance_line(curriculum_standard):
+    """Return the prompt guidance sentence for a given curriculum standard key."""
+    entry = CURRICULUM_STANDARDS.get(curriculum_standard, CURRICULUM_STANDARDS["general"])
+    return entry["guidance"]
+
+
 def get_template_sections():
     """Return the available template sections with their defaults."""
     return TEMPLATE_SECTIONS.copy()
@@ -1532,10 +1571,12 @@ Generate a COMPLETE lesson plan with the following sections (generate ONLY the s
         )
 
     prompt += "\n\n".join(section_instructions)
+    curriculum_guidance = _curriculum_guidance_line(topic_context.get("curriculum_standard", "general"))
     prompt += f"""
 
 IMPORTANT GUIDELINES:
 - All content must be appropriate for {subject} at {grade}
+- {curriculum_guidance}
 - Activities should be engaging and practical
 - Use markdown formatting for clear structure
 - Be specific and practical — a teacher should be able to use this plan directly
@@ -1791,6 +1832,8 @@ For Projects: Include phases, timeline, deliverables, and assessment criteria
 For Products: Include multiple product options with checklists
 For Self/Peer Assessment: Include ready-to-print forms with rating scales
 
+{_curriculum_guidance_line(topic_context.get("curriculum_standard", "general"))}
+
 Use markdown formatting. Make everything specific to {topic} for {grade} students.
 """
     return prompt
@@ -1924,6 +1967,7 @@ IMPORTANT:
 - Number items continuously across all sections
 - All questions must directly assess knowledge of {topic}
 - Use clear, age-appropriate language for {grade} students
+- {_curriculum_guidance_line(topic_context.get("curriculum_standard", "general"))}
 - At the END, include a complete "## Answer Key" section with all correct answers
 - Use markdown formatting throughout
 """

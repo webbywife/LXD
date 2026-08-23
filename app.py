@@ -20,7 +20,7 @@ from curriculum_loader import (
     DB_PATH, SUBJECT_DISPLAY
 )
 from lesson_generator import (
-    generate_lesson_plan, generate_lesson_plan_topic,
+    generate_lesson_plan, generate_lesson_plan_topic, get_curriculum_standards,
     generate_assessment, generate_assessment_topic,
     generate_quiz, generate_quiz_topic,
     convert_quiz_to_gift, convert_quiz_to_qti,
@@ -37,6 +37,7 @@ from module_generator import extract_text_from_file, parse_course_guide, generat
 from course_exporter import build_moodle_mbz, build_imscc
 from dlsl_generator import generate_dlsl_lesson_content, generate_dlsl_module_extras
 from dlsl_exporter import build_dlsl_imscc
+from billing import check_generation_allowed, FREE_MONTHLY_CAP, PRO_MONTHLY_PRICE_PHP
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -189,6 +190,24 @@ def _log_activity(action_type, detail="", subject="", grade=""):
         pass  # Logging must never break user-facing functionality
 
 
+# ── Billing ───────────────────────────────────────────────────
+
+def _upgrade_required_response(usage, cap):
+    """A warm, non-punitive response when a free-tier teacher hits the monthly cap."""
+    return jsonify({
+        "upgrade_required": True,
+        "usage": usage,
+        "cap": cap,
+        "pro_price_php": PRO_MONTHLY_PRICE_PHP,
+        "message": (
+            f"You've generated {usage} lesson plans this month — nice work! "
+            f"You've used all {cap} free ones for this month. "
+            f"Upgrade to Pro (₱{PRO_MONTHLY_PRICE_PHP}/mo) for unlimited generations, "
+            f"or come back next month for {cap} more, free."
+        ),
+    }), 402
+
+
 # ── Error handlers: always return JSON for /api/* routes ────
 @app.errorhandler(404)
 def err_404(e):
@@ -248,7 +267,8 @@ def generator():
     return render_template("generator.html",
                            subjects=subjects,
                            template_sections=TEMPLATE_SECTIONS,
-                           procedure_models=PROCEDURE_MODELS)
+                           procedure_models=PROCEDURE_MODELS,
+                           curriculum_standards=get_curriculum_standards())
 
 
 # ── API Routes (require login) ─────────────────────────────
@@ -313,6 +333,10 @@ def api_generate():
     if not competency_ids:
         return jsonify({"error": "Select at least one learning competency"}), 400
 
+    allowed, usage, cap, _plan = check_generation_allowed(session["user_id"])
+    if not allowed:
+        return _upgrade_required_response(usage, cap)
+
     # Convert string IDs to integers
     try:
         competency_ids = [int(cid) for cid in competency_ids]
@@ -343,6 +367,7 @@ def api_generate_topic():
     subject_name = data.get("subject_name", "").strip()
     grade = data.get("grade", "").strip()
     competencies_text = data.get("competencies_text", "").strip()
+    curriculum_standard = data.get("curriculum_standard", "general").strip()
     template_config = data.get("template_config", TEMPLATE_SECTIONS)
     use_ai = data.get("use_ai", False)
     api_key = data.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
@@ -353,11 +378,16 @@ def api_generate_topic():
     if not subject_name:
         return jsonify({"error": "Subject is required"}), 400
 
+    allowed, usage, cap, _plan = check_generation_allowed(session["user_id"])
+    if not allowed:
+        return _upgrade_required_response(usage, cap)
+
     topic_context = {
         "topic": topic,
         "subject_name": subject_name,
         "grade": grade,
         "competencies_text": competencies_text,
+        "curriculum_standard": curriculum_standard,
     }
 
     content, error = generate_lesson_plan_topic(
@@ -392,6 +422,7 @@ def api_generate_assessment_topic():
         "subject_name": subject_name,
         "grade": data.get("grade", "").strip(),
         "competencies_text": data.get("competencies_text", "").strip(),
+        "curriculum_standard": data.get("curriculum_standard", "general").strip(),
     }
     assessment_config = data.get("assessment_config", {})
     use_ai = data.get("use_ai", False)
@@ -429,6 +460,7 @@ def api_generate_quiz_topic():
         "subject_name": subject_name,
         "grade": data.get("grade", "").strip(),
         "competencies_text": data.get("competencies_text", "").strip(),
+        "curriculum_standard": data.get("curriculum_standard", "general").strip(),
     }
     quiz_config = data.get("quiz_config", {})
     use_ai = data.get("use_ai", False)
@@ -1762,6 +1794,89 @@ def api_export_dlsl_course():
     _log_activity("dlsl_export", f"Canvas: {course_title}")
     return send_file(buf, mimetype="application/zip", as_attachment=True,
                       download_name=f"{safe_title}_dlsl.imscc")
+
+
+# ── Billing routes ──────────────────────────────────────────
+
+@app.route("/account/upgrade")
+@login_required
+def account_upgrade():
+    """Show plan status and the upgrade path (checkout, or manual fallback)."""
+    from billing import get_user_plan, get_monthly_usage, paymongo_configured
+    try:
+        plan, expires_at = get_user_plan(session["user_id"])
+        usage = get_monthly_usage(session["user_id"])
+    except Exception:
+        plan, expires_at, usage = "free", None, 0
+    return render_template(
+        "upgrade.html",
+        plan=plan, expires_at=expires_at, usage=usage,
+        cap=FREE_MONTHLY_CAP, price=PRO_MONTHLY_PRICE_PHP,
+        checkout_available=paymongo_configured(),
+        support_email=os.environ.get("SUPPORT_EMAIL", "support@skooled.online"),
+    )
+
+
+@app.route("/api/checkout", methods=["POST"])
+@login_required
+def api_checkout():
+    """Start a PayMongo checkout session for one month of Pro."""
+    from billing import create_checkout_session
+    success_url = url_for("account_upgrade", _external=True, upgraded="1")
+    cancel_url = url_for("account_upgrade", _external=True)
+    checkout_url, error = create_checkout_session(
+        session["user_id"], session.get("user_email", ""), success_url, cancel_url
+    )
+    if error:
+        return jsonify({"error": error}), 400
+    return jsonify({"checkout_url": checkout_url})
+
+
+@app.route("/webhook/paymongo", methods=["POST"])
+def webhook_paymongo():
+    """PayMongo sends payment events here. Verifies signature before granting Pro.
+
+    NOT YET LIVE-TESTED — needs PAYMONGO_WEBHOOK_SECRET from a real PayMongo
+    webhook subscription to verify against real signed events.
+    """
+    from billing import verify_paymongo_signature, activate_pro_plan
+
+    webhook_secret = os.environ.get("PAYMONGO_WEBHOOK_SECRET", "")
+    signature = request.headers.get("Paymongo-Signature", "")
+    raw_body = request.get_data()
+
+    if not verify_paymongo_signature(raw_body, signature, webhook_secret):
+        return jsonify({"error": "Invalid signature"}), 400
+
+    event = request.get_json(silent=True) or {}
+    event_type = event.get("data", {}).get("attributes", {}).get("type", "")
+
+    if event_type in ("checkout_session.payment.paid", "payment.paid"):
+        metadata = (
+            event.get("data", {}).get("attributes", {})
+            .get("data", {}).get("attributes", {}).get("metadata", {})
+        )
+        user_id = metadata.get("user_id")
+        if user_id:
+            activate_pro_plan(int(user_id))
+
+    return jsonify({"received": True})
+
+
+# ── LeX inquiry chatbot ─────────────────────────────────────
+
+@app.route("/api/lex-chat", methods=["POST"])
+def api_lex_chat():
+    """Public inquiry chatbot — no login required, this is for prospects."""
+    from lex_chat import get_lex_reply
+    data = request.get_json(silent=True) or {}
+    message = data.get("message", "")
+    history = data.get("history", [])
+    if not isinstance(history, list):
+        history = []
+    ip = request.remote_addr or "unknown"
+    reply, is_fallback = get_lex_reply(message, history, ip)
+    return jsonify({"reply": reply, "is_fallback": is_fallback})
 
 
 if __name__ == "__main__":
