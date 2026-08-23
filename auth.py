@@ -453,6 +453,7 @@ def signup():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         confirm = request.form.get("confirm_password", "")
+        agreed = request.form.get("agree_terms") == "on"
 
         errors = []
         if not name:
@@ -463,6 +464,8 @@ def signup():
             errors.append("Password must be at least 8 characters.")
         if password != confirm:
             errors.append("Passwords do not match.")
+        if not agreed:
+            errors.append("Please agree to the Terms of Service and Privacy Policy to continue.")
 
         if errors:
             for e in errors:

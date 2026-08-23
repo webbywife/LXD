@@ -92,6 +92,13 @@
           <label class="ds-label">Confirm Password</label>
           <input class="ds-input" type="password" name="confirm_password" required placeholder="Re-enter your password" minlength="8">
         </div>
+        <div class="ds-fg" style="display:flex;align-items:flex-start;gap:8px;">
+          <input type="checkbox" id="agree_terms" name="agree_terms" required style="margin-top:3px;">
+          <label for="agree_terms" style="font-size:12px;font-weight:400;">
+            I agree to the <a href="{{ url_for('terms') }}" target="_blank" rel="noopener">Terms of Service</a>
+            and <a href="{{ url_for('privacy') }}" target="_blank" rel="noopener">Privacy Policy</a>.
+          </label>
+        </div>
         <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-w" style="margin-top:8px;">
           Create Account &rarr;
         </button>

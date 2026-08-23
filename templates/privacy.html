@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<title>Privacy Policy — SKOOLED-AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>(function(){var t=localStorage.getItem('sa-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--accent:#ff5f57;--bg:#060b0c;--text:#eef2f3;--dim:rgba(238,242,243,0.62);--dimmer:rgba(238,242,243,0.4);--glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.09);}
+[data-theme="light"]{--bg:#f7f7f5;--text:#1a1a1a;--dim:rgba(26,26,26,0.65);--dimmer:rgba(26,26,26,0.45);--glass:rgba(255,255,255,0.7);--glass-border:rgba(255,95,87,0.18);}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:0 20px 100px;}
+h1,h2{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;}
+a{color:var(--accent);}
+.top{max-width:720px;margin:0 auto;padding:48px 0 0;}
+.back{font-size:12px;color:var(--dim);text-decoration:none;font-weight:600;}
+h1{font-size:clamp(28px,5vw,38px);margin:20px 0 6px;}
+.updated{font-size:12px;color:var(--dimmer);margin-bottom:36px;}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:40px clamp(20px,5vw,48px);}
+h2{font-size:17px;margin:32px 0 10px;}
+h2:first-child{margin-top:0;}
+p,li{font-size:14px;color:var(--dim);}
+ul{margin:8px 0 8px 20px;}
+li{margin-bottom:6px;}
+strong{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="{{ url_for('landing') }}" class="back">&larr; Back to SKOOLED&#8209;AI</a>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Effective August 23, 2026</p>
+</div>
+<div class="top">
+<div class="card">
+
+<h2>1. Introduction</h2>
+<p>This policy explains what information SKOOLED-AI ("the Service") collects, why, and what you can do about it. SKOOLED-AI is an independent, single-developer product — it is not affiliated with DepEd or any school or institution.</p>
+
+<h2>2. Information We Collect</h2>
+<ul>
+<li><strong>Account information:</strong> your name, email address, and a password. Your password is stored as a one-way cryptographic hash — we never store or can see your actual password.</li>
+<li><strong>Content you create:</strong> the subjects, grade levels, topics, learning competencies, and other text you enter to generate lesson plans, assessments, quizzes, syllabi, rubrics, and activities, plus the content the Service generates for you.</li>
+<li><strong>Usage data:</strong> which features you use and how often, used to operate free-plan limits and improve the Service.</li>
+<li><strong>Chatbot inquiries:</strong> if you message LeX (our inquiry chatbot), we store your email address and the conversation so we can follow up and improve LeX's answers.</li>
+<li><strong>Technical data:</strong> your IP address and basic request information, used only for rate-limiting, spam/abuse prevention, and security.</li>
+</ul>
+
+<h2>3. What We Don't Collect</h2>
+<p>We do not ask for, and do not intentionally collect, any personal information about your students. Please don't enter student names or other student-identifiable information into any field — the Service is designed around subjects, grades, and topics, not individual students.</p>
+
+<h2>4. How We Use Your Information</h2>
+<p>To operate and improve the Service, enforce free-plan limits, process payments, respond to your questions, and keep the Service secure from abuse.</p>
+
+<h2>5. Who We Share It With</h2>
+<ul>
+<li><strong>Anthropic</strong> (maker of Claude AI): the content you submit to generate a lesson plan is sent to Anthropic's API to produce your output. Anthropic's own privacy policy governs how they handle that data.</li>
+<li><strong>PayMongo:</strong> if you upgrade to Pro, your payment is processed directly by PayMongo (GCash, Maya, or card). We never receive or store your full card or account credentials ourselves.</li>
+<li><strong>Our hosting provider,</strong> for the infrastructure that runs the Service.</li>
+</ul>
+<p>We do not sell your personal information, and we do not use advertising trackers or analytics cookies.</p>
+
+<h2>6. Cookies</h2>
+<p>We use a single, essential session cookie to keep you logged in. It is marked HttpOnly and Secure, and is never used for advertising or tracking.</p>
+
+<h2>7. Data Retention</h2>
+<p>We keep your account and content for as long as your account is active. You may request deletion at any time — see "Your Rights" below.</p>
+
+<h2>8. Your Rights</h2>
+<p>You can request access to, correction of, or deletion of your personal data by emailing <a href="mailto:{{ support_email }}">{{ support_email }}</a>. We aim to respond within a reasonable time. If you're in the Philippines, this is consistent with your rights under the Data Privacy Act of 2012. If you're elsewhere, we make reasonable efforts to honor equivalent requests.</p>
+
+<h2>9. Children's Privacy</h2>
+<p>SKOOLED-AI is intended for teachers and other adult educators, not for use by children, and we do not knowingly collect personal information from children.</p>
+
+<h2>10. International Use</h2>
+<p>SKOOLED-AI supports curriculum standards for multiple countries, so your information may be processed in a country other than the one you live in. We take reasonable steps to protect your data wherever it is processed.</p>
+
+<h2>11. Security</h2>
+<p>Passwords are never stored in plain text. All traffic to the Service is encrypted (HTTPS). Login sessions use secure, HTTP-only cookies. No system is 100% secure, and we can't guarantee absolute security, but we take reasonable, ongoing steps to protect your information.</p>
+
+<h2>12. Changes to This Policy</h2>
+<p>We may update this policy as the Service changes. We'll update the effective date above when we do.</p>
+
+<h2>13. Contact</h2>
+<p>Questions? Email <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+
+</div>
+</div>
+</body>
+</html>

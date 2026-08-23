@@ -259,6 +259,18 @@ def landing():
     return render_template("landing.html", recent_syllabi=recent_syllabi)
 
 
+@app.route("/privacy")
+def privacy():
+    """Public — no login required."""
+    return render_template("privacy.html", support_email=os.environ.get("SUPPORT_EMAIL", "support@skooled.online"))
+
+
+@app.route("/terms")
+def terms():
+    """Public — no login required."""
+    return render_template("terms.html", support_email=os.environ.get("SUPPORT_EMAIL", "support@skooled.online"))
+
+
 @app.route("/generator")
 @login_required
 def generator():
