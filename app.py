@@ -1867,15 +1867,25 @@ def webhook_paymongo():
 
 @app.route("/api/lex-chat", methods=["POST"])
 def api_lex_chat():
-    """Public inquiry chatbot — no login required, this is for prospects."""
+    """Public inquiry chatbot — no login required, this is for prospects.
+
+    Requires an email (rate-limit key + lead trail) and rejects likely
+    bots via a honeypot field and a minimum human-plausible elapsed time,
+    without spending an AI call or revealing the detection to the caller.
+    """
     from lex_chat import get_lex_reply
     data = request.get_json(silent=True) or {}
+    email = data.get("email", "")
     message = data.get("message", "")
     history = data.get("history", [])
+    honeypot = data.get("website", "")  # hidden field — real visitors never fill this
+    elapsed_ms = data.get("elapsed_ms")
     if not isinstance(history, list):
         history = []
+    if not isinstance(elapsed_ms, (int, float)):
+        elapsed_ms = None
     ip = request.remote_addr or "unknown"
-    reply, is_fallback = get_lex_reply(message, history, ip)
+    reply, is_fallback = get_lex_reply(email, message, history, ip, honeypot=honeypot, elapsed_ms=elapsed_ms)
     return jsonify({"reply": reply, "is_fallback": is_fallback})
 
 

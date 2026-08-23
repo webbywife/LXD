@@ -727,9 +727,15 @@ body::before{
         <button class="lex-close" id="lex-close" aria-label="Close chat">&times;</button>
     </div>
     <div class="lex-msgs" id="lex-msgs">
-        <div class="lex-bubble bot">Hi, I'm LeX! Ask me anything about SKOOLED&#8209;AI &mdash; pricing, curriculum standards, exports, how signup works, whatever you're wondering about.</div>
+        <div class="lex-bubble bot">Hi, I'm LeX! What's your email? I'll use it just to follow up if we ever get disconnected &mdash; then ask me anything about SKOOLED&#8209;AI.</div>
     </div>
-    <div class="lex-input-row">
+    <!-- Honeypot — hidden from real visitors, bots that auto-fill every field trip this -->
+    <input type="text" id="lex-hp" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true">
+    <div class="lex-input-row" id="lex-email-row">
+        <input class="lex-input" id="lex-email" type="email" placeholder="you@school.edu" autocomplete="email">
+        <button class="lex-send" id="lex-email-go">Continue</button>
+    </div>
+    <div class="lex-input-row" id="lex-chat-row" style="display:none;">
         <textarea class="lex-input" id="lex-input" rows="1" placeholder="Type a question…"></textarea>
         <button class="lex-send" id="lex-send">Send</button>
     </div>
@@ -738,16 +744,29 @@ body::before{
 <script>
 // ── LeX chat widget ───────────────────────────────────────
 (function(){
+    const pageLoadedAt=Date.now();
+    const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
     const launcher=document.getElementById('lex-launcher');
     const panel=document.getElementById('lex-panel');
     const closeBtn=document.getElementById('lex-close');
     const msgs=document.getElementById('lex-msgs');
+    const hp=document.getElementById('lex-hp');
+    const emailRow=document.getElementById('lex-email-row');
+    const emailInput=document.getElementById('lex-email');
+    const emailGoBtn=document.getElementById('lex-email-go');
+    const chatRow=document.getElementById('lex-chat-row');
     const input=document.getElementById('lex-input');
     const sendBtn=document.getElementById('lex-send');
+
     let history=[];
     let busy=false;
+    let email=(localStorage.getItem('lex_email')||'').trim();
 
-    function toggle(){panel.classList.toggle('open');if(panel.classList.contains('open'))input.focus();}
+    function toggle(){
+        panel.classList.toggle('open');
+        if(panel.classList.contains('open'))(email?input:emailInput).focus();
+    }
     launcher.addEventListener('click',toggle);
     closeBtn.addEventListener('click',toggle);
 
@@ -760,9 +779,41 @@ body::before{
         return b;
     }
 
+    function unlockChat(){
+        emailRow.style.display='none';
+        chatRow.style.display='flex';
+        addBubble("Thanks! Ask me anything about SKOOLED‑AI — pricing, curriculum standards, exports, how signup works, whatever you're wondering about.",'bot');
+        input.focus();
+    }
+
+    // Returning visitor on this browser — skip the email step
+    if(email && EMAIL_RE.test(email)){
+        msgs.innerHTML='';
+        emailRow.style.display='none';
+        chatRow.style.display='flex';
+        addBubble("Welcome back! Ask me anything about SKOOLED‑AI.",'bot');
+    }
+
+    function submitEmail(){
+        const val=emailInput.value.trim();
+        if(!EMAIL_RE.test(val)){
+            emailInput.style.borderColor='var(--danger)';
+            emailInput.placeholder='Please enter a valid email';
+            return;
+        }
+        email=val;
+        localStorage.setItem('lex_email',email);
+        unlockChat();
+    }
+    emailGoBtn.addEventListener('click',submitEmail);
+    emailInput.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){e.preventDefault();submitEmail();}
+    });
+    emailInput.addEventListener('input',function(){emailInput.style.borderColor='';});
+
     function send(){
         const text=input.value.trim();
-        if(!text||busy)return;
+        if(!text||busy||!email)return;
         busy=true;sendBtn.disabled=true;
         addBubble(text,'user');
         input.value='';
@@ -775,7 +826,10 @@ body::before{
         fetch('/api/lex-chat',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({message:text,history:history})
+            body:JSON.stringify({
+                email:email,message:text,history:history,
+                website:hp.value,elapsed_ms:Date.now()-pageLoadedAt
+            })
         }).then(r=>r.json()).then(data=>{
             typing.remove();
             addBubble(data.reply||"Sorry, something went wrong — please try again.",'bot');

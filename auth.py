@@ -216,6 +216,20 @@ def init_db():
                     INDEX idx_sa_ip_time (ip, created_at)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS lex_inquiries (
+                    id             INT AUTO_INCREMENT PRIMARY KEY,
+                    email          VARCHAR(255) NOT NULL,
+                    ip             VARCHAR(45),
+                    message        TEXT,
+                    reply          TEXT,
+                    is_fallback    BOOLEAN DEFAULT FALSE,
+                    blocked_reason VARCHAR(60) DEFAULT NULL,
+                    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_lex_email (email),
+                    INDEX idx_lex_created (created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
     finally:
         conn.close()
 
