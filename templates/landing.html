@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>SKOOLED-AI — AI-Powered Lesson Plans for Any Curriculum</title>
+<meta name="description" content="AI-powered lesson plans for MATATAG, Common Core, UK National Curriculum, ACARA, IB, and more — plus SCORM/LMS exports and 16 interactive classroom games, generated in minutes.">
+<meta property="og:title" content="SKOOLED-AI — AI-Powered Lesson Plans for Any Curriculum">
+<meta property="og:description" content="AI-powered lesson plans for MATATAG, Common Core, UK National Curriculum, ACARA, IB, and more — plus SCORM/LMS exports and 16 interactive classroom games, generated in minutes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lxd.skooled.online/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script>
@@ -777,6 +783,44 @@ body::before{
                 <a href="{{ url_for('auth.signup') }}" class="btn-p">Create Free Account &rarr;</a>
                 <a href="{{ url_for('auth.login') }}" class="btn-g">Sign In</a>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="div">
+
+<!-- FOR SCHOOLS & DISTRICTS -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv">
+            <span class="sec-label">For Institutions</span>
+            <h2 class="sec-title">School and division<br>licensing.</h2>
+            <p class="sec-sub">Give every teacher in your school or division access to SKOOLED&#8209;AI — without asking each one to sign up and hit a free-tier cap individually.</p>
+        </div>
+        <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="feat-card rv">
+                <div class="feat-tag">Access</div>
+                <h3>One License, Every Teacher</h3>
+                <p>No per-teacher signup, no individual free-tier caps. One license covers your whole school or division.</p>
+            </div>
+            <div class="feat-card rv">
+                <div class="feat-tag">Curriculum</div>
+                <h3>Curriculum-Wide Alignment</h3>
+                <p>3,567 MATATAG competencies across 19 subjects, plus Common Core, UK National Curriculum, ACARA, and IB — consistent alignment in every classroom.</p>
+            </div>
+            <div class="feat-card rv">
+                <div class="feat-tag">Export</div>
+                <h3>LMS-Ready, District-Wide</h3>
+                <p>SCORM 1.2 packages, Moodle GIFT files, and Canvas / Brightspace QTI exports that drop straight into whatever LMS your institution already runs.</p>
+            </div>
+        </div>
+        <div class="cta-box rv" style="margin-top:56px;">
+            <span class="sec-label" style="display:block;text-align:center;margin-bottom:14px;">Let's Talk</span>
+            <h2>Interested in a school or<br>division license?</h2>
+            <p>Tell us about your school or division — number of teachers, grade levels, and current LMS — and we'll get back to you about licensing SKOOLED&#8209;AI for your institution.</p>
+            <div class="cta-btns">
+                <button type="button" class="btn-p" onclick="document.getElementById('lex-launcher').click()" style="border:none;cursor:pointer;font-family:inherit;">Chat with LeX to Inquire &rarr;</button>
             </div>
         </div>
     </div>
