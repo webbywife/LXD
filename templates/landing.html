@@ -390,6 +390,72 @@ body::before{
     padding:6px 18px;border-radius:20px;box-shadow:0 8px 20px var(--accent-dim);white-space:nowrap;
 }
 
+/* ── Generator mockup preview ── */
+.gen-mock{
+    max-width:820px;margin:56px auto 0;
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border);border-radius:var(--rad);
+    padding:clamp(24px,4vw,40px);
+}
+.gen-mock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.gen-mock-label{
+    display:block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dimmer);margin-bottom:8px;
+}
+.gen-mock-input{
+    background:var(--bg);border:1px solid var(--glass-border);border-radius:10px;
+    padding:11px 14px;font-size:13px;color:var(--text);font-weight:500;
+}
+.gen-mock-models{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px;}
+.gen-mock-model{
+    background:var(--bg);border:1px solid var(--glass-border);border-radius:10px;
+    padding:14px 16px;transition:border-color .3s;
+}
+.gen-mock-model.sel{border-color:var(--accent-border);box-shadow:0 0 0 1px var(--accent-border) inset;}
+.gen-mock-model strong{display:block;font-size:12px;color:var(--text);margin-bottom:5px;font-family:'Bricolage Grotesque',sans-serif;}
+.gen-mock-model span{font-size:11px;color:var(--dimmer);line-height:1.5;}
+
+/* ── Why SKOOLED-AI differentiation ── */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:56px;}
+.why-card{
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border);border-radius:var(--rad);
+    padding:32px 28px;
+}
+.why-card .why-num{
+    font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:800;color:var(--accent);
+    margin-bottom:14px;
+}
+.why-card h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:9px;letter-spacing:-.01em;}
+.why-card p{font-size:13px;color:var(--dim);line-height:1.72;font-weight:300;}
+
+/* ── Testimonials illustrative note ── */
+.testi-illus-note{
+    font-size:11px;color:var(--dimmer);font-style:italic;margin-top:10px;
+}
+
+/* ── FAQ accordion ── */
+.faq-list{max-width:760px;margin:56px auto 0;display:flex;flex-direction:column;gap:10px;}
+.faq-item{
+    background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border);border-radius:14px;
+    overflow:hidden;
+}
+.faq-item summary{
+    padding:18px 24px;cursor:pointer;list-style:none;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;color:var(--text);
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{
+    content:'+';font-size:20px;font-weight:400;color:var(--accent);flex-shrink:0;
+    transition:transform .25s;
+}
+.faq-item[open] summary::after{transform:rotate(45deg);}
+.faq-item p{
+    padding:0 24px 20px;font-size:13px;color:var(--dim);line-height:1.75;font-weight:300;
+}
+
 /* ── LeX chat widget ── */
 .lex-launcher{
     position:fixed;bottom:24px;right:24px;z-index:200;
@@ -663,6 +729,74 @@ body::before{
 
 <hr class="div">
 
+<!-- INSIDE THE GENERATOR -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv" style="text-align:center;">
+            <span class="sec-label">Inside the Generator</span>
+            <h2 class="sec-title">A real form,<br>not a prompt box.</h2>
+            <p class="sec-sub" style="margin:0 auto;">You're not writing prompts and hoping — you're picking from the same curriculum data DepEd uses.</p>
+        </div>
+        <div class="gen-mock rv">
+            <div class="gen-mock-row">
+                <div>
+                    <span class="gen-mock-label">Subject / Learning Area</span>
+                    <div class="gen-mock-input">Science</div>
+                </div>
+                <div>
+                    <span class="gen-mock-label">Grade Level</span>
+                    <div class="gen-mock-input">Grade 6</div>
+                </div>
+                <div>
+                    <span class="gen-mock-label">Curriculum Standard</span>
+                    <div class="gen-mock-input">MATATAG (DepEd) &#9662;</div>
+                </div>
+            </div>
+            <div style="margin-top:22px;">
+                <span class="gen-mock-label">Instructional Design Model</span>
+                <div class="gen-mock-models">
+                    <div class="gen-mock-model sel"><strong>5E Model</strong><span>Engage, Explore, Explain, Elaborate, Evaluate</span></div>
+                    <div class="gen-mock-model"><strong>4A's Model</strong><span>Activity, Analysis, Abstraction, Application</span></div>
+                    <div class="gen-mock-model"><strong>DepEd DLP</strong><span>Review, Motivation, Activity, Analysis, Application, Assessment</span></div>
+                    <div class="gen-mock-model"><strong>Design Thinking</strong><span>Empathize, Define, Ideate, Prototype, Test</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="div">
+
+<!-- WHY SKOOLED-AI -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv">
+            <span class="sec-label">Why Not Just Use ChatGPT</span>
+            <h2 class="sec-title">A generic AI doesn't<br>know DepEd.</h2>
+            <p class="sec-sub">Prompting a general AI tool gets you a lesson plan that sounds right. It doesn't get you one that's actually mapped to the standard your principal checks against.</p>
+        </div>
+        <div class="why-grid">
+            <div class="why-card rv">
+                <div class="why-num">01</div>
+                <h3>Real Competency Mapping</h3>
+                <p>Every MATATAG lesson maps to one of 3,567 official DepEd learning competencies across 19 subjects — pulled from the actual curriculum guide data, not guessed at by a general model.</p>
+            </div>
+            <div class="why-card rv">
+                <div class="why-num">02</div>
+                <h3>Six Standards, One Tool</h3>
+                <p>MATATAG, Common Core, UK National Curriculum, ACARA, or IB — most AI lesson-plan tools only know one system. Switch standards without switching tools.</p>
+            </div>
+            <div class="why-card rv">
+                <div class="why-num">03</div>
+                <h3>Output an LMS Can Actually Use</h3>
+                <p>SCORM 1.2 packages, Moodle GIFT files, Canvas/Brightspace QTI, and branded PPTX — a chat window gives you text to reformat by hand; this gives you a file you upload.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="div">
+
 <!-- HOW IT WORKS -->
 <section class="sec">
     <div class="sec-inner">
@@ -704,6 +838,7 @@ body::before{
             <span class="sec-label">Educators</span>
             <h2 class="sec-title">Teachers across<br>the Philippines.</h2>
             <p class="sec-sub">Filipino educators saving hours every week with AI-powered, curriculum-aligned lesson plans.</p>
+            <p class="testi-illus-note">Illustrative examples of the kind of feedback SKOOLED&#8209;AI is built to earn — not verified reviews.</p>
         </div>
         <div class="testi-grid">
             <div class="testi-card rv">
@@ -764,6 +899,40 @@ body::before{
         {% else %}
         <div class="syl-empty-note rv">No syllabi shared yet. <a href="{{ url_for('auth.signup') }}" style="color:var(--accent);font-weight:600;">Be the first →</a></div>
         {% endif %}
+    </div>
+</section>
+
+<hr class="div">
+
+<!-- FAQ -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv" style="text-align:center;">
+            <span class="sec-label">Questions</span>
+            <h2 class="sec-title">Before you sign up.</h2>
+        </div>
+        <div class="faq-list rv">
+            <details class="faq-item">
+                <summary>Why not just use ChatGPT directly?</summary>
+                <p>You can — but you're on your own for curriculum alignment, and you'll get plain text you still have to reformat into a usable lesson plan. SKOOLED&#8209;AI maps directly to official DepEd/MATATAG competencies (or Common Core, UK, ACARA, IB), and outputs a structured lesson plan plus SCORM, GIFT, QTI, or PPTX files you can actually upload to an LMS or present from — not a chat transcript.</p>
+            </details>
+            <details class="faq-item">
+                <summary>How accurate is the DepEd/MATATAG alignment?</summary>
+                <p>The competency, content standard, and performance standard data comes from the official MATATAG curriculum guides — 3,567 competencies across 19 subjects. The AI generates the lesson content itself, but the standards it's aligning to are the real ones, not inferred from general training data.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Is my data private and secure?</summary>
+                <p>Your account, lesson content, and generated files are tied to your login and aren't shared publicly unless you explicitly share a syllabus link. We don't sell user data.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Do I need to pay to use it?</summary>
+                <p>No — every account starts on a free tier with 5 generations per month, full access to every curriculum standard and export format. A paid Pro tier for higher volume is coming; free access isn't going away.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Can I use this outside the Philippines?</summary>
+                <p>Yes. MATATAG/DepEd alignment is the deepest feature, but Common Core, UK National Curriculum, ACARA, and IB are all supported as full curriculum standards, not an afterthought.</p>
+            </details>
+        </div>
     </div>
 </section>
 
