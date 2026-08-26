@@ -227,7 +227,7 @@ body::before{
 }
 @keyframes draw{to{stroke-dashoffset:0;}}
 .balloon-rig{
-    transform-origin:130px 18px;
+    transform-origin:130px 35px;
     animation:sway 6s ease-in-out infinite;
 }
 @keyframes sway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
@@ -614,24 +614,41 @@ body::before{
             </div>
         </div>
 
-        <!-- Hot air balloon SVG, patterned on the SkoolED logo -->
-        <svg class="hero-art" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff5f57" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Hot air balloon SVG -->
+        <svg class="hero-art" viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff5f57" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <defs>
+                <clipPath id="balloonClip">
+                    <path d="M130 35 C168 35 194 63 198 103 C202 143 192 173 176 196 C184 206 180 212 166 224 C158 231 150 236 142 244 L118 244 C110 236 102 231 94 224 C80 212 76 206 84 196 C68 173 58 143 62 103 C66 63 92 35 130 35 Z"/>
+                </clipPath>
+            </defs>
             <g class="balloon-rig">
-                <!-- Envelope -->
-                <path class="draw-path" d="M130 40 C168 40 190 68 194 108 C198 148 188 178 168 198 C158 208 148 212 140 214 L120 214 C112 212 102 208 92 198 C72 178 62 148 66 108 C70 68 92 40 130 40 Z" stroke-width="2.2"/>
+                <!-- Soft tint fill + zigzag band, clipped to the envelope -->
+                <g clip-path="url(#balloonClip)">
+                    <rect x="55" y="30" width="150" height="220" fill="rgba(255,95,87,0.16)"/>
+                    <path d="M60 130 L90 112 L115 132 L130 110 L145 132 L170 112 L200 130 L200 168 L170 150 L145 170 L130 148 L115 170 L90 150 L60 168 Z" fill="#ff5f57" opacity=".9"/>
+                </g>
+                <!-- Envelope outline -->
+                <path class="draw-path" d="M130 35 C168 35 194 63 198 103 C202 143 192 173 176 196 C184 206 180 212 166 224 C158 231 150 236 142 244 L118 244 C110 236 102 231 94 224 C80 212 76 206 84 196 C68 173 58 143 62 103 C66 63 92 35 130 35 Z" stroke-width="2.2"/>
                 <!-- Gore panels -->
-                <path d="M130 42 L130 213" stroke-width="1.6" opacity=".8"/>
-                <path d="M130 42 C107 56 93 90 95 130 C96 163 106 193 118 212" stroke-width="1.6" opacity=".8"/>
-                <path d="M130 42 C153 56 167 90 165 130 C164 163 154 193 142 212" stroke-width="1.6" opacity=".8"/>
+                <path d="M130 37 L130 244" stroke-width="1.4" opacity=".7"/>
+                <path d="M130 37 C110 50 98 85 96 125 C94 160 100 195 108 224 C112 233 115 239 120 244" stroke-width="1.4" opacity=".7"/>
+                <path d="M130 37 C150 50 162 85 164 125 C166 160 160 195 152 224 C148 233 145 239 140 244" stroke-width="1.4" opacity=".7"/>
+                <!-- Crown -->
+                <circle cx="130" cy="35" r="6" fill="#ff5f57" stroke="none"/>
+                <!-- Rigging -->
+                <line x1="118" y1="244" x2="105" y2="272" stroke-width=".9" opacity=".55"/>
+                <line x1="142" y1="244" x2="155" y2="272" stroke-width=".9" opacity=".55"/>
+                <line x1="118" y1="244" x2="155" y2="272" stroke-width=".7" opacity=".35"/>
+                <line x1="142" y1="244" x2="105" y2="272" stroke-width=".7" opacity=".35"/>
                 <!-- Basket -->
-                <rect x="112" y="212" width="36" height="30" rx="3" stroke-width="2"/>
-                <path d="M112 221h36M112 230h36" stroke-width="1.2" opacity=".7"/>
+                <rect x="105" y="272" width="50" height="40" rx="4" fill="#ff5f57" opacity=".85" stroke-width="1.8"/>
+                <path d="M105 282h50M105 292h50M105 302h50" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
             </g>
-            <!-- Cloud, overlapping the envelope like the logo -->
+            <!-- Cloud, overlapping the envelope -->
             <g class="balloon-cloud c1">
-                <circle cx="52" cy="180" r="15" stroke-width="2"/>
-                <circle cx="74" cy="173" r="12" stroke-width="2"/>
-                <circle cx="33" cy="186" r="10" stroke-width="2"/>
+                <circle cx="45" cy="205" r="15" stroke-width="2"/>
+                <circle cx="66" cy="198" r="12" stroke-width="2"/>
+                <circle cx="27" cy="211" r="10" stroke-width="2"/>
             </g>
         </svg>
     </div>
