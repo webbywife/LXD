@@ -15,7 +15,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script>
 /* Anti-flicker: apply saved theme before paint */
-(function(){var t=localStorage.getItem('sa-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+(function(){
+    var t=localStorage.getItem('sa-theme');
+    if(!localStorage.getItem('sa-theme-migrated')){
+        t='dark';
+        localStorage.setItem('sa-theme','dark');
+        localStorage.setItem('sa-theme-migrated','1');
+    }
+    t=t||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
 </script>
 <style>
 /* ── Reset ── */
