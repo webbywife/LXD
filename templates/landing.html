@@ -167,8 +167,8 @@ body::before{
     background:linear-gradient(337deg,rgba(255, 230, 230, 1) 0%, rgba(250, 248, 247, 1) 50%, rgba(237, 178, 178, 1) 100%);
 }
 .hero-inner{
-    max-width:940px;width:100%;margin:0 auto;
-    display:grid;grid-template-columns:1fr 290px;
+    max-width:1020px;width:100%;margin:0 auto;
+    display:grid;grid-template-columns:1fr 380px;
     gap:60px;align-items:center;
 }
 .hero-eyebrow{
@@ -215,7 +215,7 @@ body::before{
 
 /* ── Animated SVG Art ── */
 .hero-art{
-    width:100%;max-width:260px;
+    width:100%;max-width:360px;
     opacity:.85;
     animation:float 9s ease-in-out infinite;
     filter:drop-shadow(0 0 24px rgba(255,95,87,.16));
@@ -237,6 +237,16 @@ body::before{
 
 /* ── Section base ── */
 .sec{padding:120px 24px;position:relative;z-index:1;}
+.sec-light{
+    --bg:#f7f7f5;
+    --text:#1a1a1a;
+    --dim:rgba(26,26,26,0.62);
+    --dimmer:rgba(26,26,26,0.42);
+    --dimmest:rgba(26,26,26,0.28);
+    --glass:rgba(255,255,255,0.7);
+    --glass-border:rgba(0,0,0,0.08);
+    background:var(--bg);color:var(--text);
+}
 .sec-inner{max-width:960px;margin:0 auto;}
 .sec-label{
     font-size:10px;font-weight:600;letter-spacing:.48em;
@@ -709,7 +719,7 @@ body::before{
 <hr class="div">
 
 <!-- LIVE SAMPLE -->
-<section class="sec">
+<section class="sec sec-light">
     <div class="sec-inner">
         <div class="rv" style="text-align:center;">
             <span class="sec-label">See It For Yourself</span>
@@ -789,7 +799,7 @@ body::before{
 <hr class="div">
 
 <!-- WHY SKOOLED-AI -->
-<section class="sec">
+<section class="sec sec-light">
     <div class="sec-inner">
         <div class="rv">
             <span class="sec-label">Why Not Just Use ChatGPT</span>
@@ -853,7 +863,7 @@ body::before{
 <hr class="div">
 
 <!-- TESTIMONIALS -->
-<section class="sec">
+<section class="sec sec-light">
     <div class="sec-inner">
         <div class="rv">
             <span class="sec-label">Educators</span>
@@ -926,7 +936,7 @@ body::before{
 <hr class="div">
 
 <!-- FAQ -->
-<section class="sec">
+<section class="sec sec-light">
     <div class="sec-inner">
         <div class="rv" style="text-align:center;">
             <span class="sec-label">Questions</span>
@@ -981,7 +991,7 @@ body::before{
 <hr class="div">
 
 <!-- FOR SCHOOLS & DISTRICTS -->
-<section class="sec">
+<section class="sec sec-light">
     <div class="sec-inner">
         <div class="rv">
             <span class="sec-label">For Institutions</span>
