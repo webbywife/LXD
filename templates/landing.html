@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script>
 /* Anti-flicker: apply saved theme before paint */
-(function(){var t=localStorage.getItem('sa-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
+(function(){var t=localStorage.getItem('sa-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
 </script>
 <style>
 /* ── Reset ── */
@@ -216,9 +216,9 @@ body::before{
 /* ── Animated SVG Art ── */
 .hero-art{
     width:100%;max-width:260px;
-    opacity:.7;
+    opacity:.85;
     animation:float 9s ease-in-out infinite;
-    filter:drop-shadow(0 0 24px rgba(0,187,214,.12));
+    filter:drop-shadow(0 0 24px rgba(255,95,87,.16));
 }
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
 .draw-path{
@@ -226,6 +226,19 @@ body::before{
     animation:draw 3.5s ease forwards .6s;
 }
 @keyframes draw{to{stroke-dashoffset:0;}}
+.balloon-rig{
+    transform-origin:130px 18px;
+    animation:sway 6s ease-in-out infinite;
+}
+@keyframes sway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
+.balloon-flame{
+    transform-origin:130px 244px;
+    animation:flicker 1.3s ease-in-out infinite alternate;
+}
+@keyframes flicker{from{opacity:.7;transform:scaleY(.92);}to{opacity:1;transform:scaleY(1.06);}}
+.balloon-cloud{animation:drift 12s ease-in-out infinite;}
+.balloon-cloud.c2{animation-duration:15s;animation-direction:reverse;}
+@keyframes drift{0%,100%{transform:translateX(0);}50%{transform:translateX(10px);}}
 
 /* ── Section base ── */
 .sec{padding:120px 24px;position:relative;z-index:1;}
@@ -596,42 +609,44 @@ body::before{
             </div>
         </div>
 
-        <!-- Neural network SVG -->
-        <svg class="hero-art" viewBox="0 0 260 380" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
-            <path class="draw-path" d="M130 28 C80 68 36 110 36 152 C36 202 16 244 28 292 C46 340 100 364 130 360 C160 364 214 340 232 292 C244 244 224 202 224 152 C224 110 180 68 130 28 Z" stroke="#ff5f57" stroke-width="1" opacity=".32"/>
-            <!-- Nodes -->
-            <circle cx="130" cy="28" r="7" stroke="#ff5f57" stroke-width="1.5" opacity=".9"/>
-            <circle cx="54" cy="118" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".7"/>
-            <circle cx="206" cy="118" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".7"/>
-            <circle cx="28" cy="228" r="4" stroke="#ff5f57" stroke-width="1" opacity=".5"/>
-            <circle cx="130" cy="196" r="10" stroke="#ff5f57" stroke-width="1.5" opacity=".85"/>
-            <circle cx="232" cy="228" r="4" stroke="#ff5f57" stroke-width="1" opacity=".5"/>
-            <circle cx="72" cy="308" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
-            <circle cx="188" cy="308" r="5" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
-            <circle cx="130" cy="352" r="8" stroke="#ff5f57" stroke-width="1.5" opacity=".9"/>
-            <!-- Connections -->
-            <line x1="130" y1="28"  x2="54"  y2="118" stroke="#ff5f57" stroke-width=".7" opacity=".3"/>
-            <line x1="130" y1="28"  x2="206" y2="118" stroke="#ff5f57" stroke-width=".7" opacity=".3"/>
-            <line x1="54"  y1="118" x2="28"  y2="228" stroke="#ff5f57" stroke-width=".7" opacity=".22"/>
-            <line x1="54"  y1="118" x2="130" y2="196" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
-            <line x1="206" y1="118" x2="232" y2="228" stroke="#ff5f57" stroke-width=".7" opacity=".22"/>
-            <line x1="206" y1="118" x2="130" y2="196" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
-            <line x1="130" y1="196" x2="72"  y2="308" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
-            <line x1="130" y1="196" x2="188" y2="308" stroke="#ff5f57" stroke-width=".7" opacity=".28"/>
-            <line x1="72"  y1="308" x2="130" y2="352" stroke="#ff5f57" stroke-width=".7" opacity=".32"/>
-            <line x1="188" y1="308" x2="130" y2="352" stroke="#ff5f57" stroke-width=".7" opacity=".32"/>
-            <!-- Book icon at center node -->
-            <rect x="100" y="172" width="60" height="48" rx="4" stroke="#ff5f57" stroke-width="1.2" opacity=".65"/>
-            <line x1="130" y1="172" x2="130" y2="220" stroke="#ff5f57" stroke-width="1" opacity=".45"/>
-            <line x1="106" y1="183" x2="126" y2="183" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <line x1="106" y1="190" x2="126" y2="190" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <line x1="106" y1="197" x2="126" y2="197" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="183" x2="154" y2="183" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="190" x2="154" y2="190" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <line x1="134" y1="197" x2="154" y2="197" stroke="#ff5f57" stroke-width=".8" opacity=".4"/>
-            <!-- Pulse rings -->
-            <circle cx="130" cy="196" r="18" stroke="#ff5f57" stroke-width=".7" opacity=".18"/>
-            <circle cx="130" cy="196" r="28" stroke="#ff5f57" stroke-width=".5" opacity=".1"/>
+        <!-- Hot air balloon SVG -->
+        <svg class="hero-art" viewBox="0 0 260 380" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Clouds -->
+            <g class="balloon-cloud c1" opacity=".3">
+                <circle cx="24" cy="52" r="8" stroke="#ff5f57" stroke-width="1"/>
+                <circle cx="36" cy="48" r="6" stroke="#ff5f57" stroke-width="1"/>
+                <circle cx="14" cy="46" r="5" stroke="#ff5f57" stroke-width="1"/>
+            </g>
+            <g class="balloon-cloud c2" opacity=".26">
+                <circle cx="222" cy="268" r="7" stroke="#ff5f57" stroke-width="1"/>
+                <circle cx="233" cy="264" r="5" stroke="#ff5f57" stroke-width="1"/>
+                <circle cx="212" cy="263" r="4.5" stroke="#ff5f57" stroke-width="1"/>
+            </g>
+            <g class="balloon-rig">
+                <!-- Envelope -->
+                <path class="draw-path" d="M130 18 C170 18 198 55 202 100 C206 145 196 185 172 205 C160 215 150 220 145 222 L115 222 C110 220 100 215 88 205 C64 185 54 145 58 100 C62 55 90 18 130 18 Z" stroke="#ff5f57" stroke-width="1.4" opacity=".85"/>
+                <!-- Panel stripes -->
+                <path d="M70 72 Q130 84 190 72" stroke="#ff5f57" stroke-width=".9" opacity=".4"/>
+                <path d="M57 118 Q130 134 203 118" stroke="#ff5f57" stroke-width=".9" opacity=".45"/>
+                <path d="M69 168 Q130 182 191 168" stroke="#ff5f57" stroke-width=".9" opacity=".4"/>
+                <path d="M130 18 L130 222" stroke="#ff5f57" stroke-width=".7" opacity=".25"/>
+                <!-- Rigging -->
+                <line x1="110" y1="221" x2="112" y2="258" stroke="#ff5f57" stroke-width=".8" opacity=".55"/>
+                <line x1="140" y1="221" x2="148" y2="258" stroke="#ff5f57" stroke-width=".8" opacity=".55"/>
+                <line x1="110" y1="221" x2="148" y2="258" stroke="#ff5f57" stroke-width=".6" opacity=".3"/>
+                <line x1="140" y1="221" x2="112" y2="258" stroke="#ff5f57" stroke-width=".6" opacity=".3"/>
+                <!-- Flame -->
+                <path class="balloon-flame" d="M130 222 C130 222 137 230 137 238 C137 244 134 248 130 248 C126 248 123 244 123 238 C123 230 130 222 130 222 Z" fill="#ff5f57" stroke="none" opacity=".85"/>
+                <!-- Basket -->
+                <rect x="108" y="258" width="44" height="32" rx="4" stroke="#ff5f57" stroke-width="1.2" opacity=".8"/>
+                <line x1="120" y1="258" x2="120" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
+                <line x1="130" y1="258" x2="130" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
+                <line x1="140" y1="258" x2="140" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
+                <line x1="108" y1="274" x2="152" y2="274" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
+            </g>
+            <!-- Rising wisps -->
+            <path d="M122 305 q4 10 0 20" stroke="#ff5f57" stroke-width=".8" opacity=".3"/>
+            <path d="M138 305 q-4 10 0 20" stroke="#ff5f57" stroke-width=".8" opacity=".3"/>
         </svg>
     </div>
 </section>
@@ -1179,7 +1194,7 @@ function setTheme(t){
 }
 
 // Apply saved preference (anti-flicker script already set data-theme attr)
-setTheme(localStorage.getItem('sa-theme')||'light');
+setTheme(localStorage.getItem('sa-theme')||'dark');
 
 tbtn.addEventListener('click',function(){
     setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');
