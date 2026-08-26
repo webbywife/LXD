@@ -231,11 +231,6 @@ body::before{
     animation:sway 6s ease-in-out infinite;
 }
 @keyframes sway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
-.balloon-flame{
-    transform-origin:130px 244px;
-    animation:flicker 1.3s ease-in-out infinite alternate;
-}
-@keyframes flicker{from{opacity:.7;transform:scaleY(.92);}to{opacity:1;transform:scaleY(1.06);}}
 .balloon-cloud{animation:drift 12s ease-in-out infinite;}
 .balloon-cloud.c2{animation-duration:15s;animation-direction:reverse;}
 @keyframes drift{0%,100%{transform:translateX(0);}50%{transform:translateX(10px);}}
@@ -609,44 +604,25 @@ body::before{
             </div>
         </div>
 
-        <!-- Hot air balloon SVG -->
-        <svg class="hero-art" viewBox="0 0 260 380" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <!-- Clouds -->
-            <g class="balloon-cloud c1" opacity=".3">
-                <circle cx="24" cy="52" r="8" stroke="#ff5f57" stroke-width="1"/>
-                <circle cx="36" cy="48" r="6" stroke="#ff5f57" stroke-width="1"/>
-                <circle cx="14" cy="46" r="5" stroke="#ff5f57" stroke-width="1"/>
-            </g>
-            <g class="balloon-cloud c2" opacity=".26">
-                <circle cx="222" cy="268" r="7" stroke="#ff5f57" stroke-width="1"/>
-                <circle cx="233" cy="264" r="5" stroke="#ff5f57" stroke-width="1"/>
-                <circle cx="212" cy="263" r="4.5" stroke="#ff5f57" stroke-width="1"/>
-            </g>
+        <!-- Hot air balloon SVG, patterned on the SkoolED logo -->
+        <svg class="hero-art" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff5f57" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <g class="balloon-rig">
                 <!-- Envelope -->
-                <path class="draw-path" d="M130 18 C170 18 198 55 202 100 C206 145 196 185 172 205 C160 215 150 220 145 222 L115 222 C110 220 100 215 88 205 C64 185 54 145 58 100 C62 55 90 18 130 18 Z" stroke="#ff5f57" stroke-width="1.4" opacity=".85"/>
-                <!-- Panel stripes -->
-                <path d="M70 72 Q130 84 190 72" stroke="#ff5f57" stroke-width=".9" opacity=".4"/>
-                <path d="M57 118 Q130 134 203 118" stroke="#ff5f57" stroke-width=".9" opacity=".45"/>
-                <path d="M69 168 Q130 182 191 168" stroke="#ff5f57" stroke-width=".9" opacity=".4"/>
-                <path d="M130 18 L130 222" stroke="#ff5f57" stroke-width=".7" opacity=".25"/>
-                <!-- Rigging -->
-                <line x1="110" y1="221" x2="112" y2="258" stroke="#ff5f57" stroke-width=".8" opacity=".55"/>
-                <line x1="140" y1="221" x2="148" y2="258" stroke="#ff5f57" stroke-width=".8" opacity=".55"/>
-                <line x1="110" y1="221" x2="148" y2="258" stroke="#ff5f57" stroke-width=".6" opacity=".3"/>
-                <line x1="140" y1="221" x2="112" y2="258" stroke="#ff5f57" stroke-width=".6" opacity=".3"/>
-                <!-- Flame -->
-                <path class="balloon-flame" d="M130 222 C130 222 137 230 137 238 C137 244 134 248 130 248 C126 248 123 244 123 238 C123 230 130 222 130 222 Z" fill="#ff5f57" stroke="none" opacity=".85"/>
+                <path class="draw-path" d="M130 40 C168 40 190 68 194 108 C198 148 188 178 168 198 C158 208 148 212 140 214 L120 214 C112 212 102 208 92 198 C72 178 62 148 66 108 C70 68 92 40 130 40 Z" stroke-width="2.2"/>
+                <!-- Gore panels -->
+                <path d="M130 42 L130 213" stroke-width="1.6" opacity=".8"/>
+                <path d="M130 42 C107 56 93 90 95 130 C96 163 106 193 118 212" stroke-width="1.6" opacity=".8"/>
+                <path d="M130 42 C153 56 167 90 165 130 C164 163 154 193 142 212" stroke-width="1.6" opacity=".8"/>
                 <!-- Basket -->
-                <rect x="108" y="258" width="44" height="32" rx="4" stroke="#ff5f57" stroke-width="1.2" opacity=".8"/>
-                <line x1="120" y1="258" x2="120" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
-                <line x1="130" y1="258" x2="130" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
-                <line x1="140" y1="258" x2="140" y2="290" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
-                <line x1="108" y1="274" x2="152" y2="274" stroke="#ff5f57" stroke-width=".7" opacity=".4"/>
+                <rect x="112" y="212" width="36" height="30" rx="3" stroke-width="2"/>
+                <path d="M112 221h36M112 230h36" stroke-width="1.2" opacity=".7"/>
             </g>
-            <!-- Rising wisps -->
-            <path d="M122 305 q4 10 0 20" stroke="#ff5f57" stroke-width=".8" opacity=".3"/>
-            <path d="M138 305 q-4 10 0 20" stroke="#ff5f57" stroke-width=".8" opacity=".3"/>
+            <!-- Cloud, overlapping the envelope like the logo -->
+            <g class="balloon-cloud c1">
+                <circle cx="52" cy="180" r="15" stroke-width="2"/>
+                <circle cx="74" cy="173" r="12" stroke-width="2"/>
+                <circle cx="33" cy="186" r="10" stroke-width="2"/>
+            </g>
         </svg>
     </div>
 </section>
