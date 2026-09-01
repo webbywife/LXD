@@ -56,6 +56,14 @@ Instruction.
 crossword, bingo, memory cards, and more) auto-filled from the lesson; \
 PowerPoint export; SCORM 1.2 export; LMS-ready quiz export (Moodle GIFT, \
 Canvas/Brightspace QTI 1.2).
+- Module Builder (separate from the lesson generator): upload a course \
+guide or corporate document and it generates a full multi-module course \
+(5 sections per submodule — overview, teach & learn, practice, \
+assessment, rubric), exportable as SCORM, Moodle, or Canvas/Common \
+Cartridge packages. Includes Corporate content types — Onboarding \
+(new-hire training, written for employees instead of students) and \
+Sales Enablement (written for sales reps, with role-play scenarios) — \
+so it works for corporate training content, not just school curriculum.
 - Pricing: Free plan includes 5 lesson-plan generations per month, with \
 full access to every curriculum standard, instructional model, and \
 export format (PowerPoint, SCORM, GIFT, QTI). Pro plan is Php \
