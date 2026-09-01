@@ -191,6 +191,11 @@ body::before{
     margin-bottom:26px;
 }
 .hero h1 em{font-style:normal;color:var(--accent);}
+.text-gradient{
+    background:linear-gradient(100deg,#ff5f57 10%,#ffab6b 90%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+}
 .hero-sub{
     font-size:16px;font-weight:300;color:var(--dim);
     line-height:1.8;max-width:460px;margin-bottom:38px;
@@ -604,7 +609,7 @@ body::before{
     <div class="hero-inner">
         <div class="hero-text">
             <span class="hero-eyebrow">MATATAG &nbsp;&middot;&nbsp; Common Core &nbsp;&middot;&nbsp; UK &nbsp;&middot;&nbsp; ACARA &nbsp;&middot;&nbsp; IB &amp; More</span>
-            <h1>Lesson Plans,<br><em>Powered by AI.</em><br>Any Curriculum.</h1>
+            <h1>Lesson Plans,<br><em class="text-gradient">Powered by AI.</em><br>Any Curriculum.</h1>
             <p class="hero-sub">Generate complete, classroom-ready lesson plans in minutes — plus 16 interactive games and PowerPoint slides, auto-filled from your lesson. Choose MATATAG, Common Core, UK National Curriculum, ACARA, IB, or go standard-free.</p>
             <div class="hero-ctas">
                 {% if session.get('user_id') %}
@@ -1021,7 +1026,7 @@ body::before{
     <div class="sec-inner">
         <div class="rv">
             <span class="sec-label">For Institutions</span>
-            <h2 class="sec-title">School and division<br>licensing.</h2>
+            <h2 class="sec-title">School and division<br><span class="text-gradient">licensing.</span></h2>
             <p class="sec-sub">Give every teacher in your school or division access to SKOOLED&#8209;AI — without asking each one to sign up and hit a free-tier cap individually.</p>
         </div>
         <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
@@ -1045,6 +1050,44 @@ body::before{
             <span class="sec-label" style="display:block;text-align:center;margin-bottom:14px;">Let's Talk</span>
             <h2>Interested in a school or<br>division license?</h2>
             <p>Tell us about your school or division — number of teachers, grade levels, and current LMS — and we'll get back to you about licensing SKOOLED&#8209;AI for your institution.</p>
+            <div class="cta-btns">
+                <button type="button" class="btn-p" onclick="document.getElementById('lex-launcher').click()" style="border:none;cursor:pointer;font-family:inherit;">Chat with LeX to Inquire &rarr;</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="div">
+
+<!-- FOR CORPORATE TEAMS -->
+<section class="sec">
+    <div class="sec-inner">
+        <div class="rv">
+            <span class="sec-label">For Corporate Teams</span>
+            <h2 class="sec-title">Onboarding and sales<br>training, <span class="text-gradient">built fast.</span></h2>
+            <p class="sec-sub">The same Module Builder that powers school courses also generates corporate training content — upload a policy doc or playbook, get a structured, exportable course back.</p>
+        </div>
+        <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="feat-card rv">
+                <div class="feat-tag">Onboarding</div>
+                <h3>New-Hire Onboarding</h3>
+                <p>Turn a policy doc or handbook into a structured onboarding course — written for employees, not students, with role-readiness assessments built in.</p>
+            </div>
+            <div class="feat-card rv">
+                <div class="feat-tag">Sales Enablement</div>
+                <h3>Sales Team Training</h3>
+                <p>Generate product and playbook training with built-in role-play scenarios and skills checks, tailored to how sales teams actually learn.</p>
+            </div>
+            <div class="feat-card rv">
+                <div class="feat-tag">Export</div>
+                <h3>Drops Into Your LMS</h3>
+                <p>SCORM 1.2, Moodle, and Canvas/Common Cartridge exports — the same LMS-ready pipeline schools use, works for whatever training platform your company already runs.</p>
+            </div>
+        </div>
+        <div class="cta-box rv" style="margin-top:56px;">
+            <span class="sec-label" style="display:block;text-align:center;margin-bottom:14px;">Let's Talk</span>
+            <h2>Interested in corporate<br>training content?</h2>
+            <p>Tell us about your team — onboarding, sales enablement, or something else — and we'll get back to you about using SKOOLED&#8209;AI for your company.</p>
             <div class="cta-btns">
                 <button type="button" class="btn-p" onclick="document.getElementById('lex-launcher').click()" style="border:none;cursor:pointer;font-family:inherit;">Chat with LeX to Inquire &rarr;</button>
             </div>
