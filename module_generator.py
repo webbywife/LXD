@@ -50,6 +50,55 @@ def _vocab(content_type: str) -> dict:
     return _CONTENT_TYPE_VOCAB.get(content_type, _CONTENT_TYPE_VOCAB["school"])
 
 
+# Instructional-design frameworks offered for Corporate content types — the
+# analog of PROCEDURE_MODELS (5E/4A's/etc.) in lesson_generator.py, which
+# Module Builder never had an equivalent to. Each note is woven into the
+# generation prompt to actually change content structure, not just labels.
+FRAMEWORKS = {
+    "gagne": {
+        "label": "Gagné's Nine Events of Instruction",
+        "note": (
+            "Structure the teach_and_learn and practice content around Gagné's "
+            "Nine Events of Instruction: gain attention, inform the learner of "
+            "objectives, stimulate recall of prior knowledge, present the "
+            "content, provide learning guidance, elicit performance, provide "
+            "feedback, assess performance, and enhance retention and transfer. "
+            "Make these events identifiable in the generated content, not just "
+            "implied."
+        ),
+    },
+    "kolb": {
+        "label": "Kolb's Experiential Learning Cycle",
+        "note": (
+            "Structure the content around Kolb's Experiential Learning Cycle: "
+            "open with a Concrete Experience (a realistic scenario or "
+            "role-play the learner works through), follow with Reflective "
+            "Observation (what happened, what they noticed), then Abstract "
+            "Conceptualization (the underlying principle), and close with "
+            "Active Experimentation (applying it to a new scenario). Favor "
+            "scenario-based, hands-on framing over lecture-style explanation "
+            "— this is especially suited to role-play and skills practice."
+        ),
+    },
+    "addie": {
+        "label": "ADDIE-Aligned",
+        "note": (
+            "Frame the content using an ADDIE-inspired structure: open by "
+            "naming the specific performance gap or need this addresses "
+            "(Analyze), state clear objectives (Design), deliver the core "
+            "content (Develop), include a hands-on practice task (Implement), "
+            "and close with a clear way to measure whether the objective was "
+            "met (Evaluate)."
+        ),
+    },
+}
+
+
+def _framework_note(framework: str) -> str:
+    f = FRAMEWORKS.get(framework)
+    return f["note"] if f else ""
+
+
 def extract_text_from_file(file_content: bytes, filename: str) -> Tuple[str, str]:
     """Extract plain text from PDF, DOCX, XLSX, or TXT. Returns (text, error)."""
     ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'txt'
@@ -146,6 +195,7 @@ def generate_submodule_content(
     course_context: str,
     api_key: str,
     content_type: str = "school",
+    framework: str = "",
 ) -> Tuple[Optional[dict], str]:
     """
     Generate all 5 instructional sections for a submodule.
@@ -156,6 +206,7 @@ def generate_submodule_content(
         return None, 'API key is required.'
 
     v = _vocab(content_type)
+    framework_note = _framework_note(framework)
     topics_list = '\n'.join(f'- {t}' for t in submodule.get('topics', []))
     sub_title = submodule['title']
 
@@ -215,6 +266,8 @@ Return ONLY a valid JSON object. All HTML values must use only double-quoted att
     "html": "<table><thead><tr><th>Criterion</th><th>Excellent (4)</th><th>Proficient (3)</th><th>Developing (2)</th><th>Beginning (1)</th></tr></thead><tbody><tr><td>Criterion</td><td>Excellent descriptor</td><td>Proficient descriptor</td><td>Developing descriptor</td><td>Beginning descriptor</td></tr></tbody></table>"
   }}
 }}
+
+{f'Instructional framework: {framework_note}' if framework_note else ''}
 
 Specific requirements:
 - objectives: exactly 4-5 SMART objectives starting with an action verb

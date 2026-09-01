@@ -334,6 +334,34 @@ h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
         </label>
       </div>
 
+      <div id="frameworkSection" style="display:none;">
+        <p class="card-title">Instructional Framework</p>
+        <p class="card-sub">Choose the learning-science model the AI structures content around.</p>
+        <div class="export-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:32px;">
+          <label class="export-card selected" id="fwGagne">
+            <input type="radio" name="framework" value="gagne" checked>
+            <div class="export-check">✓</div>
+            <div class="export-logo">🎯</div>
+            <div class="export-name">Gagné's Nine Events</div>
+            <div class="export-desc">Attention → objectives → prior knowledge → content → guidance → practice → feedback → assessment → transfer. The general-purpose default.</div>
+          </label>
+          <label class="export-card" id="fwKolb">
+            <input type="radio" name="framework" value="kolb">
+            <div class="export-check">✓</div>
+            <div class="export-logo">🔄</div>
+            <div class="export-name">Kolb's Experiential Cycle</div>
+            <div class="export-desc">Concrete experience → reflection → concept → experimentation. Best for role-play and skills practice, especially Sales.</div>
+          </label>
+          <label class="export-card" id="fwAddie">
+            <input type="radio" name="framework" value="addie">
+            <div class="export-check">✓</div>
+            <div class="export-logo">📐</div>
+            <div class="export-name">ADDIE-Aligned</div>
+            <div class="export-desc">Analyze the need → design objectives → develop content → implement practice → evaluate mastery.</div>
+          </label>
+        </div>
+      </div>
+
       <p class="card-title">Upload your Course Guide</p>
       <p class="card-sub">Upload a PDF, Word, Excel, or text file — or paste the content directly. The AI will extract a suggested module structure for you to review and edit.</p>
 
@@ -516,6 +544,7 @@ let courseData = {
 };
 let courseContext = ''; // raw text for AI context
 let contentType = 'school'; // 'school' | 'onboarding' | 'sales' — set by the Content Type cards in Step 1
+let framework = 'gagne'; // 'gagne' | 'kolb' | 'addie' — only used when contentType !== 'school'
 let activeSubId = null;
 let genResults = {}; // subId → html content
 let currentStep = 1;
@@ -525,6 +554,15 @@ document.querySelectorAll('input[name=content_type]').forEach(radio => {
     document.querySelectorAll('#ctSchool, #ctOnboarding, #ctSales').forEach(c => c.classList.remove('selected'));
     this.closest('.export-card').classList.add('selected');
     contentType = this.value;
+    document.getElementById('frameworkSection').style.display = (contentType === 'school') ? 'none' : 'block';
+  });
+});
+
+document.querySelectorAll('input[name=framework]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('#fwGagne, #fwKolb, #fwAddie').forEach(c => c.classList.remove('selected'));
+    this.closest('.export-card').classList.add('selected');
+    framework = this.value;
   });
 });
 
@@ -959,6 +997,7 @@ async function generateItem(mi, si, itemEl) {
       submodule:      sub,
       course_context: courseContext,
       content_type:   contentType,
+      framework:      contentType === 'school' ? '' : framework,
     });
     if (res.error) throw new Error(res.error);
 

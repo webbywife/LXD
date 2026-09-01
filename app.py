@@ -1699,6 +1699,7 @@ def api_generate_module_content():
         course_context=data.get("course_context", ""),
         api_key=api_key,
         content_type=data.get("content_type", "school"),
+        framework=data.get("framework", ""),
     )
     if err:
         return jsonify({"error": err}), 500
