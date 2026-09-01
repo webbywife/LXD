@@ -13,6 +13,33 @@ import json
 import re
 from typing import Optional, Tuple
 
+# Vocabulary swapped into generation prompts based on content_type. Keeps one
+# prompt template instead of duplicating the whole thing per content type.
+_CONTENT_TYPE_VOCAB = {
+    "school": {
+        "learner": "students",
+        "learner_cap": "Students",
+        "objective_lead": "students will be able to",
+        "quiz_label": "Formative Quiz",
+        "authentic_label": "Authentic Assessment",
+        "guide_label": "course guide",
+        "persona": "instructional designer",
+    },
+    "onboarding": {
+        "learner": "new hires",
+        "learner_cap": "New hires",
+        "objective_lead": "the new hire will be able to",
+        "quiz_label": "Knowledge Check",
+        "authentic_label": "Role-Readiness Assessment",
+        "guide_label": "onboarding guide",
+        "persona": "corporate L&D designer",
+    },
+}
+
+
+def _vocab(content_type: str) -> dict:
+    return _CONTENT_TYPE_VOCAB.get(content_type, _CONTENT_TYPE_VOCAB["school"])
+
 
 def extract_text_from_file(file_content: bytes, filename: str) -> Tuple[str, str]:
     """Extract plain text from PDF, DOCX, XLSX, or TXT. Returns (text, error)."""
@@ -42,7 +69,7 @@ def extract_text_from_file(file_content: bytes, filename: str) -> Tuple[str, str
         return '', f'Could not read file: {e}'
 
 
-def parse_course_guide(text: str, api_key: str) -> Tuple[Optional[dict], str]:
+def parse_course_guide(text: str, api_key: str, content_type: str = "school") -> Tuple[Optional[dict], str]:
     """
     Use Claude to extract a module/submodule structure from course guide text.
     Returns (structure_dict, error).
@@ -50,9 +77,10 @@ def parse_course_guide(text: str, api_key: str) -> Tuple[Optional[dict], str]:
     if not api_key:
         return None, 'API key is required.'
 
-    prompt = f"""You are an instructional designer. Analyze this course guide and extract a structured course outline.
+    v = _vocab(content_type)
+    prompt = f"""You are a {v['persona']}. Analyze this {v['guide_label']} and extract a structured course outline.
 
-COURSE GUIDE:
+{v['guide_label'].upper()}:
 {text[:12000]}
 
 Return ONLY a JSON object in this exact format (no markdown, no extra text):
@@ -81,7 +109,7 @@ Requirements:
 - 2-5 submodules per module
 - Derive structure directly from the course content
 - If structure is implicit, infer logical groupings from the subject matter
-- Use the terminology from the course guide"""
+- Use the terminology from the {v['guide_label']}"""
 
     try:
         import anthropic
@@ -108,6 +136,7 @@ def generate_submodule_content(
     submodule: dict,
     course_context: str,
     api_key: str,
+    content_type: str = "school",
 ) -> Tuple[Optional[dict], str]:
     """
     Generate all 5 instructional sections for a submodule.
@@ -117,10 +146,11 @@ def generate_submodule_content(
     if not api_key:
         return None, 'API key is required.'
 
+    v = _vocab(content_type)
     topics_list = '\n'.join(f'- {t}' for t in submodule.get('topics', []))
     sub_title = submodule['title']
 
-    prompt = f"""You are an expert instructional designer. Generate a complete 5-section educational content package for this course submodule.
+    prompt = f"""You are an expert {v['persona']}. Generate a complete 5-section educational content package for this course submodule.
 
 Course: {course_title}
 Module: {module_title}
@@ -136,7 +166,7 @@ Return ONLY a valid JSON object. All HTML values must use only double-quoted att
 {{
   "overview": {{
     "objectives": [
-      "By the end of this submodule, students will be able to [action verb] [specific outcome]"
+      "By the end of this submodule, {v['objective_lead']} [action verb] [specific outcome]"
     ],
     "resources": [
       "Textbook: Chapter X — Topic Name",
@@ -146,13 +176,13 @@ Return ONLY a valid JSON object. All HTML values must use only double-quoted att
   }},
   "teach_and_learn": {{
     "html": "<h2>Introduction</h2><p>Hook or opening scenario...</p><h2>Key Concepts</h2><h3>Concept 1</h3><p>Explanation with example.</p><blockquote>Key definition or principle.</blockquote><h3>Concept 2</h3><p>Explanation...</p><h2>Summary</h2><p>Wrap-up of main ideas.</p>",
-    "pptx_md": "# {sub_title}\\n\\n**Course:** {course_title}\\n\\n## Learning Objectives\\n- Objective 1\\n- Objective 2\\n- Objective 3\\n\\n## Key Concepts\\n- Concept 1: brief explanation\\n- Concept 2: brief explanation\\n- Concept 3: brief explanation\\n\\n## Lesson Procedure\\n### Introduction (10 min)\\n- Engage students with a hook\\n- Connect to prior knowledge\\n\\n### Instruction (20 min)\\n- Present main concepts\\n- Show examples and non-examples\\n\\n### Guided Practice (15 min)\\n- Work through examples together\\n- Check for understanding\\n\\n## Assessment\\n- Formative check question 1\\n- Formative check question 2"
+    "pptx_md": "# {sub_title}\\n\\n**Course:** {course_title}\\n\\n## Learning Objectives\\n- Objective 1\\n- Objective 2\\n- Objective 3\\n\\n## Key Concepts\\n- Concept 1: brief explanation\\n- Concept 2: brief explanation\\n- Concept 3: brief explanation\\n\\n## Lesson Procedure\\n### Introduction (10 min)\\n- Engage {v['learner']} with a hook\\n- Connect to prior knowledge\\n\\n### Instruction (20 min)\\n- Present main concepts\\n- Show examples and non-examples\\n\\n### Guided Practice (15 min)\\n- Work through examples together\\n- Check for understanding\\n\\n## Assessment\\n- Formative check question 1\\n- Formative check question 2"
   }},
   "practice": {{
-    "html": "<h2>Reinforcement Activities</h2><h3>Activity 1: [Descriptive Name]</h3><p>Clear step-by-step instructions for the activity. What students do, how long, what materials.</p><h3>Activity 2: [Descriptive Name]</h3><p>Instructions...</p><h3>Reflection Prompt</h3><p>A reflection question or journal prompt connecting the activity to the learning objectives.</p>"
+    "html": "<h2>Reinforcement Activities</h2><h3>Activity 1: [Descriptive Name]</h3><p>Clear step-by-step instructions for the activity. What {v['learner']} do, how long, what materials.</p><h3>Activity 2: [Descriptive Name]</h3><p>Instructions...</p><h3>Reflection Prompt</h3><p>A reflection question or journal prompt connecting the activity to the learning objectives.</p>"
   }},
   "assessment": {{
-    "quiz_html": "<h2>Formative Quiz</h2><ol><li><p><strong>Question text?</strong></p><p>A. Option one<br/>B. Option two<br/>C. Option three<br/>D. Option four</p><p><em>Correct Answer: A</em></p></li></ol>",
+    "quiz_html": "<h2>{v['quiz_label']}</h2><ol><li><p><strong>Question text?</strong></p><p>A. Option one<br/>B. Option two<br/>C. Option three<br/>D. Option four</p><p><em>Correct Answer: A</em></p></li></ol>",
     "quiz_questions": [
       {{
         "question": "Question text?",
@@ -160,7 +190,7 @@ Return ONLY a valid JSON object. All HTML values must use only double-quoted att
         "answer": "A"
       }}
     ],
-    "authentic_html": "<h2>Authentic Assessment</h2><h3>The Challenge / Project</h3><p>Compelling scenario or context that makes this real and meaningful for students.</p><h3>Your Task</h3><p>Clear description of what students must do.</p><h3>Deliverables</h3><ul><li>Deliverable 1</li><li>Deliverable 2</li></ul><h3>Success Criteria</h3><p>Students will be evaluated using the rubric below. Aim for Proficient or Excellent in all criteria.</p>"
+    "authentic_html": "<h2>{v['authentic_label']}</h2><h3>The Challenge / Project</h3><p>Compelling scenario or context that makes this real and meaningful for {v['learner']}.</p><h3>Your Task</h3><p>Clear description of what {v['learner']} must do.</p><h3>Deliverables</h3><ul><li>Deliverable 1</li><li>Deliverable 2</li></ul><h3>Success Criteria</h3><p>{v['learner_cap']} will be evaluated using the rubric below. Aim for Proficient or Excellent in all criteria.</p>"
   }},
   "rubric": {{
     "title": "Assessment Rubric: {sub_title}",

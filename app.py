@@ -1674,7 +1674,8 @@ def api_parse_course_guide():
     if not context_text:
         return jsonify({"error": "No content provided. Upload a file or paste text."}), 400
 
-    structure, err = parse_course_guide(context_text, api_key)
+    content_type = request.form.get("content_type", "school")
+    structure, err = parse_course_guide(context_text, api_key, content_type=content_type)
     if err:
         return jsonify({"error": err}), 500
 
@@ -1697,6 +1698,7 @@ def api_generate_module_content():
         submodule=data.get("submodule", {}),
         course_context=data.get("course_context", ""),
         api_key=api_key,
+        content_type=data.get("content_type", "school"),
     )
     if err:
         return jsonify({"error": err}), 500

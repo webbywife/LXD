@@ -308,6 +308,25 @@ h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
   <!-- ── STEP 1: Upload ── -->
   <div class="step-panel active" id="step1">
     <div class="card" style="margin-top:24px;">
+      <p class="card-title">Content Type</p>
+      <p class="card-sub">Choose who this content is for — this shapes the language and structure the AI generates.</p>
+      <div class="export-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:32px;">
+        <label class="export-card selected" id="ctSchool">
+          <input type="radio" name="content_type" value="school" checked>
+          <div class="export-check">✓</div>
+          <div class="export-logo">🎓</div>
+          <div class="export-name">School</div>
+          <div class="export-desc">Classroom lesson content for students — the original Module Builder experience.</div>
+        </label>
+        <label class="export-card" id="ctOnboarding">
+          <input type="radio" name="content_type" value="onboarding">
+          <div class="export-check">✓</div>
+          <div class="export-logo">💼</div>
+          <div class="export-name">Corporate — Onboarding</div>
+          <div class="export-desc">New-hire onboarding content, written for employees instead of students.</div>
+        </label>
+      </div>
+
       <p class="card-title">Upload your Course Guide</p>
       <p class="card-sub">Upload a PDF, Word, Excel, or text file — or paste the content directly. The AI will extract a suggested module structure for you to review and edit.</p>
 
@@ -489,9 +508,18 @@ let courseData = {
   modules: []
 };
 let courseContext = ''; // raw text for AI context
+let contentType = 'school'; // 'school' | 'onboarding' — set by the Content Type cards in Step 1
 let activeSubId = null;
 let genResults = {}; // subId → html content
 let currentStep = 1;
+
+document.querySelectorAll('input[name=content_type]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('#ctSchool, #ctOnboarding').forEach(c => c.classList.remove('selected'));
+    this.closest('.export-card').classList.add('selected');
+    contentType = this.value;
+  });
+});
 
 // ── Step Navigation ──────────────────────────────────────────────────────────
 function goStep(n) {
@@ -548,6 +576,7 @@ async function parseGuide() {
     const fd = new FormData();
     if (selectedFile) fd.append('file', selectedFile);
     if (pasteText)    fd.append('text', pasteText);
+    fd.append('content_type', contentType);
 
     const headers = {};
     if (AUTH) headers['X-Auth-Token'] = AUTH;
@@ -922,6 +951,7 @@ async function generateItem(mi, si, itemEl) {
       module_title:   mod.title,
       submodule:      sub,
       course_context: courseContext,
+      content_type:   contentType,
     });
     if (res.error) throw new Error(res.error);
 
