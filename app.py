@@ -114,6 +114,51 @@ def turl(endpoint, **kwargs):
     return url
 
 
+# ── Cookie Consent Banner ────────────────────────────────────
+
+_COOKIE_BANNER_HTML = """
+<div id="sa-cookie-banner" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(6,11,12,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#eef2f3;padding:16px 20px;display:none;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-family:'Nunito',sans-serif;font-size:13px;border-top:1px solid rgba(255,255,255,0.1);box-shadow:0 -4px 24px rgba(0,0,0,.3);">
+  <span style="max-width:640px;line-height:1.5;">This website stores cookies on your computer to serve you better. For more details, visit our <a href="__PRIVACY_URL__" style="color:#ff5f57;font-weight:700;text-decoration:underline;">Privacy Policy</a>.</span>
+  <button id="sa-cookie-accept" type="button" style="background:#ff5f57;color:#060b0c;border:none;padding:9px 22px;border-radius:30px;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Accept</button>
+</div>
+<script>
+(function(){
+    try{
+        if(!localStorage.getItem('sa-cookie-consent')){
+            var b=document.getElementById('sa-cookie-banner');
+            if(b){b.style.display='flex';}
+        }
+    }catch(e){}
+    var btn=document.getElementById('sa-cookie-accept');
+    if(btn){
+        btn.addEventListener('click',function(){
+            try{localStorage.setItem('sa-cookie-consent','1');}catch(e){}
+            document.getElementById('sa-cookie-banner').style.display='none';
+        });
+    }
+})();
+</script>
+"""
+
+
+@app.after_request
+def add_cookie_banner(response):
+    """Inject a site-wide cookie-consent banner into every HTML page,
+    just before </body>. Client-side JS shows it once (localStorage
+    flag) and links to the Privacy Policy page.
+    """
+    if response.mimetype == "text/html" and not response.direct_passthrough:
+        try:
+            body = response.get_data(as_text=True)
+        except (UnicodeDecodeError, RuntimeError):
+            return response
+        if "sa-cookie-banner" not in body and "</body>" in body:
+            snippet = _COOKIE_BANNER_HTML.replace("__PRIVACY_URL__", url_for("privacy"))
+            body = body.replace("</body>", snippet + "</body>", 1)
+            response.set_data(body)
+    return response
+
+
 # ── Security Headers ────────────────────────────────────────
 
 @app.after_request
