@@ -310,7 +310,7 @@ h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
     <div class="card" style="margin-top:24px;">
       <p class="card-title">Content Type</p>
       <p class="card-sub">Choose who this content is for — this shapes the language and structure the AI generates.</p>
-      <div class="export-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:32px;">
+      <div class="export-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:32px;">
         <label class="export-card selected" id="ctSchool">
           <input type="radio" name="content_type" value="school" checked>
           <div class="export-check">✓</div>
@@ -324,6 +324,13 @@ h1,h2,h3,h4,.grotesk{font-family:'Bricolage Grotesque',sans-serif;}
           <div class="export-logo">💼</div>
           <div class="export-name">Corporate — Onboarding</div>
           <div class="export-desc">New-hire onboarding content, written for employees instead of students.</div>
+        </label>
+        <label class="export-card" id="ctSales">
+          <input type="radio" name="content_type" value="sales">
+          <div class="export-check">✓</div>
+          <div class="export-logo">📈</div>
+          <div class="export-name">Corporate — Sales Enablement</div>
+          <div class="export-desc">Sales playbook content, written for reps — role-play scenarios instead of classroom assessments.</div>
         </label>
       </div>
 
@@ -508,14 +515,14 @@ let courseData = {
   modules: []
 };
 let courseContext = ''; // raw text for AI context
-let contentType = 'school'; // 'school' | 'onboarding' — set by the Content Type cards in Step 1
+let contentType = 'school'; // 'school' | 'onboarding' | 'sales' — set by the Content Type cards in Step 1
 let activeSubId = null;
 let genResults = {}; // subId → html content
 let currentStep = 1;
 
 document.querySelectorAll('input[name=content_type]').forEach(radio => {
   radio.addEventListener('change', function() {
-    document.querySelectorAll('#ctSchool, #ctOnboarding').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('#ctSchool, #ctOnboarding, #ctSales').forEach(c => c.classList.remove('selected'));
     this.closest('.export-card').classList.add('selected');
     contentType = this.value;
   });

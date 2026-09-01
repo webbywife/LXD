@@ -34,6 +34,15 @@ _CONTENT_TYPE_VOCAB = {
         "guide_label": "onboarding guide",
         "persona": "corporate L&D designer",
     },
+    "sales": {
+        "learner": "sales reps",
+        "learner_cap": "Sales reps",
+        "objective_lead": "the sales rep will be able to",
+        "quiz_label": "Skills Check",
+        "authentic_label": "Role-Play Scenario",
+        "guide_label": "sales playbook",
+        "persona": "sales enablement designer",
+    },
 }
 
 
