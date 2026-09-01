@@ -180,6 +180,12 @@ body::before{
     display:grid;grid-template-columns:1fr 380px;
     gap:60px;align-items:center;
 }
+.hero-badge{
+    display:inline-flex;align-items:center;
+    background:var(--accent-dim);border:1px solid var(--accent-border);
+    color:var(--accent);font-size:11px;font-weight:700;
+    padding:6px 14px;border-radius:30px;margin-bottom:16px;
+}
 .hero-eyebrow{
     font-size:10px;font-weight:600;letter-spacing:.5em;
     text-transform:uppercase;color:var(--accent);
@@ -516,8 +522,16 @@ body::before{
     display:none;flex-direction:column;overflow:hidden;
     box-shadow:0 20px 60px rgba(0,0,0,.25);
 }
-[data-theme="light"] .lex-panel{background:rgba(255,255,255,0.92);}
+[data-theme="light"] .lex-panel{background:#fdfdfc;}
 [data-theme="light"] .lex-launcher{box-shadow:0 8px 28px rgba(255,95,87,0.25);}
+[data-theme="light"] .lex-head-title,
+[data-theme="light"] .lex-bubble.bot,
+[data-theme="light"] .lex-input{color:#1a1a1a;}
+[data-theme="light"] .lex-head-sub,
+[data-theme="light"] .lex-close{color:rgba(26,26,26,0.62);}
+[data-theme="light"] .lex-bubble.bot{background:#f3f2f0;border-color:rgba(0,0,0,0.08);}
+[data-theme="light"] .lex-input{background:#f3f2f0;border-color:rgba(0,0,0,0.1);}
+[data-theme="light"] .lex-input::placeholder{color:rgba(26,26,26,0.4);}
 .lex-panel.open{display:flex;}
 .lex-head{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -608,9 +622,10 @@ body::before{
 <section class="hero">
     <div class="hero-inner">
         <div class="hero-text">
+            <span class="hero-badge">For Schools &amp; Corporate Teams</span>
             <span class="hero-eyebrow">MATATAG &nbsp;&middot;&nbsp; Common Core &nbsp;&middot;&nbsp; UK &nbsp;&middot;&nbsp; ACARA &nbsp;&middot;&nbsp; IB &amp; More</span>
             <h1>Lesson Plans,<br><em class="text-gradient">Powered by AI.</em><br>Any Curriculum.</h1>
-            <p class="hero-sub">Generate complete, classroom-ready lesson plans in minutes — plus 16 interactive games and PowerPoint slides, auto-filled from your lesson. Choose MATATAG, Common Core, UK National Curriculum, ACARA, IB, or go standard-free.</p>
+            <p class="hero-sub">Generate complete, ready-to-use lesson plans in minutes — for classrooms or corporate teams — plus 16 interactive games and PowerPoint slides, auto-filled from your content. Choose MATATAG, Common Core, UK National Curriculum, ACARA, IB, or go standard-free.</p>
             <div class="hero-ctas">
                 {% if session.get('user_id') %}
                 <a href="{{ turl('generator') }}" class="btn-p">Open Generator &rarr;</a>
