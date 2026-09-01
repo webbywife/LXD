@@ -36,6 +36,13 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
 .game-tab .gn{flex:1;line-height:1.2;}
 .game-tab .gb{font-size:9px;background:var(--orange);color:#000;padding:1px 5px;border-radius:4px;font-weight:700;flex-shrink:0;}
 
+/* Content-Type Toggle */
+.ct-toggle{display:flex;margin:4px 16px 8px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px;}
+.ct-opt{flex:1;background:none;border:none;color:var(--grey);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;padding:6px 4px;border-radius:6px;cursor:pointer;transition:.15s;}
+.ct-opt:hover{color:var(--white);}
+.ct-opt.active{background:var(--cyan);color:#000;}
+.game-tab.ct-hidden{display:none;}
+
 /* Game Panels */
 .game-panel{display:none;}
 .game-panel.active{display:block;}
@@ -355,6 +362,11 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;}
 <div class="layout">
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
+  <div class="sb-section">Content Type</div>
+  <div class="ct-toggle" id="ct-toggle">
+    <button type="button" class="ct-opt active" data-ct="school">School</button>
+    <button type="button" class="ct-opt" data-ct="corporate">Corporate</button>
+  </div>
   <div class="sb-section">Games</div>
   <div class="game-tab active" data-game="wheel"><span class="gi">&#127744;</span><span class="gn">Wheel of Names</span></div>
   <div class="game-tab" data-game="crossword"><span class="gi">&#11036;</span><span class="gn">Crossword</span></div>
@@ -953,6 +965,51 @@ const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 
 // ── State ─────────────────────────────────────────────────────
 let G={topic:"",subject:"",grade:"",vocabulary:[],true_false:[],multiple_choice:[],fill_blanks:[],sequence_steps:[],matching_pairs:[]};
+let contentType='school'; // 'school' | 'corporate'
+
+// ── Content-Type toggle: curated game set + copy swap for corporate ──
+const CORPORATE_GAMES=['wheel','flashcards','matching','fillblanks','jeopardy','truefalse','dragdrop','timeline','kahoot','bingo','crossword'];
+const COPY_SWAPS=[
+  {panel:'gp-wheel',from:'Randomly pick a student or vocabulary word — great for cold-calling or warm-ups.',to:'Randomly pick a participant or vocabulary word — great for icebreakers or warm-ups.'},
+  {panel:'gp-wheel',from:'Use the <strong>Edit Names / Words</strong> panel below to add student names or swap in custom entries.',to:'Use the <strong>Edit Names / Words</strong> panel below to add participant names or swap in custom entries.'},
+  {panel:'gp-wheel',from:'Tip: Replace vocabulary words with student names for a fun random cold-call selector!',to:'Tip: Replace vocabulary words with participant names for a fun random selector!'},
+  {panel:'gp-jeopardy',from:'A student or team <strong>picks a category and point value</strong> — teacher clicks the cell.',to:'A participant or team <strong>picks a category and point value</strong> — facilitator clicks the cell.'},
+  {panel:'gp-jeopardy',from:'Tip: Project this on screen and let students raise hands before revealing the answer.',to:'Tip: Project this on screen and let participants raise hands before revealing the answer.'},
+  {panel:'gp-bingo',from:'Whole-class activity — teacher calls definitions, students mark words on their card.',to:'Whole-group activity — facilitator calls definitions, participants mark words on their card.'},
+  {panel:'gp-bingo',from:'Each student (or group) has a <strong>5×5 Bingo card</strong> with vocabulary words. The center is a FREE space.',to:'Each participant (or group) has a <strong>5×5 Bingo card</strong> with vocabulary words. The center is a FREE space.'},
+  {panel:'gp-bingo',from:'Tip: The teacher reads the DEFINITION aloud — students find the WORD on their card!',to:'Tip: The facilitator reads the DEFINITION aloud — participants find the WORD on their card!'},
+  {panel:'gp-kahoot',from:'Tip: Project this on a screen — students shout out answers, teacher clicks for the class.',to:'Tip: Project this on a screen — participants shout out answers, facilitator clicks for the group.'},
+];
+function _applyCopySwaps(dir){ // dir: 'toCorp' | 'toSchool'
+  COPY_SWAPS.forEach(s=>{
+    const panel=$('#'+s.panel);
+    if(!panel)return;
+    if(dir==='toCorp')panel.innerHTML=panel.innerHTML.replace(s.from,s.to);
+    else panel.innerHTML=panel.innerHTML.replace(s.to,s.from);
+  });
+}
+$$('.ct-opt').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    const next=this.dataset.ct;
+    if(next===contentType)return;
+    $$('.ct-opt').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    _applyCopySwaps(next==='corporate'?'toCorp':'toSchool');
+    contentType=next;
+    if(next==='corporate'){
+      $$('.game-tab').forEach(t=>{
+        if(!CORPORATE_GAMES.includes(t.dataset.game))t.classList.add('ct-hidden');
+      });
+      const activeTab=$('.game-tab.active');
+      if(activeTab&&activeTab.classList.contains('ct-hidden')){
+        const firstVisible=$('.game-tab:not(.ct-hidden)');
+        if(firstVisible)firstVisible.click();
+      }
+    }else{
+      $$('.game-tab').forEach(t=>t.classList.remove('ct-hidden'));
+    }
+  });
+});
 
 // ── Sidebar navigation ────────────────────────────────────────
 $$('.game-tab').forEach(t=>{
